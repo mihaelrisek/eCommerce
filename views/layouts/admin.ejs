@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !='undefined' ? title: 'Admin Panel' %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+
+  <% switch (currentPath) { case '/admin/dashboard' : %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+  <% break; case '/admin/list-users' : %>
+    <link rel="stylesheet" href="/css/users.css">
+    <% break; case '/admin/list-products' : %>
+    <link rel="stylesheet" href="/css/products.css">
+<% break; default: break; } %>
+
+</head>
+<body>
+
+  <nav class="admin-nav">
+    <a class="home" href="/">Lato</a>
+
+      <ul>
+        <li><a href="/admin/list-users">Show Users</a></li>
+        <li><a href="/admin/list-products">Show products</a></li>
+        <li><a href="/admin/add-product">Add Products</a></li>
+        <li><a href="/admin/categories">Categories</a></li>
+      </ul>
+  </nav>
+
+
+    <main class="admin-main">
+      <%- body -%>
+    </main>
+    <!-- <script>
+
+    function changeTheme(e) {
+      document.body.classList.toggle('change-theme');
+
+      const isThemeChanged = document.body.classList.contains('change-theme');
+      localStorage.setItem('themeChanged', isThemeChanged);
+  }
+
+  onload = () => {
+    const themeChanged = localStorage.getItem('themeChanged');
+    if (themeChanged === 'true') {
+      document.body.classList.add('change-theme');
+    }
+  };
+    </script> -->
+
+</body>
+  
+</html>

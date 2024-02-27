@@ -1,0 +1,32 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<section class="section__users">
+  <ul>
+    <% user.forEach(usr => { %>
+      <li>
+        <h1> <%= usr.username %> </h1>
+        <table>
+          <tr><td>Id</td><td><%= usr._id %></td></tr>
+          <tr><td>First name</td><td><%= usr.first_name %></td></tr>
+          <tr><td>Last name</td><td><%= usr.last_name %></td></tr>
+          <tr><td>Email</td><td><%= usr.email %></td></tr>
+          <tr><td>Phone</td><td><%= usr.phone %></td></tr>
+          <tr><td>Address</td><td><%= usr.address %></td></tr>
+          <tr><td>Created at</td><td><%= (usr.created_at).toLocaleDateString()  %></td></tr>
+          <tr><td>Updated at</td><td><%= (usr.updated_at).toLocaleString()  %></td></tr>
+        <form action="/admin/update-role/<%= usr._id %>" method="post">
+          <tr><td>Role</td><td><select name="user_role" >
+            <% user_roles.forEach(role => { %>
+              <option value="<%= role%>" <%= usr.role === role ? 'selected' : ''%> ><%= role%></option>
+            <% }) %>
+          </select></td></tr>
+        </table>
+          <button type="submit">Update</button>
+        </form>
+        <form action="/admin/delete-users/<%= usr._id %>" method="post">
+          <button type="submit">Remove User</button>
+        </form>
+        
+      </li>
+    <% }); %>
+  </ul>
+</section>

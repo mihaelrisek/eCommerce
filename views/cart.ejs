@@ -1,0 +1,61 @@
+<!-- cart.ejs -->
+
+
+<% if (user) { %>
+  <h3>User Logged</h3>
+  <br>
+
+  <h2>Items in Shopping Cart:</h2>
+  <% if (user.cart && user.cart.items.length > 0) { %>
+
+    <section class="cart">
+      <form action="/remove-from-cart" method="post"> 
+          <ul>
+            <% let totalPrice = 0; %>
+            
+            <% user.cart.items.forEach(item => { %>
+               <% if (item.product) {%>
+                <li>
+                  <div>
+                    <img src="<%- item.product.images[0] %>" alt="<%- item.product.name %>">
+                  </div>
+                  <div>
+                    <%= item.product && item.product.name %>
+                  </div>
+                  <div>
+                    <%= item.quantity %> 
+                  </div>
+                  <div>
+                    <%= item.product.price %> €
+                  </div>
+                  <div>
+                    <%= (item.quantity * item.product.price).toFixed(2) %> € 
+                    
+                    <% totalPrice += item.quantity * item.product.price; %>
+                  </div>
+                  <div>
+                    <button type="submit" name="productId" value="<%= item.product._id %>">Remove</button>
+                  </div>
+                </li>
+               <%}%>
+            <% }); %>
+          </ul>
+      </form>
+
+
+    <span class="total-price">Total Cart Price: <%= totalPrice.toFixed(2) %> €</span>
+
+    </section>
+
+   <a href="/delivery"><button >End Shopping</button></a>
+
+
+    <!-- Display total cart price -->
+
+  <% } else { %>
+    <p>Your cart is empty.</p>
+  <% } %>
+
+<% } else { %>
+  <p>Please log in to view your cart.</p>
+<% } %>

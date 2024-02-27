@@ -1,0 +1,53 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<%# Category Start %>
+<section>
+  <h1>Materijal</h1>
+  <br>
+  <article class="form">
+
+    <table>
+      <% product_types.forEach(type => { %>
+        <tr>
+            <form action="/admin/update-product_type/<%= type %>" method="post">
+            <td>
+              <input name="product_type" type="text" value="<%= type %>" required>
+            </td>
+            <td>
+                <button type="submit">Update</button>
+            </td>
+          </form>
+        </tr>
+      <% }); %>
+    </table>
+  </article>
+
+</section>
+
+
+  <%# Category End %>
+
+    <%# Subcategories Start %>
+      <section>
+        <h1>Nakit</h1>
+  <br>
+
+    <article class="form">
+
+          <table>
+          <% subcategories.forEach(subcategory=> { %>
+            <tr>
+                <form action="/admin/update-subcategory/<%= subcategory %>" method="post">
+                <td>
+                  <input name="subcategory" type="text" value="<%= subcategory %>" required>
+                </td>
+                <td>
+                    <button type="submit">Update</button>
+                </td>
+              </form>
+            </tr>
+            <% }); %>
+            </table>
+      </article>
+      </section>
+
+      <%# Subcategories End %>

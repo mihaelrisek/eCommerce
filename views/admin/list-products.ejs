@@ -1,0 +1,37 @@
+<section>
+  <ul id="productsContainer">
+    <% if (products.length > 0) { %>
+      <% if (products !== '') { %>
+        <% products.forEach(product => { %>
+          <li>
+            <a href="/admin/update-product/<%= product._id %>">
+              <div class="img">
+                <img src="<%- product.images[0] %>" alt="<%- product.name %>">
+              </div>
+
+              <div class="details">
+                <span>
+                  <h3><%= product.name %></h3>
+                  <strong><%= product.price %> €</strong>
+                </span>
+                <% if (product.product_type) { %>
+                  <span class="category"><%= product.product_type %></span>
+                <% } else { %>
+                  <span></span>
+                <% } %>
+                </div>
+            </a>
+           
+          </li>
+       
+        <% }); %>
+
+
+      <% } %>
+    <% } else { %>
+      <p>No products found.</p>
+    <% } %>
+        
+    
+  </ul>
+</section>

@@ -1,0 +1,133 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<section class="section_product" >
+  <% if (product != null) { %>
+
+
+    <article class="article_img">
+      <article class="img_container">
+        <% product.images.forEach((img) => {%>
+          <div class="img_wrapper">
+            <img src="<%= img%>" alt="<%= product.name%>">
+          </div>
+        <% } );%>
+      </article>
+    </article>
+  
+    
+    <article class="article_txt">
+      <h1><%= product.name%></h1>
+      <h3><%= product.description %></h3>
+      <h3><strong> € <%= product.price%></strong></h3>
+      
+      <div class="details_wrapper">
+      <h3>Details</h3>
+
+        <% const displayDetails = (details) => { %>
+          <% if (details && typeof details === 'object') { %>
+            <% Object.entries(details).forEach(([key, value]) => { %>
+              <div style="margin-left: 10px;">
+                <strong><%= key %>:</strong>
+                <% if (typeof value === 'object') { %>
+                  <div style="margin-left: 10px;">
+                    <% displayDetails(value); %>
+                  </div>
+                <% } else { %>
+                  <%= value %>
+                <% } %>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p>No details available.</p>
+          <% } %>
+        <% }; %>
+      
+      <% displayDetails(product.details); %>
+    </div>
+  
+  <% if (user) { %>
+    <form method="post" action="/add-to-cart">
+      <input type="hidden" name="productId" value="<%= product._id %>">
+      <label for="quantity">Quantity:</label>
+      <input type="number" name="quantity" value="1" min="1" required>
+      <button class="latest-link-txt add-to-cart-btn" type="submit">Add to Cart</button>
+    </form>
+  <% } else { %>
+    <p>Please log in to add items to your cart.</p>
+  <% } %>
+</article>
+</section>
+
+<section class="comments">
+  <div class="container">
+
+    <h1>Product Reviews</h1>
+
+    <% if (review.length > 0) { %>
+      <% review.forEach((comment) => { %>
+        <% if (comment.user_id){ %>
+          <article>
+            <h2><%= comment.user_id.first_name %> <%= comment.user_id.last_name %></h2>
+            <p>Comment: <%= comment.comment %></p>
+            <p>Rating: <span class="rating"><%= comment.rating %></span></p>
+            <% if (user) { %>
+              <% if (user._id.toString() === comment.user_id._id.toString() || user.role === 'admin') { %>
+                <form action="/products/<%= product._id %>/comments/<%= comment._id %>/delete" method="POST">
+                  <button type="submit">Delete</button>
+                </form>
+              <% } %>
+            <% } %>
+          </article>
+        <% } %>
+      <% }); %>
+    <% } else { %>
+      <h5>Be the first one to leave a comment!</h5>
+      <% if (!user) { %>
+        <a href="/login">Log in</a>
+      <% } %>
+    <% } %>
+
+    <% if (user){ %>
+      <form id="commentForm" action="/products/<%= product._id %>/comments" method="POST">
+        <article class="comment">
+          <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
+        </article>
+        <div class="rating">
+          <input type="radio" id="star5" name="rating" value="5" /><label for="star5"></label>
+          <input type="radio" id="star4" name="rating" value="4" /><label for="star4"></label>
+          <input type="radio" id="star3" name="rating" value="3" /><label for="star3"></label>
+          <input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
+          <input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
+        </div>
+        <button type="submit" onclick="validateForm()">Pošalji</button>
+      </form>
+    <%} else if (!user && review.length > 0) {%>
+      <h5>Log in to add comments!</h5>
+      <a href="/login">Log in</a>
+      <%} %>
+
+  </div>
+
+</section>
+
+<script>
+  function validateForm() {
+    var ratingInputs = document.getElementsByName('rating');
+    var ratingSelected = false;
+    
+    // Loop through radio buttons to check if at least one is selected
+    for (var i = 0; i < ratingInputs.length; i++) {
+      if (ratingInputs[i].checked) {
+        ratingSelected = true;
+        break;
+      }
+    }
+  
+    // If no rating is selected, prevent form submission and display an alert
+    if (!ratingSelected) {
+      alert('Please select a rating.');
+      event.preventDefault(); // Prevent form submission
+    }
+  }
+  </script>
+  
+<%}%>

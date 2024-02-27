@@ -1,0 +1,57 @@
+section{
+  display: flex;
+  justify-content: center;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  gap: 1rem;
+}
+
+form input {
+  margin-left: 1rem;
+  background-color: transparent;
+  color: var(--clr-fg);
+  border: 1px solid currentColor;
+  padding: 1rem;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+button.register-btn{
+  align-self: flex-end;
+}
+
+button {
+  margin-left: 1rem;
+  background-color: transparent;
+  color: var(--clr-fg);
+  border: 1px solid currentColor;
+  padding: 1rem;
+  cursor: pointer;
+  position: relative;
+  transition: color .5s ease .1s;
+}
+
+button::before {
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  background: var(--clr-fg);
+  transition: width .2s ease;
+}
+
+button:hover::before {
+  width: 100%;
+}
+
+button:hover {
+  color: var(--clr-bg);
+}

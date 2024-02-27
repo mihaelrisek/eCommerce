@@ -1,0 +1,243 @@
+<% if (product != null) { %>
+
+  <a class="history_back" onclick="history.back()">Vrati se</a>
+
+  <h1><%=product.name%></h1>
+
+  <article class="img_container">
+    <% product.images.forEach((img) => {%>
+      <div class="img_wrapper">
+        <img src="<%-img%>" alt="<%-product.name%>">
+      </div>
+    <% } );%>
+  </article>
+
+  <p><%=product.description%></p>
+  <strong><%=product.price%> €</strong>
+  <h2><%= product.product_type %></h2>
+  <h2><%= product.subcategory %></h2>
+  <h3>Details</h3>
+  <% const displayDetails = (details) => { %>
+    <% if (details && typeof details === 'object') { %>
+      <% Object.entries(details).forEach(([key, value]) => { %>
+        <div>
+          <strong><%= key %>:</strong>
+          <% if (typeof value === 'object') { %>
+            <div style="margin-left: 10px;">
+              <% displayDetails(value); %>
+            </div>
+          <% } else { %>
+            <%= value %>
+          <% } %>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <p>No details available.</p>
+    <% } %>
+  <% }; %>
+  
+  <% displayDetails(product.details); %>
+
+  <form id="form" action="/admin/update-product/<%= product._id %>" method="POST" enctype="multipart/form-data">
+    <label for="name">Naziv proizvoda</label>
+    <input type="text" id="name" name="name" value="<%= product.name %>" required>
+
+    <label for="description">Kratak opis</label>
+    <textarea id="description" name="description" required><%= product.description %></textarea>
+    
+
+    <label for="price">Cijena (€)</label>
+    <input type="number" id="price" name="price" value="<%= product.price %>" required>
+
+    <label for="stock_quantity">Kolicina</label>
+    <input type="number" id="stock_quantity" name="stock_quantity" value="<%= product.stock_quantity %>" required>
+
+    <label for="product_type">Materijal</label>
+    <select name="product_type" id="product_type">
+      <% product_types.forEach(type => { %>
+        <option value="<%= type%>" <%= product.product_type === type ? 'selected' : ''%> ><%= type%></option>
+      <% }) %>
+    </select>
+    <div id="productTypeContainer">
+      <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_product_type new_category" id="new_product_type"
+       name="new_product_type"  placeholder="Enter new product type" disabled>
+      <input type="checkbox" onclick="addNewProductType()" name="check_new_product_type" id="check_new_product_type">
+    </div>
+
+    <label for="subcategory">Nakit</label>
+    <select name="subcategory" id="subcategory">
+      <% subcategories.forEach(subcategory => { %>
+        <option value="<%= subcategory%>" <%= product.subcategory === subcategory ? 'selected' : ''%>> <%= subcategory %></option>
+      <% }) %>
+    </select>
+    <div id="subcategoryContainer">
+      <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_subcategory new_category" id="new_subcategory" name="new_subcategory"  placeholder="Enter new subcategory" disabled>
+      <input type="checkbox" onclick="addNewSubcategory()" name="check_new_subcategory" id="check_new_subcategory">
+    </div>
+    
+
+    <label for="details">Detalji</label>
+    <div class="details" id="detailsContainer">
+      <% if (product.details && typeof product.details === 'object') { %>
+        <% Object.entries(product.details).forEach(([key, value]) => { %>
+          <div class="detailsField">
+            <input type="text" name="detailsKey[]" value="<%= key %>" placeholder="Enter detail key">
+            <input type="text" name="detailsValue[]" value="<%= value %>" placeholder="Enter detail value">
+            <button type="button" onclick="removeDetailsField(this)">Remove</button>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+
+    <button type="button" onclick="addDetailsField()">Add Details Field</button>
+
+
+
+  <label for="image">Slike proizvoda:</label>
+  <div class="uploadOuter">
+    <button type="button" id="uploadFile" onclick="triggerFileInput()">Upload image</button>
+    <strong>OR</strong>
+    <span class="dragBox">
+      Drag and Drop image here
+      <input type="file" onChange="dragNdrop(event)" ondragover="drag()" ondrop="drop()" id="images" name="images" accept="image/*" multiple />
+    </span>
+  </div>
+  <div id="preview">
+  <% product.images.forEach((img) => { %>
+    <div class="fileContainer">
+      <p><%= img %></p>
+      <img src="<%= img %>" alt="Img">
+      <input type="hidden" name="existingImages[]" value="<%= img %>">
+      <button type="button" onclick="removeImageField(this)">Delete</button>
+    </div>
+    <% }); %>
+  </div>
+
+    <button type="submit">Update Product</button>
+  </form>
+
+  <form action="/admin/delete-product/<%= product._id %>" method="POST">
+    <button type="submit" >Delete</button>
+  </form>
+<%}%>
+
+
+
+
+<script>
+   function dragNdrop(event) {
+    const files = event.target.files;
+    const preview = document.getElementById("preview");
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name;
+
+      const fileContainer = document.createElement("div");
+
+      const previewText = document.createElement("p");
+      previewText.textContent = fileName;
+      fileContainer.appendChild(previewText);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = function () {
+        fileContainer.remove();
+      };
+
+      fileContainer.appendChild(deleteButton);
+
+      preview.appendChild(fileContainer);
+    }
+  }
+
+    function removeImageField(button) {
+    const fileContainer = button.parentNode;
+    const imageName = fileContainer.querySelector('p').textContent;
+    fileContainer.remove();
+  }
+
+  function drag() {
+    document.getElementById("uploadFile").parentNode.className = "draging dragBox";
+  }
+
+  function drop() {
+    document.getElementById("uploadFile").parentNode.className = "dragBox";
+  }
+
+  function triggerFileInput() {
+    document.getElementById("images").click();
+  }
+
+
+  function addDetailsField() {
+    const detailsContainer = document.getElementById('detailsContainer');
+
+    const newDetailsField = document.createElement('div');
+    newDetailsField.className = 'detailsField';
+
+    const newInputKey = document.createElement('input');
+    newInputKey.type = 'text';
+    newInputKey.required = true;
+    newInputKey.name = 'detailsKey[]';
+    newInputKey.pattern = '^[a-zA-Z0-9]+$';
+    newInputKey.placeholder = 'Enter detail key';
+
+    const newInputValue = document.createElement('input');
+    newInputValue.type = 'text';
+    newInputValue.required = true;
+    newInputValue.name = 'detailsValue[]';
+    newInputValue.placeholder = 'Enter detail value';
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Remove';
+    removeButton.onclick = function () {
+      newDetailsField.remove();
+    };
+
+    newDetailsField.append(newInputKey, newInputValue, removeButton);
+    detailsContainer.appendChild(newDetailsField);
+  }
+
+  function removeDetailsField(button) {
+    const detailsField = button.parentNode;
+    detailsField.remove();
+  }
+
+
+
+  function addNewProductType(){
+    if (check_new_product_type.checked == true){
+      new_product_type.classList.add('isChecked');
+      new_product_type.disabled = false;
+      product_type.disabled = true;
+      product_type.value = "";
+      new_product_type.required = true;
+    }
+    else {
+      new_product_type.classList.remove('isChecked');
+      new_product_type.disabled = true;
+      product_type.disabled = false;
+      new_product_type.required = false;
+
+    }
+  }
+  function addNewSubcategory(){
+    if (check_new_subcategory.checked == true){
+      new_subcategory.classList.add('isChecked');
+      new_subcategory.disabled = false;
+      subcategory.disabled = true;
+      subcategory.value = "";
+      new_subcategory.required = true;
+
+    }
+    else {
+      new_subcategory.classList.remove('isChecked');
+      new_subcategory.disabled = true;
+      subcategory.disabled = false;
+      new_subcategory.required = false;
+    }
+  }
+
+</script>

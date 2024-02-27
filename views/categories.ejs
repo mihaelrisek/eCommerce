@@ -1,0 +1,14 @@
+<a href="/">Home</a>
+<a href="#">Explore Categories</a>
+
+
+<%  if (categories !== '') {%>
+  <div class="category-wrapper">
+  <%   categories.forEach((category, categoryIndex)=>{ %>
+    <div class="category-links">
+      <a href="/categories/<%- category.name.toString().toLowerCase() %>"> <%- category.name %></a>
+    </div>
+    <% }) %>
+  </div>
+
+<% } %>

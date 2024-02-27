@@ -1,0 +1,152 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<form action="/admin/add-product" method="POST"  enctype="multipart/form-data">
+  <label for="name">Naziv proizvoda</label>
+  <input type="text" id="name" name="name" required>
+
+  <label for="description">Kratak opis</label>
+  <textarea id="description" name="description" required></textarea>  
+
+  <label for="price">Cijena (€)</label>
+  <input type="number" id="price" name="price" required>
+
+  <label for="stock_quantity">Kolicina</label>
+  <input type="number" id="stock_quantity" name="stock_quantity" required >
+  
+  <label for="image">Slike proizvoda:</label>
+  <div class="uploadOuter">
+    <button type="button" id="uploadFile" onclick="triggerFileInput()">Upload image</button>
+    <strong>OR</strong>
+    <span class="dragBox">
+      Drag and Drop image here
+      <input type="file" onChange="dragNdrop(event)" ondragover="drag()" ondrop="drop()"
+       id="images" name="images" accept="image/*" multiple />
+    </span>
+  </div>
+  <div id="preview"></div>
+
+  <label for="product_type">Materijal</label>
+  <select name="product_type" id="product_type">
+    <% product_types.forEach(type => { %>
+      <option value="<%= type %>"><%= type %></option>
+    <% }); %>
+  </select>
+  <div id="productTypeContainer">
+    <input type="text" class="new_product_type new_category" id="new_product_type"
+     name="new_product_type"  placeholder="Enter new product type" disabled>
+    <input type="checkbox" onclick="addNewProductType()" name="check_new_product_type" id="check_new_product_type">
+  </div>
+
+
+  <label for="subcategory">Nakit</label>
+  <select name="subcategory" id="subcategory">
+    <% subcategories.forEach(category => { %>
+      <option value="<%= category %>"><%= category %></option>
+    <% }); %>
+  </select>
+  <div id="subcategoryContainer">
+    <input type="text" class="new_subcategory new_category" id="new_subcategory" name="new_subcategory"  placeholder="Enter new subcategory" disabled>
+    <input type="checkbox" onclick="addNewSubcategory()" name="check_new_subcategory" id="check_new_subcategory">
+  </div>
+
+
+  <label for="details">Detalji</label>
+    <div class="details" id="detailsContainer">
+   
+    </div>
+ 
+
+  <button type="button" onclick="addDetailsField()">Add Details Field</button>
+
+  <button type="submit">Add Product</button>
+</form>
+
+<script>
+
+  function addNewProductType(){
+    if (check_new_product_type.checked == true){
+      new_product_type.classList.add('isChecked');
+      new_product_type.disabled = false;
+      product_type.disabled = true;
+    }
+    else {
+      new_product_type.classList.remove('isChecked');
+      new_product_type.disabled = true;
+      product_type.disabled = false;
+
+    }
+  }
+  function addNewSubcategory(){
+    if (check_new_subcategory.checked == true){
+      new_subcategory.classList.add('isChecked');
+      new_subcategory.disabled = false;
+      subcategory.disabled = true;
+
+    }
+    else {
+      new_subcategory.classList.remove('isChecked');
+      new_subcategory.disabled = true;
+      subcategory.disabled = false;
+
+    }
+  }
+
+
+  function addDetailsField() {
+    const detailsContainer = document.getElementById('detailsContainer');
+
+    const newInputKey = document.createElement('input');
+    newInputKey.type = 'text';
+    newInputKey.name = 'detailsKey[]'; // Array to handle multiple details keys
+    newInputKey.placeholder = 'Enter detail key';
+
+    const newInputValue = document.createElement('input');
+    newInputValue.type = 'text';
+    newInputValue.name = 'detailsValue[]'; // Array to handle multiple details values
+    newInputValue.placeholder = 'Enter detail value';
+
+    const wrapper = document.createElement('div');
+    wrapper.append(newInputKey, newInputValue);
+
+    detailsContainer.append(wrapper);
+}
+
+
+function dragNdrop(event) {
+    const files = event.target.files;
+    const preview = document.getElementById("preview");
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name;
+
+      const fileContainer = document.createElement("div");
+
+      const previewText = document.createElement("p");
+      previewText.textContent = fileName;
+      fileContainer.appendChild(previewText);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = function () {
+        fileContainer.remove();
+      };
+
+      fileContainer.appendChild(deleteButton);
+
+      preview.appendChild(fileContainer);
+    }
+  }
+
+  function drag() {
+    document.getElementById("uploadFile").parentNode.className = "draging dragBox";
+  }
+
+  function drop() {
+    document.getElementById("uploadFile").parentNode.className = "dragBox";
+  }
+
+  function triggerFileInput() {
+    document.getElementById("images").click();
+  }
+
+</script>

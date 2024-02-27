@@ -1,0 +1,31 @@
+
+<% if (user) { %>
+  <p>Welcome, <%= user.username %>!</p>
+<% } else { %>
+  <p>Welcome, Guest!</p>
+
+<% } %>
+
+
+<%# Category Start %>
+<section>
+  <h1>Categories</h1>
+  <article class="article_categories">
+    <% product_types.forEach(type => { %>
+      <ul>
+        <li>
+          <a href="products/<%= type.toLowerCase() %>"> <%= type  %></a>
+          <ul>
+              <% subcategoriesMap.get(type).forEach(subcategory => { %>
+                <li>
+                   <a href="products/<%= type.toLowerCase()  %>/<%= subcategory.toLowerCase() %>"> <%= subcategory  %></a>
+                </li>
+              <% }); %>
+          </ul>
+        </li>
+      </ul>
+    <% }); %>
+  </article>
+</section>
+
+<%# Category End %>

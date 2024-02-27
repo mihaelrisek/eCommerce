@@ -1,0 +1,32 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<section> 
+  <% if (product !== '') { %>
+    <ul>
+    <% product.forEach(product => { %>
+      <li>
+        <a href="/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
+          <div class="img">
+            <img src="<%- product.images[0] %>" alt="<%- product.name %>">
+          </div>
+
+          <div class="details">
+            <span>
+              <h3><%= product.name %></h3>
+              <strong><%= product.price %> €</strong>
+            </span>
+            <% if (product.product_type) { %>
+              <span class="category"><%= product.product_type %></span>
+            <% } else { %>
+              <span></span>
+            <% } %>
+            </div>
+        </a>
+      </li>
+
+    <% }); %>
+  </ul>
+
+    <% } else { %>
+      <p>No products found.</p>
+    <% } %>
+</section>

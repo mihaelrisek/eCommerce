@@ -1,0 +1,150 @@
+
+
+<aside>
+
+  <form data-filter-url-reset="<%=currentPath%>" id="filterForm" action="/products" method="GET">
+    <h3>Material</h3>
+    <article>
+      <% product_types.forEach((type, index) => { %>
+    <div class="checkbox-wrapper-15">
+
+          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=type%>" type="checkbox" name="productType" value="<%= type %>" <% if (selectedTypes.includes(type)) { %>checked<% } %>> 
+          <label class="cbx" for="cbx-<%=index%>-<%=type%>">
+            <span>
+              <svg width="12px" height="9px" viewbox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span><%= type %></span>
+          </label>
+    </div>
+      <% }); %>
+    </article>
+
+  
+
+    <h3>Nakit</h3>
+
+    <article>
+
+      <% subcategories.forEach((subcategory, index) => { %>
+        <div class="checkbox-wrapper-15">
+
+          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=subcategory%>" type="checkbox" name="subcategory" value="<%= subcategory %>" <% if (selectedSubcategories.includes(subcategory)) { %>checked<% } %>> 
+          <label class="cbx" for="cbx-<%=index%>-<%=subcategory%>">
+            <span>
+              <svg width="12px" height="9px" viewbox="0 0 12 9">
+                <polyline points="1 5 4 8 11 1"></polyline>
+              </svg>
+            </span>
+            <span><%= subcategory %></span>
+          </label>
+      </div>
+      <% }); %>
+    </article>
+
+    
+    <button type="submit" >Filter</button>
+    <button type="button" onclick="resetForm()">Reset</button>
+  </form>
+</aside>
+
+  <section>
+  <a class="history_back" onclick="history.back()">Vrati se</a>
+
+  <ul id="productsContainer">
+    <% if (products.length > 0) { %>
+      <% if (products !== '') { %>
+        <% products.forEach(product => { %>
+          <li>
+            <a href="/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
+              <div class="img">
+                <img src="<%- product.images[0] %>" alt="<%- product.name %>">
+              </div>
+
+              <div class="details">
+                <span>
+                  <h3><%= product.name %></h3>
+                  <strong><%= product.price %> €</strong>
+                </span>
+                <% if (product.product_type) { %>
+                  <span class="category"><%= product.product_type %></span>
+                <% } else { %>
+                  <span></span>
+                <% } %>
+                </div>
+            </a>
+          </li>
+        <% }); %>
+
+        <button type="button" onclick="showMore()">Show More</button>
+
+      <% } %>
+    <% } else { %>
+      <p>No products found.</p>
+    <% } %>
+  
+        
+    
+  </ul>
+
+</section>
+
+<script>
+  let limit = 1; // Set the initial limit value
+
+  function showMore() {
+    // Increase the limit value
+    limit += 1; 
+
+    // Fetch more products using AJAX
+    fetch(`/products?limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Update the product container with the new products
+        const productsContainer = document.getElementById('productsContainer');
+
+        data.forEach((product) => {
+          // Create a new list item for each product
+          const li = document.createElement('li');
+
+          // Set the inner HTML for the list item using a template string
+          li.innerHTML = `
+            <a href="/products/${product._id}">
+              <div class="img">
+                <img src="${product.images[0]}" alt="${product.name}">
+              </div>
+              <div class="details">
+                <span>
+                  <h3>${product.name}</h3>
+                  <strong>${product.price} €</strong>
+                </span>
+                ${product.product_type ? `<span class="category">${product.product_type}</span>` : ''}
+              </div>
+            </a>
+          `;
+
+          // Append the new list item to the products container
+          productsContainer.appendChild(li);
+        });
+      })
+      .catch((error) => {
+        console.error('Error fetching more products:', error);
+      });
+  }
+
+  document.getElementById('showMoreButton').addEventListener('click', showMore);
+
+
+  function resetForm() {
+    const form = document.getElementById('filterForm');
+    if (!location.search) form.reset();
+    else location.href = "/products";
+  }
+</script>

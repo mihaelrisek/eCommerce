@@ -1,0 +1,76 @@
+
+
+
+form, .form {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  gap: 1rem;
+}
+
+/* Has to be fixed */
+form input,
+.form input,
+
+form select,
+.form  select,
+textarea {
+  margin-left: 1rem;
+  background-color: transparent;
+  color: var(--clr-fg);
+  border: 1px solid currentColor;
+  padding: 1rem;
+  outline: none;
+  -webkit-appearance: auto; /***************************************/
+  -moz-appearance: auto; /***************************************/
+  appearance:auto; /***************************************/
+}
+form textarea{
+  resize: vertical;
+  min-height: 48px;
+}
+
+form select option {
+  background: var(--clr-bg);
+}
+
+form input[type="date"] {
+  width: max-content;
+}
+
+button#submit {
+  margin-top: 2rem;
+  align-self: flex-end;
+}
+
+button {
+  margin-left: 1rem;
+
+  background-color: transparent;
+  color: var(--clr-fg);
+  border: 1px solid currentColor;
+  padding: 1rem;
+  cursor: pointer;
+  position: relative;
+  transition: color .5s ease .1s;
+}
+
+button::before {
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  background: var(--clr-fg);
+  transition: width .2s ease;
+}
+
+button:hover::before {
+  width: 100%;
+}
+
+button:hover {
+  color: var(--clr-bg);
+}
