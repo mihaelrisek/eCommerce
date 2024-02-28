@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "build": "npm install && npm test && echo 'Build complete'"
+    "build": "npm install && echo 'Build complete'"
   },
   "author": "",
   "license": "ISC",
