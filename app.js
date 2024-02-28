@@ -66,4 +66,4 @@ app.use('/', adminRoutes);
 //   res.status(404).render('404', {user});
 // });
 
-app.listen(PORT, () => console.log(`Server is up on http://localhost:${PORT}`) )
+// app.listen(PORT, () => console.log(`Server is up on http://localhost:${PORT}`) )
