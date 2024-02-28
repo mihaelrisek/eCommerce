@@ -7,9 +7,9 @@ const fileUpload = require('express-fileupload');
 const session = require('express-session');
 const flash = require('express-flash');
 const app = express();
-
-
 const PORT = process.env.PORT || 3000;
+const mongoose = require('mongoose');
+
 const SECRET_KEY = 'somethjing';
 
 require('dotenv').config();
@@ -66,4 +66,18 @@ app.use('/', adminRoutes);
 //   res.status(404).render('404', {user});
 // });
 
-// app.listen(PORT, () => console.log(`Server is up on http://localhost:${PORT}`) )
+
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true})
+  .then(() => {
+    console.log('MongoDB connected');
+    
+    // Start server only after MongoDB connection is established
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('MongoDB connection error:', error);
+  });
