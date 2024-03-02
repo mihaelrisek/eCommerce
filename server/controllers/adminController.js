@@ -5,12 +5,7 @@ const Cart = require('../models/Cart');  // Product.js
 const mongoose = require('mongoose');
 
 
-const path = require('path');
-const fs = require('fs');
-const { name } = require('ejs');
-const fsPromise = require('fs').promises;
-
-// Define an asynchronous function to fetch product types and subcategories
+// An asynchronous function to fetch product types and subcategories
 const getCategories = async () => {
   // Hardcoded default values for product types and subcategories
   const PRODUCT_TYPE = ["Diamond", "Silver", "Gold"];
@@ -96,7 +91,7 @@ exports.deleteUser = async (req, res) => {
     const userId = req.params.user_id;
 
     // Check if the logged-in user is an admin
-    const loggedInUser = req.user; // Assuming you have a middleware to set req.user
+    const loggedInUser = req.user; 
     if (!loggedInUser || loggedInUser.role !== 'admin') {
       return res.status(403).send('Permission denied');
     }
@@ -166,7 +161,6 @@ async function deleteEmptyFolders(product_type, subcategory, name) {
       }
   } catch (error) {
       console.error('Error deleting empty folders:', error.message);
-      // Optionally, you can throw the error to propagate it to the calling code
       throw error;
   }
 }
@@ -308,7 +302,7 @@ exports.addProduct = async (req, res) => {
        folder: folder,
        resource_type: 'image'
      });
-     // // Store the URL of the uploaded image in the database
+     // Store the URL of the uploaded image in the database
      newProduct.images.push(result.secure_url);
 
    }));

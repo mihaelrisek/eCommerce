@@ -129,7 +129,7 @@ exports.updateUser = async (req, res) => {
 
     // Check if the email is being changed and if it already exists
     if (profil_email_checkbox) {
-      // Validate inputs (for simplicity, you can add more specific validation logic)
+      // Validate inputs 
       if (!profil_email || !validateEmail(profil_email)) {
         return res.status(400).send('Invalid email');
       }
@@ -202,8 +202,8 @@ exports.getAllProducts = async (req, res) => {
 
     // Find products based on the constructed query
 
-      const products = await Product.find(query)
-      // const products = await Product.find(query).limit(limit);
+    const products = await Product.find(query)
+    // const products = await Product.find(query).limit(limit);
       
     // Check if it's an AJAX request
 
@@ -234,7 +234,7 @@ exports.getSpecificProduct = async (req, res) => {
 
     const product = await Product.findById(actualProductId);
     const review = await Review.find({ product_id: actualProductId }).populate('user_id');
-    console.log("review",review)
+    
     res.render('product.ejs', { title: product.name, product, user, review });
 
   } catch (error) {
@@ -283,7 +283,6 @@ exports.deleteComment = async (req, res) =>{
     // Find the comment by ID
     const comment = await Review.findById(comment_id);
 
-    console.log("req.user.role",req.user.role)
     // Check if the logged-in user is the owner of the comment or administrator
     if (comment 
         && comment.user_id.toString() === req.user._id.toString()
@@ -305,27 +304,44 @@ exports.deleteComment = async (req, res) =>{
 
 exports.cart = async (req, res) => {
   try {
+    let cartItems = [];
+    let guestProducts = [];
+    let user = null;
+    // // Ensure the user is logged in
+    // if (!req.isAuthenticated()) {
+    //   res.redirect('/login'); // Redirect to the login page if the user is not logged in
+    //   return;
+    // }
+    if (req.user) {
+      // Retrieve the user with populated cart and items
+      user = await User.findById(req.user._id)
+        .populate({
+          path: 'cart',
+          populate: {
+            path: 'items.product',
+            model: 'Product', 
+          },
+        })
+        .exec();
 
-    // Ensure the user is logged in
-    if (!req.isAuthenticated()) {
-      res.redirect('/login'); // Redirect to the login page if the user is not logged in
-      return;
+        if (user && user.cart && user.cart.items) {
+          cartItems = user.cart.items;
+        }
+
+    } else {
+      cartItems = req.session.guestCart || [];
+
+      for (const item of cartItems) {
+        const product = await Product.findById(item.productId).exec();
+        if (product) {
+          guestProducts.push(product);
+        }
+      }
     }
-
-    // Retrieve the user with populated cart and items
-    const user = await User.findById(req.user._id)
-      .populate({
-        path: 'cart',
-        populate: {
-          path: 'items.product',
-          model: 'Product', 
-        },
-      })
-      .exec();
-
+    console.log("cartItems", cartItems);
 
     // Render the cart template with the populated user object
-    res.render('cart.ejs', { title: 'Cart', user });
+    res.render('cart.ejs', { title: 'Cart', user , cartItems, guestProducts });
   } catch (error) {
     console.error(error);
     res.status(500).send(error + "\tServer Error");
@@ -341,32 +357,48 @@ exports.addToCart = async (req, res) => {
 
     // Extract productId and quantity from the request body
     const { productId, quantity } = req.body;
+    if (user) {
+      // Find or create the user's cart
+      let userCart = await Cart.findOne({ user: user._id });
 
-    // Find or create the user's cart
-    let userCart = await Cart.findOne({ user: user._id });
+      if (!userCart) {
+        userCart = new Cart({ user: user._id, items: [] });
+        await userCart.save();
+        user.cart = userCart._id;
+        await user.save();
+      }
 
-    if (!userCart) {
-      userCart = new Cart({ user: user._id, items: [] });
+      // Check if the product is already in the cart
+      const existingItem = userCart.items.find((item) => item.product.equals(productId));
+
+      if (existingItem) { 
+        // If the product is already in the cart, increment the quantity
+        existingItem.quantity += parseInt(quantity);
+      } else {
+        // If the product is not in the cart, add a new item
+        userCart.items.push({ product: productId, quantity: parseInt(quantity) });
+      }
+
+      // Save the updated cart
       await userCart.save();
-      user.cart = userCart._id;
-      await user.save();
-    }
 
-    // Check if the product is already in the cart
-    const existingItem = userCart.items.find((item) => item.product.equals(productId));
+      res.redirect('/cart'); // Redirect to the cart page or any other desired page
+  }
+  else {
+      // If user is a guest then store cart items to session storage
+      let guestCart = req.session.guestCart || [];
+      const existingItemIndex = guestCart.findIndex(item => item.productId === productId);
 
-    if (existingItem) {
-      // If the product is already in the cart, increment the quantity
-      existingItem.quantity += parseInt(quantity);
-    } else {
-      // If the product is not in the cart, add a new item
-      userCart.items.push({ product: productId, quantity: parseInt(quantity) });
-    }
+      if (existingItemIndex !== -1) {
+        guestCart[existingItemIndex].quantity += parseInt(quantity);
+      } else {
+        guestCart.push({ productId, quantity: parseInt(quantity) });
+      }
 
-    // Save the updated cart
-    await userCart.save();
-
-    res.redirect('/cart'); // Redirect to the cart page or any other desired page
+      req.session.guestCart = guestCart;
+      console.log("req.session.guestCart", req.session.guestCart);
+      res.redirect('/cart');
+  }
   } catch (error) {
     console.error(error);
 
@@ -378,20 +410,46 @@ exports.addToCart = async (req, res) => {
 
 exports.removeFromCart = async (req, res) => {
   try {
-    const user = req.user; // Access the authenticated user
-    const productIdToRemove = req.body.productId || req.params.productId;
+    if (req.user) {
+      // User is logged in
+      const user = req.user; // Access the authenticated user
+      const productIdToRemove = req.body.productId || req.params.productId;
 
-    // Check if the user is logged in and the product ID is valid
-    if (user && productIdToRemove) {
-      // Remove the item from the cart based on the product ID
+      // Check if the product ID is provided
+      if (!productIdToRemove) {
+        // Redirect the user back to the cart page with a message
+        return res.redirect('/cart?error=productIdNotProvided');
+      }
+
+      // Remove the item from the user's cart based on the product ID  
       await Cart.updateOne(
         { user: user._id },
         { $pull: { items: { product: productIdToRemove } } }
       );
 
-      console.log('Item removed successfully');
-      res.redirect('/cart');
+      console.log('Item removed successfully from user cart');
+      // Redirect the user back to the cart page
+      return res.redirect('/cart');
+
+    } else if (req.session.guestCart) {
+      // Guest user
+      const productIdToRemove = req.body.productId || req.params.productId;
+
+      // Check if the product ID is provided
+      if (!productIdToRemove) {
+        // Redirect the user back to the cart page with a message
+        return res.redirect('/cart?error=productIdNotProvided');
+      }
+
+      // Remove the item from the guest cart based on the product ID  
+      req.session.guestCart = req.session.guestCart.filter(item => item.productId !== productIdToRemove);
+      console.log('Item removed successfully from guest cart');
+      return res.redirect('/cart');
     }
+
+    // Redirect the user back to the cart page with a message
+    return res.redirect('/cart?error=invalidRequest');
+
   } catch (error) {
     console.error(error);
 
@@ -402,15 +460,9 @@ exports.removeFromCart = async (req, res) => {
 
 exports.checkout = async (req, res) => {
   try {
-    const { userId, cartId, shippingAddress, paymentDetails } = req.body;
 
-    const order = new Order({
-      user: userId,
-      cart: cartId,
-    })
   } catch (error) {
     console.error(error);
-
 
     res.status(500).send(error + "\tServer Error");
   }
@@ -420,6 +472,8 @@ exports.delivery = async (req, res) => {
   try {
     const user = req.user;
 
+
+
     res.render('delivery.ejs', { title: 'Deliver', user });
   } catch (error) {
     console.error(error);
@@ -428,7 +482,6 @@ exports.delivery = async (req, res) => {
     res.status(500).send(error + "\tServer Error");
   }
 };
-
 
 
 
@@ -450,146 +503,3 @@ exports.about = async (req, res) => {
 
   res.render('about.ejs', { title: 'eCommerce - About', user });
 }
-
-
-
-
-//  const productsData = [
-//    {
-//     name: 'Diamond Necklace',
-//     description: 'A stunning diamond necklace.',
-//     price: 450,
-//     stock_quantity: 50,
-//     images: ["diamant-narukvica-1.jpg", "diamant-narukvica-1.jpg"],
-//     product_type: 'Diamond',
-//     subcategory: 'Necklace',
-//     details: {
-//       material: 'Platinum',
-//       diamonds: {
-//         carat: 2.5,
-//         cut: 'Round Brilliant',
-//         color: 'D',
-//         clarity: 'IF',
-//       },
-//       length: '18 inches',
-//       weight: 10,
-//     },
-//    },
-//    {
-//      name: "Gold Necklace",
-//      description: "A stunning gold necklace.",
-//      price: 350,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-4.jpg", "diamant-narukvica-1.jpg"],
-//      product_type: 'Gold',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-//        diamonds: {
-//          carat: 2.5,
-//          cut: 'Round Brilliant',
-//          color: 'D',
-//          clarity: 'IF',
-//        },
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    {
-//      name: "Diamond Necklace",
-//      description: "A stunning diamond necklace.",
-//      price: 500,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-3.jpg", "diamant-narukvica-4.jpg"],
-//      product_type: 'Diamond',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-//        diamonds: {
-//          carat: 2.5,
-//          cut: 'Round Brilliant',
-//          color: 'D',
-//          clarity: 'IF',
-//        },
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    {
-//      name: "Gold Necklace",
-//      description: "A stunning gold necklace.",
-//      price: 200,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-2.jpg", "diamant-narukvica-1.jpg"],
-//      product_type: 'Gold',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-      
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    {
-//      name: "Silver Necklace",
-//      description: "A stunning silver necklace.",
-//      price: 150,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-3.jpg", "diamant-narukvica-4.jpg"],
-//      product_type: 'Silver',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-      
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    {
-//      name: "Diamond Necklace",
-//      description: "A stunning diamond necklace.",
-//      price: 340,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-1.jpg", "diamant-narukvica-1.jpg"],
-//      product_type: 'Diamond',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-//        diamonds: {
-//          carat: 2.5,
-//          cut: 'Round Brilliant',
-//          color: 'D',
-//          clarity: 'IF',
-//        },
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    {
-//      name: "Silver Necklace",
-//      description: "A stunning silver necklace.",
-//      price: 380,
-//      stock_quantity: 50,
-//      images: ["diamant-narukvica-3.jpg", "diamant-narukvica-4.jpg"],
-//      product_type: 'Silver',
-//      subcategory: 'Necklace',
-//      details: {
-//        material: 'Platinum',
-//        length: '18 inches',
-//        weight: 10,
-//      },
-//    },
-//    
-//  ];
-//  // Insert products into the database
-//  async function insertProducts() {
-//    try {
-//      await Product.deleteMany({});
-//      console.log('Old products deleted successfully');
-//      await Product.insertMany(productsData);
-//      console.log('New products inserted successfully');
-//    } catch (error) {
-//      console.error('Error inserting products:', error);
-//    }
-//  }
-// //  insertProducts();

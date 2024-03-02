@@ -44,16 +44,12 @@
       <% displayDetails(product.details); %>
     </div>
   
-  <% if (user) { %>
     <form method="post" action="/add-to-cart">
       <input type="hidden" name="productId" value="<%= product._id %>">
       <label for="quantity">Quantity:</label>
       <input type="number" name="quantity" value="1" min="1" required>
       <button class="latest-link-txt add-to-cart-btn" type="submit">Add to Cart</button>
     </form>
-  <% } else { %>
-    <p>Please log in to add items to your cart.</p>
-  <% } %>
 </article>
 </section>
 
