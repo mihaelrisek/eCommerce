@@ -259,6 +259,9 @@ exports.addProduct = async (req, res) => {
 
     const detailsKey = req.body['detailsKey[]'];
     const detailsValue = req.body['detailsValue[]'];
+    const sizes = req.body['newSize[]'];
+
+    console.log("newSize",sizes)
 
     const selectedProductType = check_new_product_type ? new_product_type.trim() : product_type;
 
@@ -282,7 +285,8 @@ exports.addProduct = async (req, res) => {
       stock_quantity,
       product_type: selectedProductType,
       subcategory: selectedSubcategory,
-      details: details
+      details: details,
+      sizes: sizes
     });
 
 
@@ -409,6 +413,7 @@ exports.updateProduct = async (req, res) => {
 
      }
 
+     const newSize = req.body['newSize[]'] || [];
 
 
     // Update the product properties based on the form data
@@ -418,6 +423,9 @@ exports.updateProduct = async (req, res) => {
     existingProduct.stock_quantity    =     req.body.stock_quantity;
     existingProduct.product_type      =     selectedProductType;
     existingProduct.subcategory       =     selectedSubcategory;
+    existingProduct.sizes             =     newSize;
+
+    console.log("newSize",newSize)
 
      // Update images
     const existingImages = req.body['existingImages[]'];

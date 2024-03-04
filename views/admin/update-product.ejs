@@ -52,6 +52,19 @@
     <label for="stock_quantity">Kolicina</label>
     <input type="number" id="stock_quantity" name="stock_quantity" value="<%= product.stock_quantity %>" required>
 
+    <label for="size">Velicina</label>
+    <% if (product.sizes && product.sizes.length > 0){ %>
+     <div class="sizes" id="sizesContainer">
+        <% product.sizes.forEach((size) => { %>
+          <div>
+            <input type="text" name="newSize[]" id="newSize[]" placeholder="<%= size  %>" value="<%= size %>">
+            <button type="button" onclick="removeSize(this)">Remove</button>
+          </div>
+        <%  }) %>
+    </div>
+    <% } %>
+     <button type="button" onclick="addSize()">Dodaj</button>
+
     <label for="product_type">Materijal</label>
     <select name="product_type" id="product_type">
       <% product_types.forEach(type => { %>
@@ -239,5 +252,32 @@
       new_subcategory.required = false;
     }
   }
+  
 
+  function addSize(){
+    const detailsContainer = document.getElementById('sizesContainer');
+
+    const newSize = document.createElement('input');
+    newSize.type = 'text';
+    newSize.name = 'newSize[]'; 
+    newSize.placeholder = 'Enter new size';
+    newSize.required = true;
+
+    const newSizeWrapper = document.createElement('div');
+    
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Remove';
+    removeButton.onclick = function () {
+      newSizeWrapper.remove();
+    };
+
+    newSizeWrapper.append(newSize, removeButton)
+    detailsContainer.append(newSizeWrapper);
+  }
+
+  function removeSize(button) {
+    const detailsField = button.parentNode;
+    detailsField.remove();
+  }
 </script>

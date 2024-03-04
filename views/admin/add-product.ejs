@@ -12,6 +12,11 @@
   <label for="stock_quantity">Kolicina</label>
   <input type="number" id="stock_quantity" name="stock_quantity" required >
   
+  <label for="size">Velicina</label>
+  <div class="sizes" id="sizesContainer"></div>
+  <button type="button" onclick="addSize()">Dodaj</button>
+  
+  
   <label for="image">Slike proizvoda:</label>
   <div class="uploadOuter">
     <button type="button" id="uploadFile" onclick="triggerFileInput()">Upload image</button>
@@ -55,7 +60,7 @@
     </div>
  
 
-  <button type="button" onclick="addDetailsField()">Add Details Field</button>
+  <button type="button" onclick="addDetailsField()">Dodaj detalj</button>
 
   <button type="submit">Add Product</button>
 </form>
@@ -94,39 +99,50 @@
   function addDetailsField() {
     const detailsContainer = document.getElementById('detailsContainer');
 
+    const newDetailsField = document.createElement('div');
+    newDetailsField.className = 'detailsField';
+
     const newInputKey = document.createElement('input');
     newInputKey.type = 'text';
-    newInputKey.name = 'detailsKey[]'; // Array to handle multiple details keys
+    newInputKey.required = true;
+    newInputKey.name = 'detailsKey[]';
+    newInputKey.pattern = '^[a-zA-Z0-9]+$';
     newInputKey.placeholder = 'Enter detail key';
 
     const newInputValue = document.createElement('input');
     newInputValue.type = 'text';
-    newInputValue.name = 'detailsValue[]'; // Array to handle multiple details values
+    newInputValue.required = true;
+    newInputValue.name = 'detailsValue[]';
     newInputValue.placeholder = 'Enter detail value';
 
-    const wrapper = document.createElement('div');
-    wrapper.append(newInputKey, newInputValue);
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Remove';
+    removeButton.onclick = function () {
+      newDetailsField.remove();
+    };
 
-    detailsContainer.append(wrapper);
-}
+    newDetailsField.append(newInputKey, newInputValue, removeButton);
+    detailsContainer.appendChild(newDetailsField);
+  }
 
 
 function dragNdrop(event) {
     const files = event.target.files;
-    const preview = document.getElementById("preview");
+    const preview = document.getElementById('preview');
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileName = file.name;
 
-      const fileContainer = document.createElement("div");
+      const fileContainer = document.createElement('div');
 
-      const previewText = document.createElement("p");
+      const previewText = document.createElement('p');
       previewText.textContent = fileName;
       fileContainer.appendChild(previewText);
 
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
       deleteButton.onclick = function () {
         fileContainer.remove();
       };
@@ -138,15 +154,37 @@ function dragNdrop(event) {
   }
 
   function drag() {
-    document.getElementById("uploadFile").parentNode.className = "draging dragBox";
+    document.getElementById('uploadFile').parentNode.className = 'draging dragBox';
   }
 
   function drop() {
-    document.getElementById("uploadFile").parentNode.className = "dragBox";
+    document.getElementById('uploadFile').parentNode.className = 'dragBox';
   }
 
   function triggerFileInput() {
-    document.getElementById("images").click();
+    document.getElementById('images').click();
+  }
+
+
+  function addSize(){
+    const detailsContainer = document.getElementById('sizesContainer');
+
+    const newSize = document.createElement('input');
+    newSize.type = 'text';
+    newSize.name = 'newSize[]'; 
+    newSize.placeholder = 'Enter new size';
+
+    const newSizeWrapper = document.createElement('div');
+    
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Remove';
+    removeButton.onclick = function () {
+      newSizeWrapper.remove();
+    };
+
+    newSizeWrapper.append(newSize, removeButton)
+    detailsContainer.append(newSizeWrapper);
   }
 
 </script>
