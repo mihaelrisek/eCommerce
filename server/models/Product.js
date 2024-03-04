@@ -9,6 +9,7 @@ const productSchema = new mongoose.Schema({
   product_type: String,
   subcategory: String,
   details: mongoose.Schema.Types.Mixed, // Mixed type for dynamic details
+  sizes: { type: [String], default: []},
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });
