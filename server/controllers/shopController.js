@@ -4,24 +4,11 @@ const Review = require('../models/Review');  // Review.js
 
 const User =       require('../models/User');  // User.js
 const Product =    require('../models/Product'); // Product.js
-const Cart =       require('../models/Cart'); // Cart.js
 const Order = require('../models/Order'); // Order.js
-
-require('../models/database');
-
-
-// Set first char of string to upper case
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-// Function to validate email format
-function validateEmail(email) {
-  // Regular expression to validate email format
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(String(email).toLowerCase());
-}
-
+const Image = require('../models/Images'); 
+const { capitalizeFirstLetter,
+  validateEmail} = require('../functions/func');
+  
 
 /**
  * GET /
@@ -29,41 +16,42 @@ function validateEmail(email) {
 */
 exports.home = async (req, res) => {
   try {
-    // const categories = await Category.find({});
     const products = await Product.find({});
 
-    const product_types = await Product.distinct('product_type');
-    const subcategories = await Product.distinct('subcategory');
+    const materials = await Product.distinct('material');
+    const categories = await Product.distinct('category');
 
-    const subcategoriesMap = new Map();
+    const categoriesMap = new Map();
 
-    for (const type of product_types) {
-      const distinctSubcategories = await Product.distinct('subcategory', { product_type: type });
-      subcategoriesMap.set(type, distinctSubcategories);
+    for (const material of materials) {
+      const distinct_categories = 
+        await Product.distinct('category', { material: material });
+        categoriesMap.set(material, distinct_categories);
     }
 
-    // Check if a user is logged in
-    // Check if user exists
+    const material_data = await Image.find({});
+
     const user = req.user;
 
-
-    res.render('index.ejs', { title: 'eCommerce - Home', products, user, product_types, subcategories , subcategoriesMap,  currentPath: req.path });
+    res.render('index.ejs', 
+    { title: 'Lato \u2022 Pocetna', products,
+      material_data, user, materials, categories,
+      categoriesMap,  currentPath: req.path });
   } catch (error) {
-    res.status(500).send({ message: error.message || 'Error Occurred' });
+    res.status(500).send({ message: error.message || 'Greška!' });
   }
 };
 
 
 
-exports.renderByCategory = async (req, res) => {
+exports.renderByMaterial = async (req, res) => {
   try {
-    const category = capitalizeFirstLetter(req.params.category);
+    const material = capitalizeFirstLetter(req.params.material);
     const user = req.user;
-
  
-    const product = await Product.find({ product_type: category });
+    const product = await Product.find({ material: material });
 
-    res.render('product_type.ejs', { title: category, product, user });
+    res.render('material.ejs', {  currentPath: '/products', title: 'Lato \u2022 ' + material, product, user });
 
   } catch (error) {
     console.error(error);
@@ -71,16 +59,16 @@ exports.renderByCategory = async (req, res) => {
   }
 };
 
-exports.renderByCategory_subcategory = async (req, res) => {
+exports.renderByMaterialAndCategory= async (req, res) => {
   try {
     const user = req.user;
 
+    const material = capitalizeFirstLetter(req.params.material);
     const category = capitalizeFirstLetter(req.params.category);
-    const subcategory = capitalizeFirstLetter(req.params.subcategory);
 
-    const product = await Product.find( { product_type: category , subcategory: subcategory});
+    const product = await Product.find( { material: material , category: category});
 
-    res.render('material-subcategory.ejs', { title: category, product, user });
+    res.render('material-category.ejs', { currentPath: '/products', title: 'Lato \u2022 ' + category, product, user });
 
   } catch (error) {
     console.error(error);
@@ -97,13 +85,40 @@ exports.profil = async (req, res) => {
       res.redirect('/login'); 
       return;
     }
+
     const user = req.user;
 
-    res.render('profil.ejs', { title: 'eCommerce - Profil', user });
+    const orders = await Order.find({
+      $and: [
+        { 'user.email': user.email },
+        {  status: { $ne: 'Otkazano' } } 
+      ]})
+
+
+    res.render('profil.ejs', { title: 'Lato \u2022 Moj racun', user, orders });
   } catch (error) {
-    res.status(500).send({ message: error.message || 'Error Occurred' });
+    res.status(500).send({ message: error.message || 'Greška!' });
   }
 }
+
+
+exports.viewOrder = async (req, res) => {
+  try {
+    if (!req.isAuthenticated())
+      return res.redirect('/');
+   
+    const user = req.user;
+    const order_id = req.params.order_id;
+
+    const order = await Order.findById(order_id);
+
+    res.render('order.ejs', { title: "Order",  user, order });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+};
+
 
 
 exports.updateUser = async (req, res) => {
@@ -118,12 +133,13 @@ exports.updateUser = async (req, res) => {
 
     // Destructure request body
     const {
-          profil_username,   profil_username_checkbox,
-          profil_first_name, profil_first_name_checkbox,
-          profil_last_name,  profil_last_name_checkbox,
-          profil_email,      profil_email_checkbox,
-          profil_address,    profil_address_checkbox,
-          profil_phone,      profil_phone_checkbox
+          profil_first_name,        profil_first_name_checkbox,
+          profil_last_name,         profil_last_name_checkbox,
+          profil_email,             profil_email_checkbox,
+          profil_address_street,
+          profil_address_city,
+          profil_address_zip_code,  profil_address_checkbox,
+          profil_phone,             profil_phone_checkbox
           } = req.body;
 
 
@@ -141,11 +157,15 @@ exports.updateUser = async (req, res) => {
     }
 
     // Update user information
-    user.username = profil_username_checkbox ? profil_username : user.username;
     user.first_name = profil_first_name_checkbox ? profil_first_name : user.first_name;
     user.last_name = profil_last_name_checkbox ? profil_last_name : user.last_name;
     user.email = profil_email_checkbox ? profil_email : user.email;
-    user.address = profil_address_checkbox ? profil_address : user.address;
+    user.address = profil_address_checkbox 
+    ? {region : 'Hrvatska',
+       street : profil_address_street,
+       city : profil_address_city,
+       zip_code : profil_address_zip_code}
+     : user.address;
     user.phone = profil_phone_checkbox ? profil_phone : user.phone;
     user.updated_at = new Date();
 
@@ -175,44 +195,14 @@ exports.getAllProducts = async (req, res) => {
   try {
     const user = req.user;
 
-    const product_types = await Product.distinct('product_type');
-    const subcategories = await Product.distinct('subcategory');
-
-    const limit = parseInt(req.query.limit) || 3;
-    // Find products based on the selected product types and subcategories
-    const selectedTypes = [].concat(req.query.productType).filter(Boolean);
-    const selectedSubcategories = [].concat(req.query.subcategory).filter(Boolean);
-
-    // Find products based on the selected product types and subcategories
-    let query = {};
-
-    // Build the query based on the selected product types and subcategories
-    if (selectedTypes.length && selectedSubcategories.length) {
-      query = {
-        $and: [
-          { product_type: { $in: selectedTypes } },
-          { subcategory: { $in: selectedSubcategories } }
-        ]
-      };
-    } else if (selectedTypes.length) {
-      query = { product_type: { $in: selectedTypes } };
-    } else if (selectedSubcategories.length) {
-      query = { subcategory: { $in: selectedSubcategories } };
-    }
+    const materials = await Product.distinct('material');
+    const categories = await Product.distinct('category');
 
     // Find products based on the constructed query
-
-    const products = await Product.find(query)
-    // const products = await Product.find(query).limit(limit);
-      
-    // Check if it's an AJAX request
-
-    // if (req.xhr || req.headers.accept.includes('json')) {
-    //   // If it's an AJAX request, send JSON response
-    //   res.json(products);
-    // } else {
-      // If it's a regular request, render the page with products
-      res.render('products.ejs', { title: 'Filtered Products', selectedSubcategories, selectedTypes, user, products, product_types, subcategories });
+    const limit = 6;
+    const products = await Product.find().limit(limit);
+   
+      res.render('products.ejs', {currentPath: '/products', title: 'Lato \u2022 Proizvodi', user, products, materials, categories });
     // }
   } catch (error) {
     console.error(error);
@@ -222,20 +212,108 @@ exports.getAllProducts = async (req, res) => {
 
 
 
+/**
+ * POST /load_more
+ * Load more products based on scroll
+ */
+exports.loadMoreProducts = async (req, res) => {
+  try {
+
+    // Find products based on the selected product types and subcategories
+    const selected_material = [].concat(req.query.material).filter(Boolean);
+    const selected_category = [].concat(req.query.category).filter(Boolean);
+
+    // Find products based on the selected product types and subcategories
+    let query = {};
+
+    // Build the query based on the selected product types and subcategories
+    if (selected_material.length && selected_category.length) {
+      query = {
+        $and: [
+          { material: { $in: selected_material } },
+          { category: { $in: selected_category } }
+        ]
+      };
+    } else if (selected_material.length) {
+      query = { material: { $in: selected_material } };
+    } else if (selected_category.length) {
+      query = { category: { $in: selected_category } };
+    }
+
+    // Paginate products to load more
+    const skip = parseInt(req.body.skip) || 0;
+    const limit = 3; // Adjust as per your requirement
+    // Find products based on the constructed query with pagination
+    const products = await Product.find(query).skip(skip).limit(limit);
+
+    res.json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
+exports.filterProducts = async (req, res) =>{
+  try {
+
+      // Find products based on the selected product types and subcategories
+      const selected_material = [].concat(req.body.material).filter(Boolean);
+      const selected_category = [].concat(req.body.category).filter(Boolean);
+
+
+  
+      // Find products based on the selected product types and subcategories
+      let query = {};
+  
+      // Build the query based on the selected product types and subcategories
+      if (selected_material.length && selected_category.length) {
+        query = {
+          $and: [
+            { material: { $in: selected_material } },
+            { category: { $in: selected_category } }
+          ]
+        };
+      } else if (selected_material.length) {
+        query = { material: { $in: selected_material } };
+      } else if (selected_category.length) {
+        query = { category: { $in: selected_category } };
+      }
+
+      console.log("queryy",query)
+    // Find products based on the constructed query
+    const products = await Product.find(query);
+
+    res.json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+}
+
+
+
+
 exports.getSpecificProduct = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user;  
+
+    const login_url = `/login?redirect=${req.originalUrl}`;
+
 
     let product_id = req.params.product_id;
 
     const parts = product_id.split('-');
     const actualProductId = parts[parts.length - 1];
 
-
     const product = await Product.findById(actualProductId);
-    const review = await Review.find({ product_id: actualProductId }).populate('user_id');
+
+    const review = await Review.find({ product_id: actualProductId })
+                               .populate('user_id');
+
     
-    res.render('product.ejs', { title: product.name, product, user, review });
+    res.render('product.ejs', {currentPath: '/product', title: 'Lato \u2022 ' + product.name, product, user, review, login_url });
 
   } catch (error) {
     console.error(error);
@@ -252,6 +330,19 @@ exports.addComment = async (req, res) =>{
     }
 
     const { comment, rating  } = req.body;
+
+
+    if (!comment || typeof comment !== 'string') {
+      throw new Error('Komentar nije valjan!');
+    }
+
+    comment = comment.trim();
+
+
+    if (!comment || !rating || rating < 1 || rating > 5) {
+      res.status(400).send('Error');
+      return;
+  }
     const product_id = req.params.product_id;
    
     const user = req.user;
@@ -264,12 +355,15 @@ exports.addComment = async (req, res) =>{
        comment,
      });
 
-    // Save the new comment
+     
+     // Save the new comment
      await newReview.save();
-
+     
+     await newReview.populate('user_id');
+     
      // res.redirect(`/products/${product_id}`);
      // Redirect back to the product page
-    res.redirect('back');
+     res.status(201).json(newReview);
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
@@ -292,7 +386,8 @@ exports.deleteComment = async (req, res) =>{
       // Redirect back to the product page
       return res.redirect('back');
     } else {
-      // If the user is not the owner of the comment, or the comment doesn't exist, return an error
+      // If the user is not the owner of the comment
+      // or the comment doesn't exist, return an error
       return res.status(403).send('Unauthorized');
     }
   } catch (error) {
@@ -301,50 +396,133 @@ exports.deleteComment = async (req, res) =>{
   }
 }
 
+// async function addProducts() {
+//   try {
+//     const products = [
+//       {
+//         "name": "Srebrna narukvica s ružičastim safirom",
+//         "description": "Narukvica od srebra s ružičastim safirom kao centralnim kamenom.",
+//         "price": 280,
+//         "material": "Srebro",
+//         "category": "Narukvica"
+//       },
+//       {
+//         "name": "Zlatne naušnice s dijamantima",
+//         "description": "Elegantne naušnice od 18-karatnog zlata s dijamantima.",
+//         "price": 850,
+//         "material": "Zlato",
+//         "category": "Nausnica"
+//       },
+//       {
+//         "name": "Diamantna broša",
+//         "description": "Luksuzna broša ukrašena dijamantima.",
+//         "price": 1200,
+//         "material": "Diamant",
+//         "category": "Broša"
+//       },
+//       {
+//         "name": "Srebrni prsten s peridotom",
+//         "description": "Prsten od srebra s peridotom kao centralnim kamenom.",
+//         "price": 220,
+//         "material": "Srebro",
+//         "category": "Prsten",
+//         "sizes": ["M", "L"]
+//       },
+//       {
+//         "name": "Zlatna ogrlica s akvamarinom",
+//         "description": "Elegantna ogrlica od 22-karatnog zlata s akvamarinom.",
+//         "price": 980,
+//         "material": "Zlato",
+//         "category": "Ogrlica"
+//       },
+//       {
+//         "name": "Srebrni lančić s privjeskom od ametista",
+//         "description": "Lančić od srebra s prekrasnim ametistom kao privjeskom.",
+//         "price": 320,
+//         "material": "Srebro",
+//         "category": "Lančić"
+//       },
+//       {
+//         "name": "Diamantne naušnice s tanzanitom",
+//         "description": "Naušnice s dijamantima oko tanzanita.",
+//         "price": 480,
+//         "material": "Diamant",
+//         "category": "Nausnica"
+//       },
+//       {
+//         "name": "Zlatni prsten s rubinom",
+//         "description": "Prsten od 24-karatnog zlata s rubinom kao centralnim kamenom.",
+//         "price": 1150,
+//         "material": "Zlato",
+//         "category": "Prsten",
+//         "sizes": ["S", "M", "L"]
+//       },
+//       {
+//         "name": "Srebrne naušnice s topazom",
+//         "description": "Naušnice od srebra s topazom kao centralnim kamenom.",
+//         "price": 180,
+//         "material": "Srebro",
+//         "category": "Nausnica"
+//       },
+//       {
+//         "name": "Zlatna narukvica s peridotom",
+//         "description": "Elegantna narukvica od 18-karatnog zlata s peridotom.",
+//         "price": 750,
+//         "material": "Zlato",
+//         "category": "Narukvica"
+//       }
+//     ];
+
+//     // Dodavanje proizvoda u bazu
+//     const addedProducts = await Product.insertMany(products);
+//     console.log('Products added successfully:', addedProducts);
+//   } catch (error) {
+//     console.error('Error adding products:', error);
+//   }
+// }
+
+// addProducts();
 
 exports.cart = async (req, res) => {
   try {
-    let cartItems = [];
-    let guestProducts = [];
-    let user = null;
-    // // Ensure the user is logged in
-    // if (!req.isAuthenticated()) {
-    //   res.redirect('/login'); // Redirect to the login page if the user is not logged in
-    //   return;
-    // }
-    if (req.user) {
-      // Retrieve the user with populated cart and items
-      user = await User.findById(req.user._id)
-        .populate({
-          path: 'cart',
-          populate: {
-            path: 'items.product',
-            model: 'Product', 
-          },
-        })
-        .exec();
 
-        if (user && user.cart && user.cart.items) {
-          cartItems = user.cart.items;
-        }
-
+    const user = req.user;
+    let cart_items = [];
+    let guest_products = [];
+    let user_products = [];
+  
+    // Check if the request has a user object
+    if (user) {
+       // If user is registered retrive cart_items from session storage
+       cart_items = req.session.user_cart || [];
+ 
+       // Populate user_products array with product details
+       for (const item of cart_items) {
+         const product = await Product.findById(item.product_id).exec();
+         if (product) {
+           user_products.push(product);
+         }
+       }
+        
     } else {
-      cartItems = req.session.guestCart || [];
+       // If user is guest then  retrive cart_items from session storage
+      cart_items = req.session.guest_cart || [];
 
-      for (const item of cartItems) {
-        const product = await Product.findById(item.productId).exec();
+      // Populate guest_products array with product details
+      for (const item of cart_items) {
+        const product = await Product.findById(item.product_id).exec();
         if (product) {
-          guestProducts.push(product);
+          guest_products.push(product);
         }
       }
     }
-    console.log("cartItems", cartItems);
 
     // Render the cart template with the populated user object
-    res.render('cart.ejs', { title: 'Cart', user , cartItems, guestProducts });
+    res.render('cart.ejs', { currentPath: '/cart', title: 'Lato \u2022 Košarica', user,
+     cart_items, user_products,  guest_products });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error + "\tServer Error");
+    res.status(500).send(error + "Greška!");
   }
 }
 
@@ -353,135 +531,473 @@ exports.cart = async (req, res) => {
 
 exports.addToCart = async (req, res) => {
   try {
-    const user = req.user; // Access the authenticated user
+    // Get the authenticated user
+    const user = req.user; 
+    // Extract productId , quantity and sizes (optional) from the request body
+    const { product_id, quantity, size } = req.body;
 
-    // Extract productId and quantity from the request body
-    const { productId, quantity } = req.body;
     if (user) {
-      // Find or create the user's cart
-      let userCart = await Cart.findOne({ user: user._id });
+        // Check if the user is a guest, if so, store cart items in session storage
+      // Retrieve user cart from session storage or initialize an empty array
+      let user_cart = req.session.user_cart || []; 
 
-      if (!userCart) {
-        userCart = new Cart({ user: user._id, items: [] });
-        await userCart.save();
-        user.cart = userCart._id;
-        await user.save();
-      }
+      // Find existing item in the user cart based on product ID
+      const existing_item = user_cart.find(item => item.product_id === product_id);
 
-      // Check if the product is already in the cart
-      const existingItem = userCart.items.find((item) => item.product.equals(productId));
+      // If the item already exists in the user cart
+      if (existing_item) {
+        // Increment the quantity of the existing item by the quantity specified
+        if (existing_item.size !== size)
+          user_cart.push({ product_id, quantity: parseInt(quantity), size: size });
+        else 
+          existing_item.quantity += parseInt(quantity);
 
-      if (existingItem) { 
-        // If the product is already in the cart, increment the quantity
-        existingItem.quantity += parseInt(quantity);
       } else {
-        // If the product is not in the cart, add a new item
-        userCart.items.push({ product: productId, quantity: parseInt(quantity) });
+        // Else add a new item to the cart
+        user_cart.push({ product_id, quantity: parseInt(quantity), size: size });
       }
 
-      // Save the updated cart
-      await userCart.save();
+      // Update the guest cart in session storage with the modified cart
+      req.session.user_cart = user_cart;
 
-      res.redirect('/cart'); // Redirect to the cart page or any other desired page
+      // Redirect the user to the cart page after updating the cart
+      res.redirect('/cart');
   }
   else {
-      // If user is a guest then store cart items to session storage
-      let guestCart = req.session.guestCart || [];
-      const existingItemIndex = guestCart.findIndex(item => item.productId === productId);
+      // Check if the user is a guest, if so, store cart items in session storage
+      // Retrieve guest cart from session storage or initialize an empty array
+      let guest_cart = req.session.guest_cart || []; 
 
-      if (existingItemIndex !== -1) {
-        guestCart[existingItemIndex].quantity += parseInt(quantity);
+      // Find existing item in the guest cart based on product ID
+      const existing_item = guest_cart.find(item => item.product_id === product_id);
+
+      // If the item already exists in the guest cart
+      if (existing_item) {
+        // Increment the quantity of the existing item by the quantity specified
+        if (existing_item.size !== size)
+          guest_cart.push({ product_id, quantity: parseInt(quantity), size: size });
+        else
+          existing_item.quantity += parseInt(quantity);
+
       } else {
-        guestCart.push({ productId, quantity: parseInt(quantity) });
+        // Else add a new item to the cart
+        guest_cart.push({ product_id, quantity: parseInt(quantity), size: size });
       }
 
-      req.session.guestCart = guestCart;
-      console.log("req.session.guestCart", req.session.guestCart);
+      // Update the guest cart in session storage with the modified cart
+      req.session.guest_cart = guest_cart;
+
+      // Redirect the user to the cart page after updating the cart
       res.redirect('/cart');
   }
   } catch (error) {
     console.error(error);
 
-
-    res.status(500).send(error + "\tServer Error");
+    res.status(500).send(error + "Greška!");
   }
 };
 
 
 exports.removeFromCart = async (req, res) => {
   try {
-    if (req.user) {
-      // User is logged in
-      const user = req.user; // Access the authenticated user
-      const productIdToRemove = req.body.productId || req.params.productId;
+      const product_id = req.params.product_id;
+      const size = req.params.size;
+
+      let cart, products;
+
+      if (req.session.user_cart)
+         cart = req.session.user_cart;
+
+      else if (req.session.guest_cart)
+         cart = req.session.guest_cart;
+        
+      else 
+        return res.json({ error: "Greška, proizvod nedostupan!" });
+      
 
       // Check if the product ID is provided
-      if (!productIdToRemove) {
-        // Redirect the user back to the cart page with a message
-        return res.redirect('/cart?error=productIdNotProvided');
-      }
+      if (!product_id) 
+          return res.json({ error: "Greška, proizvod nedostupan!" });
+      
 
-      // Remove the item from the user's cart based on the product ID  
-      await Cart.updateOne(
-        { user: user._id },
-        { $pull: { items: { product: productIdToRemove } } }
-      );
+      // Remove the item from the cart based on the product ID and size (if provided)
+      if (size === 'undefined') 
+          cart = cart.filter(item => String(item.product_id) !== String(product_id));
+       else 
+          cart = cart.filter(item => !(String(item.product_id) === String(product_id) 
+                                                  && item.size === size.replace(/"/g, '')));
+      
+      products = await Promise.all(cart.map(async item => {
+          const product = await Product.findById(item.product_id).exec();
+          return product;
+      }));
 
-      console.log('Item removed successfully from user cart');
-      // Redirect the user back to the cart page
-      return res.redirect('/cart');
+      if (req.session.user_cart) req.session.user_cart = cart;
+      else req.session.guest_cart = cart;
 
-    } else if (req.session.guestCart) {
-      // Guest user
-      const productIdToRemove = req.body.productId || req.params.productId;
 
-      // Check if the product ID is provided
-      if (!productIdToRemove) {
-        // Redirect the user back to the cart page with a message
-        return res.redirect('/cart?error=productIdNotProvided');
-      }
+      const cart_items_count = 
+      req.session.guest_cart !== undefined ? req.session.guest_cart.length : 
+      (req.session.user_cart !== undefined ? req.session.user_cart.length : 0);
+ 
 
-      // Remove the item from the guest cart based on the product ID  
-      req.session.guestCart = req.session.guestCart.filter(item => item.productId !== productIdToRemove);
-      console.log('Item removed successfully from guest cart');
-      return res.redirect('/cart');
-    }
+      res.locals.cart_items_count = cart_items_count;
 
-    // Redirect the user back to the cart page with a message
-    return res.redirect('/cart?error=invalidRequest');
-
+      return res.json({
+          cart_items: cart || [],
+          user_products: products || [],
+          guest_products: products || [],
+          cart_items_count: cart_items_count,
+          message: 'Uspjesno'
+      });
   } catch (error) {
-    console.error(error);
-
-
-    res.status(500).send(error + "\tServer Error");
+      console.error(error);
+      res.status(500).send(error + "Greška!");
   }
 };
 
-exports.checkout = async (req, res) => {
-  try {
 
-  } catch (error) {
-    console.error(error);
+exports.renderDelivery = async (req, res) => {
 
-    res.status(500).send(error + "\tServer Error");
-  }
-};
-
-exports.delivery = async (req, res) => {
   try {
     const user = req.user;
 
+    const login_url = `/login?redirect=${encodeURIComponent(req.originalUrl)}`;
 
+    if (user){
+       const cart_items = req.session.user_cart;
+  
+      if (!cart_items || cart_items.length <= 0) return res.redirect('/cart');
+    }
+    
+    res.render('delivery.ejs', {currentPath: '/delivery', title: 'Lato \u2022 Narudzba', user, login_url });
+   
+  } catch (error) {
+    console.error(error);
 
-    res.render('delivery.ejs', { title: 'Deliver', user });
+    res.status(500).send(error + "Greška!");
+  }
+};
+
+exports.renderGuestDelivery = async (req, res) => {
+  try {
+    const user = req.user;
+    const cart_items = req.session.guest_cart;
+
+    if (!cart_items || cart_items.length <= 0) return res.redirect('/cart');
+
+    res.render('guest_delivery.ejs', { currentPath: '/delivery', title: 'Lato \u2022 Gost narudzba', user });
+   
   } catch (error) {
     console.error(error);
 
 
-    res.status(500).send(error + "\tServer Error");
+    res.status(500).send(error + "Greška!");
   }
 };
+
+
+async function checkIfUserExists(email) {
+  try {
+    // Find a user with the provided email address
+    const existingUser = await User.findOne({ email });
+    
+    // If a user with the provided email exists, return true
+    // Otherwise, return false
+    return !!existingUser;
+  } catch (error) {
+    
+    console.error('Error checking if user exists:', error);
+    throw error; 
+  }
+}
+
+
+
+exports.processUserDelivery = async (req, res) => {
+  try{
+
+    // Check if user is logged in
+    if (req.user){
+      const user = req.user;
+      const { city, zip_code, street, payment_method } = req.body;
+
+      // Get user cart items from database
+      let total_price = 0;
+
+      const cart_items = req.session.user_cart;
+      const user_cart_items = []
+
+      if (cart_items && cart_items.length > 0) {
+        for (const item of cart_items) {
+          const product = await Product.findById(item.product_id).exec();
+          if (product) {
+            if (product.discount.active ){
+              total_price += item.quantity * (product.price - (product.price * product.discount.percentage / 100 ));
+            }
+            else total_price += item.quantity * product.price;
+  
+            user_cart_items.push({
+              product: {
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                discount:{
+                  active: product.discount.active,
+                  percentage: product.discount.percentage
+                },
+                material: product.material,
+                category: product.category
+              },
+              quantity: item.quantity,
+              sizes: item.sizes,
+              total_price: total_price
+            });
+          }
+        }
+      }
+  
+      
+
+      const default_address = {
+        region: 'Hrvatska',
+        street: user.address.street,
+        city: user.address.city,
+        zip_code: user.address.zip_code
+      };
+      
+      // Construct the address object based on the provided input values
+      // or default values if inputs are empty
+      const new_address = {
+        region: default_address.region,
+        street: street ? street.trim() : default_address.street,
+        city: city ? city.trim() : default_address.city,
+        zip_code: zip_code ?  zip_code.trim() : default_address.zip_code 
+      };
+
+      // Check if the address needs to be updated
+      const address_changed = new_address.street !== user.address.street
+                           || new_address.city !== user.address.city 
+                           || new_address.zip_code !== user.address.zip_code;
+
+      const user_data = {
+        first_name: user.first_name,
+        last_name: user.first_name,
+        phone: user.phone,
+        email: user.email
+      }
+
+
+      const order = new Order({
+        user: user_data, 
+        order_date: new Date(),
+        total_amount: total_price,
+        status: 'U tijeku',
+        cart_items: user_cart_items, 
+        address:  address_changed ? new_address : default_address,
+        payment_method: payment_method
+         
+      });
+    
+      // Save the order to the database
+      await order.save();
+
+
+
+      
+    for (const item of order.cart_items) {
+      const product = await Product.findById(item.product.id);
+
+      // If product exists and both quantity and stock_quantity are valid numbers
+      if (product && !isNaN(item.quantity) && !isNaN(product.stock_quantity)) {
+          // Update stock quantity
+          product.stock_quantity -= item.quantity;
+          
+          await product.save();
+      }
+  }
+  
+      req.session.user_cart = [];
+      res.redirect('/delivery?success');
+    }
+
+  }catch (error) {
+    console.error(error);
+    res.status(500).send(error + "Greška!");
+  }
+}
+
+
+exports.proccesGuestDelivery = async (req, res) => {
+  try {
+    const cart_items = req.session.guest_cart;
+
+    const guest_cart_items = []
+
+
+    const { first_name, last_name,
+      city, zip_code, street,
+      email, phone, payment_method } = req.body;
+
+
+    // Check if a user with the provided email already exists
+    const userExists = await checkIfUserExists(email);
+
+    if (userExists) {
+      return res.status(400).send('A user with this email already exists.');
+    } 
+  
+    // Create a new user record
+    const guest_user = new User({
+      first_name: first_name,
+      last_name: last_name,
+      address: {
+        region: 'Hrvatska',
+        street: street,
+        city: city,
+        zip_code: zip_code
+      },
+      email: email,
+      phone: phone,
+      role: 'guest'
+    });
+  
+    // Save the user record to the database
+
+    await guest_user.save();
+
+
+  
+    let total_price = 0;
+  
+    if (cart_items && cart_items.length > 0) {
+      for (const item of cart_items) {
+        const product = await Product.findById(item.product_id).exec();
+        if (product) {
+          if (product.discount.active ){
+            total_price += item.quantity * (product.price - (product.price * product.discount.percentage / 100 ));
+          }
+          else total_price += item.quantity * product.price;
+
+          guest_cart_items.push({
+            product: {
+              id: product._id,
+              name: product.name,
+              price: product.price,
+              discount:{
+                active: product.discount.active,
+                percentage: product.discount.percentage
+              },
+              material: product.material,
+              category: product.category
+            },
+            quantity: item.quantity,
+            sizes: item.sizes,
+            total_price: total_price
+          });
+        }
+      }
+    }
+
+    const guest_data = {
+      first_name: guest_user.first_name,
+      last_name: guest_user.first_name,
+      phone: guest_user.phone,
+      email: guest_user.email
+    }
+
+    // Create the order
+    const order = new Order({
+      user: guest_data, 
+      order_date: new Date(),
+      total_amount: total_price,
+      status: 'U tijeku',
+      cart_items: guest_cart_items, 
+      address: {
+        region: 'Hrvatska', // Hardcoded for now
+        street: street,
+        city: city,
+        zip_code: zip_code
+      },
+      payment_method: payment_method
+    });
+
+  
+    // Save the order to the database
+    await order.save();
+
+    for (const item of order.cart_items) {
+      const product = await Product.findById(item.product.id);
+
+      // If product exists and both quantity and stock_quantity are valid numbers
+      if (product && !isNaN(item.quantity) && !isNaN(product.stock_quantity)) {
+          // Update stock quantity
+          product.stock_quantity -= item.quantity;
+          await product.save();
+      }
+  }
+
+
+    req.session.guest_cart = [];
+
+    res.redirect('/cart?success');
+
+
+
+  } catch (error) {
+    res.status(500).send(error + "Greška!");
+  }
+};
+
+
+
+exports.cancelOrder = async (req, res) =>{
+  try {
+    const order_id = req.params.order_id;
+    const user = req.user;
+
+    // Check for valid order id
+    if (!order_id) 
+      return res.status(400).json({error: 'Narudžba nije pronađena!'});
+
+    const order = await Order.findById(order_id);
+    // Check if order exists
+    if (!order) 
+      return res.status(404).json({  error: 'Narudžba nije pronađena!' });
+
+    // Check if order status is aviable for changing
+    if (order.status !== 'U tijeku')
+      return res.json({message: "Narudžbu nije moguće poništiti!"})
+
+      for (const item of order.cart_items) {
+        const product = await Product.findById(item.product.id);
+  
+        // If product exists and both quantity and stock_quantity are valid numbers
+        if (product && !isNaN(item.quantity) && !isNaN(product.stock_quantity)) {
+            // Update stock quantity
+            product.stock_quantity += item.quantity;
+            
+            await product.save();
+        }
+    }
+
+
+    order.status = 'Otkazano';
+    
+    // await order.deleteOne();
+
+    await order.save();
+    
+    return res.json({
+      message: 'Narudžba je uspješno poništena!'});
+
+  } catch (error) {
+    // Log the error
+    console.error(error);
+    return res.status(500).send('Greška!');
+  }
+}
+
 
 
 
@@ -491,7 +1007,7 @@ exports.delivery = async (req, res) => {
  */
 exports.contact = async (req, res) => {
   const user = req.user;
-  res.render('contact.ejs', { title: 'eCommerce - Contact', user });
+  res.render('contact.ejs', { title: 'Lato \u2022 Kontakt', user });
 }
 
 /**
@@ -501,5 +1017,5 @@ exports.contact = async (req, res) => {
 exports.about = async (req, res) => {
   const user = req.user;
 
-  res.render('about.ejs', { title: 'eCommerce - About', user });
+  res.render('about.ejs', { title: 'Lato \u2022 O nama', user });
 }

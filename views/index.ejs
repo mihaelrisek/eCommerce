@@ -1,31 +1,50 @@
 
-<% if (user) { %>
-  <p>Welcome, <%= user.username %>!</p>
-<% } else { %>
-  <p>Welcome, Guest!</p>
-
-<% } %>
-
+<header>
+  <h1>Lato</h1>
+  <img src="img/enhanced.png" alt="">
+</header>
 
 <%# Category Start %>
-<section>
-  <h1>Categories</h1>
-  <article class="article_categories">
-    <% product_types.forEach(type => { %>
-      <ul>
-        <li>
-          <a href="products/<%= type.toLowerCase() %>"> <%= type  %></a>
+
+
+
+<% if(materials) {%>
+  <% materials.forEach((material, index) => { %>
+
+    <section class="material_section" >
+      <h2 class="collections_line" ><%=material %></h2>
+      
+      <article class="material_article">
+
+       <div class="category_text">
+        <h4><%= material %></h4>
+        <% material_data.forEach((description) => { %>
+          <% if (description.material == material) {%>
+            <p><%=description.description %></p>
+          <% } %>
+          
+       <% }); %>
+       </div>
+
+
+       <ul>
+      
+        <li class="content__title-main">
+          <a href="products/<%= material.toLowerCase() %>"> <%= material  %></a>
           <ul>
-              <% subcategoriesMap.get(type).forEach(subcategory => { %>
-                <li>
-                   <a href="products/<%= type.toLowerCase()  %>/<%= subcategory.toLowerCase() %>"> <%= subcategory  %></a>
+              <% categoriesMap.get(material).forEach((category, index) => { %>
+               
+                <img src="<%= products[index].images[0] %>" alt="Proizvod">
+                <li class="content__title-sub">
+                  <a href="products/<%= material.toLowerCase()  %>/<%= category.toLowerCase() %>"> <%= category  %></a>
                 </li>
               <% }); %>
           </ul>
         </li>
       </ul>
+      </article>
+    </section>
     <% }); %>
-  </article>
-</section>
+<% } %>
 
 <%# Category End %>

@@ -1,0 +1,120 @@
+<h1>Narudzba</h1>
+
+<% if (order) {%>
+
+
+  <form action="/admin/orders/change/<%= order._id %>" method="post">
+    <table class="order">
+      <tbody>
+          <tr> <td>ID narudžbe</td><td><%= order._id %></td></tr>
+          <tr> <td>Ime</td><td><%= order.user.first_name %></td></tr>
+          <tr> <td>Prezime</td><td><%= order.user.last_name %></td></tr>
+          <tr> <td>Email</td><td><%= order.user.email %></td></tr>
+          <tr> <td>Phone</td><td><%= order.user.phone %></td></tr>
+          <tr> <td>Datum narudžbe</td><td><%= order.order_date.toLocaleString() %></td></tr>
+          <tr> <td>Ukupni iznos</td><td>$<%= order.total_amount.toFixed(2) %></td></tr>
+          <tr> <td>Stanje narudžbe</td><td><%= order.status %></td></tr>
+          <tr> <td>Naćin plačanja</td><td><%= order.payment_method == 'cod'? 'Pouzeće' : 'Kartično plaćanje' %></td></tr>
+  
+          <tr> <td>Država</td><td><%= order.address.region %></td></tr>
+          <tr> <td>Ulica</td><td><%= order.address.street %></td></tr>
+          <tr> <td>Mjesto</td><td><%= order.address.city %></td></tr>
+          <tr> <td>Poštanski broj</td><td><%= order.address.zip_code %></td></tr>
+          
+          <% order.cart_items.forEach((item, index) => { %>
+            <tr><td><h2>Proizvod <%= index+1  %> </h2></td></tr>
+            <tr><td> Naziv proizvoda </td><td><%= item.product.name %></td></tr>
+            <% if (item.product.discount && item.product.discount.active) { %>
+              <tr><td>Cijena jednog proizvoda uz popust </td><td>$<%= (item.product.price - (item.product.price * (item.product.discount.active ? item.product.discount.percentage / 100 : 0))).toFixed(2) %></td></tr>
+              <tr><td>Popust</td><td><%= item.product.discount.percentage %> %</td></tr>
+            <% } else { %>
+              <tr><td> Cijena jednog proizvoda </td><td>$<%= item.product.price %></td></tr>
+            <% } %>
+            <tr><td> Kolicina</td><td> <%= item.quantity %></td></tr>
+            <tr><td> Materijal</td><td> <%= item.product.material %></td></tr>
+            <tr><td> Kategorija</td><td> <%= item.product.category %></td></tr>
+            <% if (item.sizes){ %>
+              <tr><td> Velicina</td><td> <%= item.sizes %></td></tr>
+              <tr><td> <strong>Status</strong></td><td> <%= order.status %></td></tr>
+            <% } %>
+          <% }) %>
+              
+            </tbody>
+    </table>
+      <h3>Status narudzbe</h3>
+      <div class="order_select_status">
+        <div class="order_select">
+          <input <%= order.status !=='U tijeku' ? 'disabled' : "" %>   type="radio" name="order_status" <%= order.status =='U tijeku' ? 'checked' : "" %>  value="U tijeku" id="order_status">
+          <i></i>
+          <span>
+            <svg  width="24" height="24" viewBox="0 0 256 256"><path fill="currentColor" d="M128 40a96 96 0 1 0 96 96a96.11 96.11 0 0 0-96-96m0 176a80 80 0 1 1 80-80a80.09 80.09 0 0 1-80 80m45.66-125.66a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32l40-40a8 8 0 0 1 11.32 0M96 16a8 8 0 0 1 8-8h48a8 8 0 0 1 0 16h-48a8 8 0 0 1-8-8"/></svg>
+            U tijeku
+          </span>
+        </div>
+        <div class="order_select">
+          <input <%= order.status == 'Dostavljeno' ? 'disabled' : "" %> type="radio" name="order_status" <%= order.status =='Na putu' ? 'checked' : "" %> value="Na putu" id="order_status">
+          <i></i>
+          <span>
+            <svg  width="24" height="24" viewBox="0 0 32 32"><path fill="currentColor" d="M0 6v2h19v15h-6.156c-.446-1.719-1.992-3-3.844-3c-1.852 0-3.398 1.281-3.844 3H4v-5H2v7h3.156c.446 1.719 1.992 3 3.844 3c1.852 0 3.398-1.281 3.844-3h8.312c.446 1.719 1.992 3 3.844 3c1.852 0 3.398-1.281 3.844-3H32v-8.156l-.063-.157l-2-6L29.72 10H21V6zm1 4v2h9v-2zm20 2h7.281L30 17.125V23h-1.156c-.446-1.719-1.992-3-3.844-3c-1.852 0-3.398 1.281-3.844 3H21zM2 14v2h6v-2zm7 8c1.117 0 2 .883 2 2s-.883 2-2 2s-2-.883-2-2s.883-2 2-2m16 0c1.117 0 2 .883 2 2s-.883 2-2 2s-2-.883-2-2s.883-2 2-2"/></svg>
+            Na putu
+          </span>
+        </div>
+        <div class="order_select">
+          <input <%= order.status == 'U tijeku' ? 'disabled' : "" %> type="radio" name="order_status" <%= order.status =='Dostavljeno' ? 'checked' : "" %> value="Dostavljeno" id="order_status">
+          <i></i>
+          <span>
+            <svg  width="24" height="24" viewBox="0 0 32 32"><path fill="currentColor" d="M5 5v22h22V5zm2 2h18v18H7zm14.281 4.281L14 18.562l-3.281-3.28l-1.438 1.437l4 4l.719.687l.719-.687l8-8z"/></svg>
+            Dostavljeno
+          </span>
+        </div>
+        <div class="order_select" >
+          <input <%= order.status == 'U tijeku' ? 'disabled' : "" %> type="radio" name="order_status" <%= order.status =='Otkazano' ? 'checked' : "" %> value="Dostavljeno" id="order_status">
+          <i style="border-color: red;" ></i>
+          <span style="color: red;">
+            <svg  width="24" height="24" viewBox="0 0 32 32"><path fill="currentColor" d="M5 5v22h22V5zm2 2h18v18H7zm14.281 4.281L14 18.562l-3.281-3.28l-1.438 1.437l4 4l.719.687l.719-.687l8-8z"/></svg>
+            Otkazano
+          </span>
+        </div>
+      </div>
+   
+  </form>
+
+  <form action="/admin/orders/delete/<%= order._id %>" method="post">
+    <button type="submit">Izbrisi narudzbu</button>
+  </form>
+<% } else{ %>
+  <h3>Greska!</h3>
+<% } %>
+
+
+<script>
+
+document.querySelectorAll('input[type=radio][name=order_status]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        // Fetch the new order status value
+        const new_order_status = this.value;
+        // Fetch the order ID from the form 
+        const order_id = '<%= order._id %>'; 
+
+        // Send a fetch request to update the order status
+        fetch(`/admin/orders/change/${order_id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ order_status: new_order_status })
+        })
+        .then(response => {
+            console.log(response.json())
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+</script>

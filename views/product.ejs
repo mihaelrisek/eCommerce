@@ -1,6 +1,6 @@
 <a class="history_back" onclick="history.back()">Vrati se</a>
+<% if (product != null) { %>
 <section class="section_product" >
-  <% if (product != null) { %>
 
 
     <article class="article_img">
@@ -17,8 +17,26 @@
     <article class="article_txt">
       <h1><%= product.name%></h1>
       <h3><%= product.description %></h3>
-      <h3><strong> € <%= product.price%></strong></h3>
-      
+      <h3>
+        <strong>€ <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %></strong>
+       
+        <% if (product.discount.active) {%>
+          <span style="text-decoration: line-through;">€ <%= product.price %></span>
+          <span><%= product.discount.percentage %>% off</span>
+          <span> 
+            <% 
+              let endDate = new Date(product.discount.end_date);
+              let currentDate = new Date();
+              let timeDifference = endDate.getTime() - currentDate.getTime();
+              let daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+              if (daysDifference > 0) {
+            %>
+            <%= "Požurite jer popust vrijedi još "+  daysDifference %>  dan<%= daysDifference !== 1 ? 'a' : '' %> 
+            <% } %>
+          </span>
+        <% } %>
+      </h3>
+
       <div class="details_wrapper">
       <h3>Details</h3>
 
@@ -44,46 +62,32 @@
       <% displayDetails(product.details); %>
     </div>
   
-    <form method="post" action="/add-to-cart">
-      <input type="hidden" name="productId" value="<%= product._id %>">
-      <label for="quantity">Quantity:</label>
-      <input type="number" name="quantity" value="1" min="1" required>
-      <button class="latest-link-txt add-to-cart-btn" type="submit">Add to Cart</button>
+    <form action="/add-to-cart" method="post" >
+      <% if (product.sizes && product.sizes.length > 0){ %>
+        <% product.sizes.forEach((size) => { %>
+          <label for="size"><%= size  %></label>
+          <input type="radio" name="size" id="size" value="<%= size  %>" required>
+        <% }) %>
+      <% } %>
+
+      <input type="hidden" name="product_id" value="<%= product._id %>">
+
+
+      <% if (product.stock_quantity > 0) {%>
+        <label for="quantity">Quantity:</label>
+        <input type="number" name="quantity" value="1" min="1" max="999" required>
+        <button class="latest-link-txt add-to-cart-btn" type="submit">Add to Cart</button>
+      <% } else { %>
+        <p>Trenutno nema dostupnih u skladištu!</p>
+      <% } %>
+
     </form>
 </article>
 </section>
 
 <section class="comments">
-  <div class="container">
-
-    <h1>Product Reviews</h1>
-
-    <% if (review.length > 0) { %>
-      <% review.forEach((comment) => { %>
-        <% if (comment.user_id){ %>
-          <article>
-            <h2><%= comment.user_id.first_name %> <%= comment.user_id.last_name %></h2>
-            <p>Comment: <%= comment.comment %></p>
-            <p>Rating: <span class="rating"><%= comment.rating %></span></p>
-            <% if (user) { %>
-              <% if (user._id.toString() === comment.user_id._id.toString() || user.role === 'admin') { %>
-                <form action="/products/<%= product._id %>/comments/<%= comment._id %>/delete" method="POST">
-                  <button type="submit">Delete</button>
-                </form>
-              <% } %>
-            <% } %>
-          </article>
-        <% } %>
-      <% }); %>
-    <% } else { %>
-      <h5>Be the first one to leave a comment!</h5>
-      <% if (!user) { %>
-        <a href="/login">Log in</a>
-      <% } %>
-    <% } %>
-
     <% if (user){ %>
-      <form id="commentForm" action="/products/<%= product._id %>/comments" method="POST">
+      <form id="commentForm" action="/products/<%= product._id %>/comments" method="POST" onsubmit="event.preventDefault(); addComment()">
         <article class="comment">
           <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
         </article>
@@ -98,32 +102,127 @@
       </form>
     <%} else if (!user && review.length > 0) {%>
       <h5>Log in to add comments!</h5>
-      <a href="/login">Log in</a>
+      <a href="<%=login_url%>">Log in</a>
       <%} %>
 
+    <h1>Product Reviews</h1>
+
+  <div class="container">
+
+
+    <% if (review.length > 0) { %>
+      <%  review.reverse().forEach((comment) => { %>
+        <% if (comment.user_id){ %>
+          <article id="comment-<%= comment._id %>">
+            <h2><%= comment.user_id.first_name %> <%= comment.user_id.last_name %></h2>
+            <p>Comment: <%= comment.comment %></p>
+            <p>Rating: <span class="rating"><%= comment.rating %></span></p>
+            <% if (user) { %>
+              <% if (user._id.toString() === comment.user_id._id.toString() || user.role === 'admin') { %>
+                <form action="/products/<%= product._id %>/comments/<%= comment._id %>/delete" onsubmit="event.preventDefault(); deleteComment('<%= comment._id %>') " method="POST" >
+                  <button type="submit">Izbriši</button>
+                </form>
+              <% } %>
+            <% } %>
+          </article>
+        <% } %>
+      <% }); %>
+    <% } else { %>
+      <h5 id="message_default" >Be the first one to leave a comment!</h5>
+      <% if (!user) { %>
+        <a href="<%=login_url%>">Log in</a>
+      <% } %>
+    <% } %>
+
+  
   </div>
 
 </section>
+<%}%>
 
 <script>
-  function validateForm() {
-    var ratingInputs = document.getElementsByName('rating');
-    var ratingSelected = false;
+  
+  function addComment() {
+    const form = document.getElementById('commentForm');
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin' // Include this line if you are using sessions for authentication
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      form.reset();
+      return response.json();
+    })
+    .then(data => {
+      // Assuming the response includes the newly added comment data
+      // Update the UI to display the newly added comment
+      const comment_container = document.querySelector('.comments .container');
+      const new_comment_article = document.createElement('article');
+      new_comment_article.id = 'comment-' + data._id;
+      new_comment_article.innerHTML = `
+          <h2>${data.user_id.first_name} ${data.user_id.last_name}</h2>
+          <p>Comment: ${data.comment}</p>
+          <p>Rating: <span class="rating">${data.rating}</span></p>
+          <form action="/products/${data.product_id}/comments/${data._id}/delete" id="delete-${data._id}" onsubmit="event.preventDefault(); deleteComment('${data._id}') " method="POST">
+            <button type="submit">Izbriši</button>
+          </form>
+      `;
+      comment_container.prepend(new_comment_article);
+      document.getElementById('message_default').remove();
+    })  
+    .catch(error => {
+      console.error('There was an error adding the comment:', error);
+    });
+}
+
+
+function deleteComment(comment_id) {
+  fetch(`/products/<%= product._id %>/comments/${comment_id}/delete`, {
+    method: 'POST',
+    credentials: 'same-origin' // Include this line if you are using sessions for authentication
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    // Assuming the response indicates successful deletion
+    // Update the UI to remove the deleted comment
+    const commentElement = document.getElementById(`comment-${comment_id}`);
+    if (commentElement) {
+      commentElement.remove();
+    }
+  })
+  .catch(error => {
+    console.error('There was an error deleting the comment:', error);
+  });
+}
+
+
+  
+
+function validateForm() {
+    let ratingInputs = document.getElementsByName('rating');
+    let ratingSelected = false;
     
-    // Loop through radio buttons to check if at least one is selected
-    for (var i = 0; i < ratingInputs.length; i++) {
+    for (let i = 0; i < ratingInputs.length; i++) {
       if (ratingInputs[i].checked) {
         ratingSelected = true;
         break;
       }
     }
-  
-    // If no rating is selected, prevent form submission and display an alert
+
     if (!ratingSelected) {
       alert('Please select a rating.');
-      event.preventDefault(); // Prevent form submission
+      event.preventDefault(); 
     }
   }
-  </script>
-  
-<%}%>
+
+
+</script>
+
+

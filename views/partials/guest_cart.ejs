@@ -1,0 +1,135 @@
+<h3>Košarica</h3>
+<br>
+
+<h2>Proizvodi u košarici:</h2>
+
+<section class="cart">
+  <ul id="cart-items">
+      <% let totalPrice = 0; %>
+      <% guest_products.forEach((item, itemIndex) => { %>
+          <% if (item) { %>
+              <li>
+                  <a href="/product/<%= item.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= item._id %>">
+                      <div>
+                          <img src="<%- item.images[0] %>" alt="<%- item.name %>">
+                      </div>
+                      <div>
+                          <%= item && item.name %>
+                      </div>
+                      <div>
+                          <% if (cart_items[itemIndex].size) { %>
+                              Velicina: <%= cart_items[itemIndex].size %>
+                          <% } %>  
+                      </div>
+                      <div>
+                          Kolicina: <%= cart_items[itemIndex].quantity %> 
+                      </div>
+                      <div>
+                          <% if (item.discount.active) { %>
+                              <%= (item.price - (item.price * (item.discount.percentage / 100))).toFixed(2) %> € (<%= item.discount.percentage %>%) 
+                          <% } else { %>
+                              <%= item.price %> € 
+                          <% } %>
+                      </div>
+                      <div>
+                          <%= (cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price)).toFixed(2) %> € 
+                          <% totalPrice += cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price); %>
+                      </div>
+                      <div>
+                          <button class="remove-from-cart" name="product_id" <%= cart_items[itemIndex].size ? 'data-product-size="' + cart_items[itemIndex].size + '"' : 'nema' %> data-product-id="<%= item._id %>">Izbriši</button>
+                      </div>
+                  </a>
+              </li>
+          <% } %>
+      <% }); %>
+  </ul>
+  <span class="total-price">Sveukupna cijena <%= totalPrice.toFixed(2) %> €</span>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const removeButtons = document.querySelectorAll('.remove-from-cart');
+
+    removeButtons.forEach(button => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const product_id = button.dataset.productId;
+            const size = button.dataset.productSize;
+
+            console.log("size", size)
+
+            const listItem = button.closest('li');
+
+            // Show loader while waiting for response
+            listItem.classList.add('loading');
+
+            try {
+                const response = await fetch(`/remove-from-cart/${product_id}/${size}`, {
+                    method: 'POST'
+                });
+                const responseData = await response.json();
+                console.log(responseData);
+
+                // Update cart UI with new data
+                updateCart(responseData);
+
+                // Remove loading indicator
+                listItem.classList.remove('loading');
+
+                // Remove the item from the cart UI
+                listItem.remove();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+
+                // Remove loading indicator in case of error
+                listItem.classList.remove('loading');
+            }
+        });
+    });
+});
+
+function updateCart(data) {
+    const cartItemsContainer = document.getElementById('cart-items');
+    const totalPriceElement = document.querySelector('.total-price');
+    let totalPrice = 0;
+
+    cartItemsContainer.innerHTML = '';
+
+    // Iterate over cart items and add them to the UI
+    data.guest_products.forEach((item, itemIndex) => {
+        if (item) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <a href="/product/${item.name.trim().replace(/\s+/g, '-').toLowerCase()}-${item._id}">
+                    <div>
+                        <img src="${item.images[0]}" alt="${item.name}">
+                    </div>
+                    <div>${item.name}</div>
+                    <div>${data.cart_items[itemIndex].size ? 'Velicina: ' + data.cart_items[itemIndex].size : ''}</div>
+                    <div>Kolicina: ${data.cart_items[itemIndex].quantity}</div>
+                    <div>${item.discount.active ? `${(item.price - (item.price * (item.discount.percentage / 100))).toFixed(2)} € (${item.discount.percentage}%)` : `${item.price} €`}</div>
+                    <div>${(data.cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price)).toFixed(2)} €</div>
+                </a>
+                <div>
+                        <button class="remove-from-cart" name="product_id" ${data.cart_items[itemIndex].size ? 'data-product-size="' + data.cart_items[itemIndex].size + '"' : 'nema'} data-product-id="${item._id}">Izbriši</button>
+                </div>
+            `;
+            cartItemsContainer.appendChild(li);
+
+          
+
+            // Calculate total price
+            totalPrice += data.cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price);
+        }
+    });
+
+            document.querySelector('.cart_bag_li span').textContent = (data.cart_items_count == 0) ? "" : data.cart_items_count;
+
+
+    // Update total price in the UI
+    totalPriceElement.innerText = `Sveukupna cijena ${totalPrice.toFixed(2)} €`;
+}
+</script>
+
+<a href="/delivery"><button >Završi kupnju</button></a>

@@ -1,21 +1,23 @@
 
+<div class="btn_filter_menu"></div>
 
-<aside>
+<aside class="filter_wrapper">
 
-  <form data-filter-url-reset="<%=currentPath%>" id="filterForm" action="/products" method="GET">
+
+  <form data-filter-url-reset="<%=currentPath%>" id="filterForm"  action="/filter_products" method="POST">
     <h3>Material</h3>
     <article>
-      <% product_types.forEach((type, index) => { %>
+      <% materials.forEach((material, index) => { %>
     <div class="checkbox-wrapper-15">
 
-          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=type%>" type="checkbox" name="productType" value="<%= type %>" <% if (selectedTypes.includes(type)) { %>checked<% } %>> 
-          <label class="cbx" for="cbx-<%=index%>-<%=type%>">
+          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=material%>" type="checkbox" name="material" value="<%= material %>"> 
+          <label class="cbx" for="cbx-<%=index%>-<%=material%>">
             <span>
               <svg width="12px" height="9px" viewbox="0 0 12 9">
                 <polyline points="1 5 4 8 11 1"></polyline>
               </svg>
             </span>
-            <span><%= type %></span>
+            <span><%= material %></span>
           </label>
     </div>
       <% }); %>
@@ -27,39 +29,53 @@
 
     <article>
 
-      <% subcategories.forEach((subcategory, index) => { %>
+      <% categories.forEach((category, index) => { %>
         <div class="checkbox-wrapper-15">
 
-          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=subcategory%>" type="checkbox" name="subcategory" value="<%= subcategory %>" <% if (selectedSubcategories.includes(subcategory)) { %>checked<% } %>> 
-          <label class="cbx" for="cbx-<%=index%>-<%=subcategory%>">
+          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=category%>" type="checkbox" name="category" value="<%= category %>" > 
+          <label class="cbx" for="cbx-<%=index%>-<%=category%>">
             <span>
               <svg width="12px" height="9px" viewbox="0 0 12 9">
                 <polyline points="1 5 4 8 11 1"></polyline>
               </svg>
             </span>
-            <span><%= subcategory %></span>
+            <span><%= category %></span>
           </label>
       </div>
       <% }); %>
     </article>
 
+    <h3>Akcije</h3>
+    <article>
+      <div class="checkbox-wrapper-15">
+
+        <input style="display: none;" class="inp-cbx" id="cbx-s-b" type="checkbox" name="category" value="" > 
+        <label class="cbx" for="cbx-s-b">
+          <span>
+            <svg width="12px" height="9px" viewbox="0 0 12 9">
+              <polyline points="1 5 4 8 11 1"></polyline>
+            </svg>
+          </span>
+          <span>Akcija</span>
+        </label>
+    </div>
+    </article>
+
     
-    <button type="submit" >Filter</button>
-    <button type="button" onclick="resetForm()">Reset</button>
+    <button type="button" onclick="resetFilters()">Reset</button>
   </form>
 </aside>
 
-  <section>
-  <a class="history_back" onclick="history.back()">Vrati se</a>
+  <section class="products_section reveal" >
 
-  <ul id="productsContainer">
+  <ul id="productsContainer" class="reveal_img">
     <% if (products.length > 0) { %>
       <% if (products !== '') { %>
         <% products.forEach(product => { %>
-          <li>
-            <a href="/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
-              <div class="img">
-                <img src="<%- product.images[0] %>" alt="<%- product.name %>">
+          <li id="product"  data-animate class="reveal_img_item product" >
+            <a href="/product/<%=product.name.trim().replace(/\s+/g, '-').toLowerCase()%>-<%=product._id%>" class="reveal_img_inner">
+              <div class="img reveal_img_bl ">
+                  <img class="reveal_img_img" src="<%= product.images[0] %>" alt="<%= product.name %>">
               </div>
 
               <div class="details">
@@ -67,8 +83,8 @@
                   <h3><%= product.name %></h3>
                   <strong><%= product.price %> €</strong>
                 </span>
-                <% if (product.product_type) { %>
-                  <span class="category"><%= product.product_type %></span>
+                <% if (product.material) { %>
+                  <span class="category"><%= product.material %></span>
                 <% } else { %>
                   <span></span>
                 <% } %>
@@ -76,8 +92,6 @@
             </a>
           </li>
         <% }); %>
-
-        <button type="button" onclick="showMore()">Show More</button>
 
       <% } %>
     <% } else { %>
@@ -89,62 +103,168 @@
   </ul>
 
 </section>
+<script defer>
+ 
+let isLoading = false;
+let limit = 3; // Initial limit
 
-<script>
-  let limit = 1; // Set the initial limit value
+let maxYOffset = 0; // Initialize maximum Y offset from top
 
-  function showMore() {
-    // Increase the limit value
-    limit += 1; 
+let lastScrollY = 0; // Store the last scroll position
+const viewportHeight = window.innerHeight ;
 
-    // Fetch more products using AJAX
-    fetch(`/products?limit=${limit}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Update the product container with the new products
-        const productsContainer = document.getElementById('productsContainer');
+window.addEventListener('scroll', () => {
+  const currentYOffset = window.scrollY;
+  const product =  document.querySelectorAll('.reveal_img_item');
 
-        data.forEach((product) => {
-          // Create a new list item for each product
-          const li = document.createElement('li');
+  // Update maximum Y offset
+  maxYOffset = Math.max(maxYOffset, currentYOffset);
+  // Check if the user is scrolling down and product is in view
+  console.log("lastScrollY + viewportHeight", lastScrollY + viewportHeight);
 
-          // Set the inner HTML for the list item using a template string
-          li.innerHTML = `
-            <a href="/products/${product._id}">
-              <div class="img">
-                <img src="${product.images[0]}" alt="${product.name}">
-              </div>
-              <div class="details">
-                <span>
-                  <h3>${product.name}</h3>
-                  <strong>${product.price} €</strong>
-                </span>
-                ${product.product_type ? `<span class="category">${product.product_type}</span>` : ''}
-              </div>
-            </a>
-          `;
-
-          // Append the new list item to the products container
-          productsContainer.appendChild(li);
-        });
-      })
-      .catch((error) => {
-        console.error('Error fetching more products:', error);
-      });
+  console.log("currentYOffset",currentYOffset)
+  if (currentYOffset === maxYOffset && product && !isLoading) {
+    // if (currentYOffset >= lastScrollY + viewportHeight) {
+    isLoading = true;
+    loadMoreProducts(limit); // Load more products
+    lastScrollY = currentYOffset; // Update the last fetch position
+  // }
   }
+  lastScrollY = maxYOffset;
+});
 
-  document.getElementById('showMoreButton').addEventListener('click', showMore);
+const loadMoreProducts = (limit) => {
+
+  const xhr = new XMLHttpRequest();
+  const skip = document.querySelectorAll('.reveal_img_item').length;
+
+  const selectedMaterial = getSelectedFilters('material') ? 'material=' + getSelectedFilters('material') + "&" : "";
+  const selectedCategory = getSelectedFilters('category') ? 'category=' + getSelectedFilters('category') : "";
+  const url = `/load_more?${selectedMaterial}${selectedCategory}`;
+
+  xhr.open('POST', url);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      // Append new products to the DOM
+      appendProducts(response.products);
+      // Increase the limit for the next scroll
+      limit += 6; 
+      isLoading = false;
+    }
+  };
+  xhr.send(JSON.stringify({ skip, limit }));
+}
+
+const appendProducts = (newProducts, emptyContainer) => {
+  const productsContainer = document.getElementById('productsContainer');
+
+  if (emptyContainer)   productsContainer.innerHTML = '';
+
+  newProducts.forEach(product => {
+    const li = document.createElement('li');
+    li.classList.add('reveal_img_item'); 
+   
+    li.id = `product_${product._id}`;
+    li.innerHTML = `
+      <a href="/product/${product.name.trim().replace(/\s+/g, '-').toLowerCase()}-${product._id}" class="reveal_img_inner">
+        <div class="img reveal_img_bl">
+          <img class="reveal_img_img" src="${product.images[0]}" alt="${product.name}">
+        </div>
+        <div class="details">
+          <span>
+            <h3>${product.name}</h3>
+            <strong>${product.price} €</strong>
+          </span>
+          ${product.material ? `<span class="category">${product.material}</span>` : '<span></span>'}
+        </div>
+      </a>
+    `;
+    productsContainer.appendChild(li);
+
+    observer.observe(li); // Observe each newly added product
+  });
+}
+
+// Intersection Observer setup
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('inView');
+    }
+  });
+}, { threshold: 0.2 });
+
+// Initial observation of existing products
+document.querySelectorAll('.reveal_img_item').forEach(product => {
+  observer.observe(product);
+});
 
 
-  function resetForm() {
-    const form = document.getElementById('filterForm');
-    if (!location.search) form.reset();
-    else location.href = "/products";
-  }
+
+const resetFilters = () => {
+  document.getElementById('filterForm').reset();
+  filterProducts();
+}
+
+
+const getSelectedFilters = (name) => {
+  const checkboxes = document.querySelectorAll(`[name="${name}"]:checked`);
+  return Array.from(checkboxes).map(checkbox => checkbox.value).join(',');
+}
+
+const filterProducts = () => {
+  const selectedMaterial = getSelectedFilters('material');
+  const selectedCategory = getSelectedFilters('category');
+
+  SmoothScroll.scrollToTop
+  // Send XHR request to server with selected filters
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/filter_products');
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      // Update product list with filtered products
+      appendProducts(response.products, true);
+    }
+  };
+  const formData = new FormData(document.getElementById('filterForm'));
+  xhr.send(formData);
+}
+
+// Attach change event listener to each checkbox input
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+  checkbox.addEventListener('change', filterProducts);
+});
+
+
+
+const toggleFilterMenu = () => {
+    document.querySelector('.filter_wrapper').classList.toggle('inView');
+}
+
+
+document.querySelector('.btn_filter_menu').addEventListener('click', toggleFilterMenu);
+document.querySelector('.btn_filter_menu').addEventListener('touch', toggleFilterMenu);
+
+
+// const section = document.querySelector('section');
+
+// let currentPos = window.pageYOffset;
+
+// const update = () => {
+//   const newPos = window.pageYOffset;
+//   const diff = newPos - currentPos;
+//   const speed = diff * 0.1;
+  
+//   section.style.transform = `skewY(${ speed }deg)`;  
+  
+//   currentPos = newPos;
+  
+//   requestAnimationFrame(update);
+// }
+
+// update();
+
 </script>

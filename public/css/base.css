@@ -1,0 +1,148 @@
+.menu_btn{
+  cursor: pointer;
+}
+.menu_close{
+  position: absolute;
+  top: 3rem;
+  left: 3rem;
+  color: rgb(var(--clr-bg));
+}
+.content {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	position: relative;
+	align-items: center;
+	height: 100vh;
+	justify-content: center;
+}
+
+.content__title {
+	font-weight: 400;
+	text-align: center;
+	font-size: 7.5vw;
+	line-height: 0.75;
+	cursor: default;
+	margin: 10vh 0 0 0;
+}
+
+.content__title-main {
+    display: block;
+    will-change: opacity, transform;
+}
+
+.content__title-sub {
+	display: block;
+	will-change: opacity, transform;
+}
+
+.menu-wrap {
+  overflow: hidden;
+	background: rgb(var(--clr-fg));
+	pointer-events: none;
+  position: fixed;
+  z-index: 101;
+  inset: 0;
+	opacity: 0;
+}
+
+.menu-wrap.menu-wrap--open {
+	pointer-events: auto;
+	opacity: 1;
+}
+
+
+.menu {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+
+.menu__item {
+	font-size: 9vw;
+	color: #fff;
+	cursor: pointer;
+	line-height: 1;
+	font-weight: 300;
+    text-align: right;
+    position: relative;
+    will-change: opacity, transform;
+}
+.menu__item:hover {
+  color: rgb(var(--clr-bg));
+}
+
+
+.menu__item-tiny {
+	font-size: 1rem;
+}
+
+.menu__item:nth-child(odd) {
+	margin-left: -10vw;
+}
+
+
+.tiles {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	height: 150vh;
+	display: flex;
+	opacity: 0.5;
+	flex-direction: column;
+	justify-content: center;
+	transform: translate3d(-50%,-50%, 0) rotate(22.5deg);
+}
+
+.tiles__line {
+	display: flex;
+	transform: translateX(25%);
+	animation: runner 10s linear infinite;
+}
+
+.tiles__line:nth-child(2) {
+	animation-duration: 16s;
+}
+
+.tiles__line:nth-child(3) {
+	animation-duration: 22s;
+}
+
+@keyframes runner {
+	to {
+		transform: translateX(-25%);
+	}
+}
+
+.tiles__line-img {
+	--tile-margin: 3vw;
+	flex: none;
+	width: 30vh;
+	height: 30vh;
+	margin: var(--tile-margin);
+	background-size: cover;
+	background-position: 50% 50%;
+	border-radius: 50%;
+}
+
+.tiles__line-img--large {
+	width: 100vh;
+	border-radius: 20vh;
+}
+
+
+.overlay {
+  inset: 0;
+	position: fixed;
+	z-index: 1000;
+	pointer-events: none;
+	width: 100%;
+	height: 100%;
+}
+
+.overlay .overlay__path{
+  fill: rgb(var(--clr-fg));
+}

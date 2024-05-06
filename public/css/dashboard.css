@@ -40,7 +40,6 @@ body {
 }
 
 .admin-nav ul li a {
-  margin: auto;
   color: var(--clr-fg2);
 }
 
@@ -68,7 +67,7 @@ strong {
   transition: transform 0.3s;
 }
 
-input[type="file"] {
+.uploadOuter input[type="file"] {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -89,7 +88,6 @@ input[type="file"] {
 }
 
 
-
 form, .form {
   display: flex;
   flex-direction: column;
@@ -97,31 +95,6 @@ form, .form {
   gap: 1rem;
 }
 
-/* Has to be fixed */
-form input,
-.form input,
-
-form select,
-.form  select,
-textarea {
-  margin-left: 1rem;
-  background-color: transparent;
-  color: var(--clr-fg);
-  border: 1px solid currentColor;
-  padding: 1rem;
-  outline: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-form textarea{
-  resize: vertical;
-  min-height: 48px;
-}
-
-form select option {
-  background: var(--clr-bg);
-}
 
 form input[type="date"] {
   width: max-content;
@@ -132,37 +105,6 @@ button#submit {
   align-self: flex-end;
 }
 
-button {
-  margin-left: 1rem;
-
-  background-color: transparent;
-  color: var(--clr-fg);
-  border: 1px solid currentColor;
-  padding: 1rem;
-  cursor: pointer;
-  position: relative;
-  transition: color .5s ease .1s;
-}
-
-button::before {
-  position: absolute;
-  content: '';
-  width: 0;
-  height: 100%;
-  left: 0;
-  top: 0;
-  z-index: -1;
-  background: var(--clr-fg);
-  transition: width .2s ease;
-}
-
-button:hover::before {
-  width: 100%;
-}
-
-button:hover {
-  color: var(--clr-bg);
-}
 
 .details{
   display: flex;
@@ -174,5 +116,104 @@ button:hover {
   border: 1px solid #00000079;
 }
 .new_category.isChecked{
-  border: 1px solid var(--clr-fg);
+  border: 1px solid rgb(var(--clr-fg));
+}
+
+
+
+/* Order */
+
+
+.change_order_status{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgb(var(--clr-fg));
+  width: 300px;
+  height: 300px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgb(var(--clr-bg));
+  visibility: hidden;
+  opacity: 0;
+}
+.change_order_status.in-view{
+  visibility: visible;
+  opacity: 1;
+}
+.change_order_status .btn_close_orderFrom{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.order_select_status{
+  display: flex;
+  gap: 2rem;
+  margin: 1rem;
+}
+.order_select_status .order_select{
+  position: relative;
+  width: 150px;
+  height: 100px;
+}
+.order_select_status .order_select span{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+  color: rgb(var(--clr-fg));
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.order_select_status .order_select input[type="radio"]{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+  appearance:none; 
+  border: 0;
+  outline: 0;
+}
+.order_select_status .order_select i {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(var(--clr-fg), 0.6);
+  z-index: -1;
+}
+.order_select_status .order_select input[type="radio"]:checked + i{
+  border: 2px solid rgba(var(--clr-fg), 1);
+}
+.order_select_status .order_select input[type="radio"]:checked ~ span{
+  font-weight: bold;
+}
+.order_select_status .order_select input[type="radio"]:checked ~ span svg path{
+  stroke: rgba(var(--clr-fg), 1);
+  stroke-width: 0.2px;
+}
+.order_select_status .order_select input[type="radio"][disabled]{
+cursor:  not-allowed;
+}
+
+
+
+.orders_table .delivered td{
+  color: #00000079;
+  
+}
+
+
+.category_images_preview img{
+  width: 300px;
 }

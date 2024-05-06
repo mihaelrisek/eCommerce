@@ -12,8 +12,9 @@ class SmoothScroll {
       ? document.documentElement
       : target;
 
-    target.addEventListener('mousewheel', this.scrolled.bind(this), { passive: false });
-    target.addEventListener('DOMMouseScroll', this.scrolled.bind(this), { passive: false });
+
+    target.addEventListener('wheel', this.scrolled.bind(this), { passive: false });
+    target.addEventListener('touchmove', this.scrolled.bind(this), { passive: false });
 
     this.speed = speed;
     this.smooth = smooth;
@@ -56,8 +57,7 @@ class SmoothScroll {
 }
 
 function init() {
-  const smoothScroll = new SmoothScroll(document, 90, 12);
-  smoothScroll.scrollToTop();
+  const smoothScroll = new SmoothScroll(document, 100, 16);
+  // smoothScroll.scrollToTop();
 }
-
-init();
+window.addEventListener('DOMContentLoaded',  init())

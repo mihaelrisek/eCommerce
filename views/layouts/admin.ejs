@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/dashboard.css">
 
-  <% switch (currentPath) { case '/admin/dashboard' : %>
-    <link rel="stylesheet" href="/css/dashboard.css">
-  <% break; case '/admin/list-users' : %>
+  <% switch (currentPath) { case '/admin/users' : %>
     <link rel="stylesheet" href="/css/users.css">
     <% break; case '/admin/list-products' : %>
     <link rel="stylesheet" href="/css/products.css">
@@ -22,10 +20,11 @@
     <a class="home" href="/">Lato</a>
 
       <ul>
-        <li><a href="/admin/list-users">Show Users</a></li>
-        <li><a href="/admin/list-products">Show products</a></li>
-        <li><a href="/admin/add-product">Add Products</a></li>
-        <li><a href="/admin/categories">Categories</a></li>
+        <li><a class="underline_hover" href="/admin/users">Korisnici</a></li>
+        <li><a class="underline_hover" href="/admin/list-products">Uredi proizvod</a></li>
+        <li><a class="underline_hover" href="/admin/add-product">Dodaj proizvod</a></li>
+        <li><a class="underline_hover" href="/admin/categories">Kategorije</a></li>
+        <li><a class="underline_hover" href="/admin/orders">Narudzbe</a></li>
       </ul>
   </nav>
 
@@ -33,22 +32,10 @@
     <main class="admin-main">
       <%- body -%>
     </main>
-    <!-- <script>
 
-    function changeTheme(e) {
-      document.body.classList.toggle('change-theme');
+    <script src="/js/index.js"></script>
 
-      const isThemeChanged = document.body.classList.contains('change-theme');
-      localStorage.setItem('themeChanged', isThemeChanged);
-  }
-
-  onload = () => {
-    const themeChanged = localStorage.getItem('themeChanged');
-    if (themeChanged === 'true') {
-      document.body.classList.add('change-theme');
-    }
-  };
-    </script> -->
+   
 
 </body>
   

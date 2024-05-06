@@ -1,36 +1,38 @@
-<!-- views/register.ejs -->
-<h1>Register</h1>
-<section>
+<section class="register_section" >
 
-  <form action="/register" method="post" id="form__register">
+<form action="/register" method="post" id="form__register">
+<h1>Osobni podatci</h1>
+   <article>
+    <div>
+      <input type="text" id="first_name" placeholder="Ime" name="first_name">
+      <input type="text" id="last_name" placeholder="Prezime" name="last_name">
+    </div>
 
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
+    <div>
+      <input type="email" id="email" name="email" placeholder="E-mail" required>
+      <input type="text" id="phone" placeholder="Broj mobitelja" name="phone">
+    </div>
 
-    <label for="first_name">First Name:</label>
-    <input type="text" id="first_name" name="first_name">
-
-    <label for="last_name">Last Name:</label>
-    <input type="text" id="last_name" name="last_name">
-
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-
-    <label for="password_repeat">Repeat password:</label>
-    <input type="password" id="password_repeat" name="password_repeat" oninput="checkPasswordMatch()" required>
+    <div>
+      <input type="password" id="password" name="password" placeholder="Lozinka" required>
+      <input type="password" id="password_repeat" name="password_repeat" placeholder="Ponovi lozinku" oninput="checkPasswordMatch()" required>
+    </div>
     <p id="passwordMatchError" style="color: red;"></p>
-
-    <label for="address">Address:</label>
-    <input type="text" id="address" name="address">
-
-    <label for="phone">Phone:</label>
-    <input type="text" id="phone" name="phone">
-
-    <button type="submit" class="register-btn" id="submitButton" disabled>Register</button>
-
+   </article>
+    <h1>Mjesni podatci</h1>
+   <article>
+    <div>
+      <select name="region" id="region">
+        <option value="Hrvatska" placeholder="Drzava" selected >Hrvatska</option>
+      </select>
+      <input type="text" id="street" name="street" placeholder="Adresa" required>
+    </div>
+    <div>
+      <input type="text" id="city" placeholder="Mjesto" name="city">
+      <input type="text" id="zip_code" name="zip_code" placeholder="Postanski broj" required>
+    </div>
+   </article>
+  <button type="submit" class="register-btn" id="submit_btn" disabled>Prijavi se</button>
   </form>
 </section>
 
@@ -39,14 +41,14 @@
     let password = document.getElementById("password").value;
     let password_repeat = document.getElementById("password_repeat").value;
     let errorElement = document.getElementById("passwordMatchError");
-    let submitButton = document.getElementById("submitButton");
+    let submit_btn = document.getElementById("submit_btn");
 
     if (password !== password_repeat) {
-      errorElement.textContent = "Passwords do not match";
-      submitButton.setAttribute("disabled", "");
+      errorElement.textContent = "Lozinke se ne podudaraju";
+      submit_btn.setAttribute("disabled", "");
     } else {
       errorElement.textContent = "";
-      submitButton.removeAttribute("disabled");
+      submit_btn.removeAttribute("disabled");
     }
   }
 </script>

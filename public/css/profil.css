@@ -21,9 +21,9 @@ textarea {
   border: 1px solid currentColor;
   padding: 1rem;
   outline: none;
-  -webkit-appearance: auto; /***************************************/
-  -moz-appearance: auto; /***************************************/
-  appearance:auto; /***************************************/
+  -webkit-appearance: auto; 
+  -moz-appearance: auto; 
+  appearance:auto; 
 }
 form textarea{
   resize: vertical;

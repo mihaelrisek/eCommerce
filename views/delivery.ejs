@@ -1,1 +1,72 @@
 <h1>Delivery</h1>
+
+<% if (!user) { %>
+
+
+
+  <div class="container">
+    <section class="wrapper">
+      <div class="heading">
+        <h1 class="text text-large">Log in to your account</h1>
+        <p class="text text-normal">New user? <span><a href="/register" class="text text-links">Create an account</a></span>
+        </p>
+      </div>
+      <form name="signin" action="<%= login_url %> " method="post" class="form">
+        <div class="input-control">
+          <label for="email" class="input-label" hidden>Email Address</label>
+          <input type="email" name="email" id="email" class="input-field" placeholder="Email Address">
+        </div>
+        <div class="input-control">
+          <label for="password" class="input-label" hidden>Password</label>
+          <input type="password" name="password" id="password" class="input-field" placeholder="Password">
+        </div>
+        <div class="input-control">
+          <a href="/forgot-password" class="text text-links">Forgot Password</a>
+          <input type="submit" name="submit" class="input-submit" value="Sign In" >
+        </div>
+      </form>
+      
+    </section>
+  </div>
+
+
+  <a href="/delivery/guest">Nastavi kao gost</a>
+
+<% } else { %>
+  <% if (user){ %>
+    <form action="/delivery" method="POST">
+
+      <label for="city">Mjesto</label>
+      <input type="text" id="address_city" name="city" value="<%= user.address.city %>" disabled>
+  
+      <label for="zip_code">Postanski broj</label>
+      <input type="text" id="address_zip_code" name="zip_code" value="<%= user.address.zip_code %>" required disabled>
+  
+      <label for="street">Ulica</label>
+      <input type="text" id="address_street" name="street" value="<%= user.address.street %>" required disabled>
+      
+      <label for="region">Drzava </label>
+      <input type="text" id="region" name="region" disabled placeholder="Hrvatska">
+
+      <input type="checkbox" onchange="updateAdress(this)"  name="update_checkbox" id="update_checkbox">
+
+      <label for="payment_method">Odaberi naćin plaćanja</label>
+      <select id="payment_method" name="payment_method">
+        <option value="credit_card">Kartica</option>
+        <option value="cod">Pouzeće</option>
+      </select>
+
+      <button type="submit" >Spremi</button>
+    </form>
+
+
+    <script>
+      function updateAdress(checkbox){
+        const addressInputs = document.querySelectorAll('input[type="text"][id^="address_"]');
+        for (let i = 0; i < addressInputs.length; i++) {
+            addressInputs[i].disabled = !checkbox.checked;
+        }
+      }
+    </script>
+    <% } %>
+<% } %>

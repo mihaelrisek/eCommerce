@@ -1,0 +1,32 @@
+<h1>Narudzbe</h1>
+
+<% if (orders && orders.length > 0){ %>
+   <table class="orders_table" >
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Korisnik</th>
+        <th>Datum narudzbe</th>
+        <th>Ukupni iznos</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach((order) => { %>
+        <tr <%= (order.status=='Dostavljeno') ? "class=delivered" : "" %> >
+          <td><%= order._id %></td>
+          <td><%= order.user.first_name %> <%= order.user.last_name %></td>
+          <td><%= order.order_date.toDateString() %></td>
+          <td>$<%= order.total_amount.toFixed(2) %></td>
+          <td><%= order.status %></td>
+          <td><a href="/admin/orders/<%= order._id %>">View Details</a></td>
+        </tr>
+
+     
+      <% }); %>
+    </tbody>
+  </table>
+
+<% } else { %>
+  <p>Ne postoji niti jedna narudzba</p>
+  <% } %>

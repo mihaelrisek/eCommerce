@@ -2,13 +2,13 @@
   "name": "ecommerce",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
     "build": "npm install && echo 'Build complete'"
   },
-  "author": "",
+  "author": "Mihael Risek",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",

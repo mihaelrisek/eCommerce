@@ -1,0 +1,53 @@
+<section>
+
+  <form action="/delivery/guest" method="post">
+
+    <label for="first_name">Ime</label>
+    <input type="text" id="first_name" name="first_name">
+
+    <label for="last_name">Prezime</label>
+    <input type="text" id="last_name" name="last_name">
+
+    <label for="city">Mjesto</label>
+    <input type="text" id="city" name="city">
+
+    <label for="zip_code">Postanski broj</label>
+    <input type="text" id="zip_code" name="zip_code" required>
+
+    <label for="street">Ulica</label>
+    <input type="text" id="street" name="street" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="phone">Telefon</label>
+    <input type="text" id="phone" name="phone">
+
+    <label for="region">Drzava </label>
+    <input type="text" id="region" name="region" disabled placeholder="Hrvatska">
+
+    <label for="payment_method">Odaberi naćin plaćanja</label>
+      <select id="payment_method" name="payment_method">
+        <option value="credit_card">Kartica</option>
+        <option value="cod">Pouzeće</option>
+      </select>
+      
+    <button type="submit" class="register-btn" id="submitButton">Register</button>
+    <button type="button" class="order-btn" id="orderButton" style="display: none;">Place Order</button>
+
+  </form>
+
+</section>
+
+
+<script>
+  document.getElementById('submitButton').addEventListener('click', function () {
+    // Show the "Place Order" button
+    document.getElementById('orderButton').style.display = 'block';
+  });
+
+  document.getElementById('orderButton').addEventListener('click', function () {
+    // Submit the form for order placement
+    document.querySelector('form').submit();
+  });
+</script>

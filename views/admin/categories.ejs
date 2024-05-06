@@ -1,16 +1,15 @@
 <a class="history_back" onclick="history.back()">Vrati se</a>
-<%# Category Start %>
 <section>
   <h1>Materijal</h1>
   <br>
   <article class="form">
 
     <table>
-      <% product_types.forEach(type => { %>
+      <% materials.forEach(material => { %>
         <tr>
-            <form action="/admin/update-product_type/<%= type %>" method="post">
+            <form action="/admin/update-material/<%= material %>" method="post">
             <td>
-              <input name="product_type" type="text" value="<%= type %>" required>
+              <input name="material" type="text" value="<%= material %>" required>
             </td>
             <td>
                 <button type="submit">Update</button>
@@ -24,21 +23,19 @@
 </section>
 
 
-  <%# Category End %>
 
-    <%# Subcategories Start %>
       <section>
         <h1>Nakit</h1>
   <br>
 
-    <article class="form">
+    <article >
 
           <table>
-          <% subcategories.forEach(subcategory=> { %>
+          <% categories.forEach(category=> { %>
             <tr>
-                <form action="/admin/update-subcategory/<%= subcategory %>" method="post">
+                <form class="form" action="/admin/update-category/<%= category %>" method="post">
                 <td>
-                  <input name="subcategory" type="text" value="<%= subcategory %>" required>
+                  <input name="category" type="text" value="<%= category %>" required>
                 </td>
                 <td>
                     <button type="submit">Update</button>
@@ -50,4 +47,72 @@
       </article>
       </section>
 
-      <%# Subcategories End %>
+
+      <h1>Category based images</h1>
+
+      <div class="category_images_preview">
+        <% if(materials) {%>
+          <% materials.forEach(material => { %>
+            <h1><%=material%></h1>
+              <% material_data.forEach((description) => { %>
+                <% if (description.material == material) {%>
+                  <p><%=description.description %></p>
+                <% } %>
+                
+             <% }); %>
+           <% }); %>
+           <% } %>
+      </div>
+
+      <form action="/admin/upload"  id="imageUploadForm" method="POST" >
+        <label for="description">Opis</label>
+        <textarea name="description" id="" rows="10"></textarea>
+      
+        <label for="material_img">Select Material:</label>
+        <select name="material_img" id="material_img">
+          <% materials.forEach(material=> { %>
+            <option value="<%= material %>">
+              <%= material %>
+            </option>
+            <% }); %>
+        </select>
+        <button type="submit">Upload</button>
+      </form>
+      <div id="message"></div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('imageUploadForm');
+  const messageDiv = document.getElementById('message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const responseData = await response.json();
+
+      // Handle server response
+      if (response.ok) {
+        console.log(responseData)
+        messageDiv.textContent = responseData.message;
+        // Optionally update the page content with new data
+        // For example:
+        // - Update materials dropdown
+        // - Update images preview
+      } else {
+        messageDiv.textContent = responseData.message;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      messageDiv.textContent = 'Greška prilikom slanja zahtjeva.';
+    }
+  });
+});
+      </script>

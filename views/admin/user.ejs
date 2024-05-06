@@ -1,0 +1,34 @@
+<a class="history_back" onclick="history.back()">Vrati se</a>
+<section class="section__users">
+  <ul>
+        <h1> <%= user.first_name %> <%= user.last_name %>  </h1>
+        <table>
+          <tr><td>Id</td><td><%= user._id %></td></tr>
+          <tr><td>First name</td><td><%= user.first_name %></td></tr>
+          <tr><td>Last name</td><td><%= user.last_name %></td></tr>
+          <tr><td>Email</td><td><%= user.email %></td></tr>
+          <tr><td>Phone</td><td><%= user.phone %></td></tr>
+          <tr><td>Address</td><td><%= user.address %></td></tr>
+          <tr><td>Created at</td><td><%= (user.created_at).toLocaleDateString()  %></td></tr>
+          <tr><td>Updated at</td><td><%= (user.updated_at).toLocaleString()  %></td></tr>
+          <% if (user.role !=='guest') {%>
+            <form action="/admin/update-role/<%= user._id %>" method="post">
+              <tr><td>Role</td><td><select name="user_role" >
+                <% user_roles.forEach(role => { %>
+                  <option value="<%= role%>" <%= user.role === role ? 'selected' : ''%> ><%= role%></option>
+                <% }) %>
+              </select></td></tr>
+            </table>
+              <button type="submit">Update</button>
+            </form>
+          <% }else{ %>
+            <tr><td>Role</td><td>Gost</td></tr>
+            <% } %>
+            <% if (user.role == 'regular_user'){ %>
+              <form action="/admin/delete-users/<%= user._id %>" method="post">
+                <button type="submit">Remove User</button>
+              </form>
+            <% } %> 
+        
+  </ul>
+</section>

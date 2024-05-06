@@ -1,37 +1,296 @@
-<section>
-  <ul id="productsContainer">
+<section class="filter_section" >
+
+<div class="search_container" >
+  <input type="search" name="search" id="search" class="input-search" placeholder="Pretraži...">
+</div>
+
+<div class="form_container" >
+  <form id="filterForm" action="/admin/sort-products" method="POST">
+    <div>
+      <label class="select_label" for="resetFiltersBtn">
+        <input type="checkbox" id="resetFiltersBtn" >
+        Svi
+      </label>
+    </div>
+    <div>
+      <% materials.forEach(material => { %>
+        <label class="select_label">
+          <input type="checkbox" name="material" value="<%= material %>">
+          <%= material %>
+        </label>
+      <% }); %>
+    </div>
+
+    <div>
+      <% categories.forEach(category => { %>
+        <label class="select_label">
+          <input type="checkbox" name="category" value="<%= category %>">
+          <%= category %>
+        </label>
+      <% }); %>
+    </div>
+
+    <div>
+      <label class="select_label">
+        <input type="checkbox" name="stock" value="true">
+        Nema na zalihama
+        </label>
+    </div>
+
+    
+  </form>
+ </div>
+</section>
+
+<section class="discount_section">
+  <h1>Popust &#9660;</h1>
+ <form action="/admin/multiple-discount" method="POST">
+  <label for="percentage">Postotak popusta (%)</label>
+  <input type="number" id="percentage" name="percentage" min="0" max="100" required>
+  
+  <label for="start_date">Od</label>
+  <input type="date" id="start_date" name="start_date" required>
+  
+  <label for="end_date">Do</label>
+  <input type="date" id="end_date" name="end_date" required>
+  
+  <label for="discount_active">Aktivnost</label>
+  <input type="checkbox" id="discount_active" name="discount_active" checked>
+  
+  <button id="discount_btn">Spremi</button>
+ </form>
+</section>
+
+<section class="products_section">
+  <ul id="products_container">
     <% if (products.length > 0) { %>
-      <% if (products !== '') { %>
-        <% products.forEach(product => { %>
-          <li>
-            <a href="/admin/update-product/<%= product._id %>">
-              <div class="img">
-                <img src="<%- product.images[0] %>" alt="<%- product.name %>">
-              </div>
-
-              <div class="details">
-                <span>
-                  <h3><%= product.name %></h3>
-                  <strong><%= product.price %> €</strong>
-                </span>
-                <% if (product.product_type) { %>
-                  <span class="category"><%= product.product_type %></span>
-                <% } else { %>
-                  <span></span>
-                <% } %>
-                </div>
-            </a>
-           
-          </li>
-       
-        <% }); %>
-
-
-      <% } %>
+      <% products.forEach(product => { %>
+        <li class="inView">
+          <input type="checkbox" class="product_discount_checkbox" data-product-id="<%= product._id %>" value="<%= product._id %>">
+          <a href="/admin/update-product/<%= product._id %>">
+            <div class="img">
+              <img src="<%= product.images[0] %>" alt="<%= product.name %>">
+            </div>
+            <div class="details">
+              <span>
+                <h3><%= product.name %></h3>
+                <strong><%= product.price %> €</strong>
+              </span>
+              <% if (product.material) { %>
+                <span class="category"><%= product.material %></span>
+              <% } else { %>
+                <span></span>
+              <% } %>
+            </div>
+          </a>
+        </li>
+      <% }); %>
     <% } else { %>
       <p>No products found.</p>
     <% } %>
-        
-    
   </ul>
-</section>
+
+
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+
+    const filterForm = document.getElementById('filterForm');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const checkboxes = document.querySelectorAll('.search_container input[type="checkbox"]');
+    const radios = document.querySelectorAll('input[type="radio"]');
+
+    const filterProducts = async (event) =>{
+      event.preventDefault(); 
+
+      const formData = new FormData(filterForm);
+      const filters = {};
+      for (const [name, value] of formData) {
+        if (!filters[name]) {
+          filters[name] = [];
+        }
+        filters[name].push(value);
+      }
+      try {
+        const response = await fetch('/admin/sort-products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(filters),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+
+        displayProducts( await response.json());
+
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    const showAll = async () => {
+      filterForm.reset(); 
+      try {
+        const response = await fetch('/admin/sort-products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Send an empty object as the body
+          body: JSON.stringify({}), 
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+
+        displayProducts(await response.json());
+
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+      // Event listeners for checkboxes
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', filterProducts);
+    });
+
+    // Event listeners for radios
+    radios.forEach(radio => {
+      radio.addEventListener('change', filterProducts);
+    });
+    // Event listener for reset button
+
+    resetFiltersBtn.addEventListener('change', showAll);
+    resetFiltersBtn.addEventListener('touch', showAll);
+
+    function displayProducts(products) {
+      const products_container = document.getElementById('products_container');
+      products_container.innerHTML = ''; 
+
+      products.forEach(product => {
+        const li = document.createElement('li');
+        li.classList.add('inView');
+        li.innerHTML = `
+        <input type="checkbox" class="product_discount_checkbox" data-product-id="${product._id}" value="${product._id}">
+          <a href="/admin/update-product/${product._id}">
+            <div class="img">
+              <img src="${product.images[0]}" alt="${product.name}">
+            </div>
+            <div class="details">
+              <span>
+                <h3>${product.name}</h3>
+                <strong>${product.price} €</strong>
+              </span>
+              ${product.material ? `<span class="category">${product.material}</span>` : ''}
+            </div>
+          </a>
+        `;
+        products_container.appendChild(li);
+      });
+    }
+
+       const searchInput = document.getElementById('search');
+       const searchResults = document.getElementById('products_container');
+
+        searchInput.addEventListener('input', async () => {
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm.length === 0) {
+               showAll();
+               return;
+              }
+
+            const response = await fetch(`/admin/search?search=${encodeURIComponent(searchTerm)}`);
+            const products = await response.json();
+
+            searchResults.innerHTML = ''; 
+            console.log("products", products)
+            displayProducts(products);
+        });
+
+
+
+        const selectSelected = () => {
+          const select_inputs = document.querySelectorAll('.select_label input');
+          const show_all = document.querySelector('.select_label input[id="resetFiltersBtn"]');
+
+          // Add event listener to the "Show All" button to toggle the class when clicked
+          show_all.addEventListener('click', () => {
+              select_inputs.forEach(input => {
+                  if (input.parentElement.classList.contains('selected'))
+                    input.parentElement.classList.remove('selected');
+                  else 
+                    input.parentElement.classList.add('selected');
+
+              });
+        });
+
+          // Add event listeners to each select input to toggle the class when changed
+          select_inputs.forEach(input => {
+              input.addEventListener('change', () => {
+                  input.parentElement.classList.toggle('selected');
+              });
+          });
+        };
+        selectSelected()
+    
+  });
+
+
+
+
+  const setDiscount = async (event) => {
+      event.preventDefault(); 
+
+      const selectedProducts = Array.from(document.querySelectorAll('.product_discount_checkbox:checked'))
+                                     .map(checkbox => checkbox.dataset.productId);
+
+      const percentage = document.getElementById('percentage').value;
+      const start_date = document.getElementById('start_date').value;
+      const end_date = document.getElementById('end_date').value;
+      const discount_active = document.getElementById('discount_active').checked;
+
+      const requestBody = { 
+        percentage: percentage,
+        start_date: start_date,
+        end_date: end_date,
+        discount_active: discount_active,
+        selectedProducts: selectedProducts
+      }; 
+
+      console.log("requestBody", requestBody)
+      
+       fetch('/admin/multiple-discount', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json'
+         },
+         body: JSON.stringify(requestBody)
+       })
+         .then(response => {
+           if (response.ok) {
+             console.log("sucesss")
+           } else {
+             throw new Error('err');
+           }
+         })
+         .catch(error => {
+           console.error(error);
+         });
+     }
+
+    document.getElementById('discount_btn').addEventListener('click',setDiscount);
+    document.getElementById('discount_btn').addEventListener('touch',setDiscount);
+
+    const openCloseDiscount = () =>{
+      document.querySelector('.discount_section').classList.toggle('resize');
+      document.querySelectorAll('.product_discount_checkbox').forEach((checkbox) =>{
+        checkbox.classList.toggle('show');
+      })
+    }
+    document.querySelector('.discount_section h1').addEventListener('click',openCloseDiscount);
+    document.querySelector('.discount_section h1').addEventListener('touch',openCloseDiscount);
+ 
+</script>

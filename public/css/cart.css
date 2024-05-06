@@ -4,9 +4,10 @@ h2{
   margin-bottom: 1rem;
 }
 section.cart{
-  border: 1px solid #fff;
+  border: 1px solid var(--clr-fg);
   display: flex;
   position: relative;
+  margin-bottom: 1rem;
 }
 section.cart ul{
   margin: auto;
@@ -14,12 +15,20 @@ section.cart ul{
   flex-direction: column;
   gap: 1rem;
 }
-
 section.cart ul li{
+  list-style: none;
+  display: flex;
+}
+
+section.cart ul a{
   display: flex;
   gap: 3rem;
+  padding-right: 1.5rem;
+  border: 1px solid var(--clr-fg);
+  color: var(--clr-fg);
 
 }
+
 section.cart ul li div{
   height: 100px;
   display: flex;

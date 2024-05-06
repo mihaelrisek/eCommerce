@@ -1,46 +1,32 @@
 <!-- views/login.ejs -->
 
-
-<% if (messages.error) { %>
-  <p>
-    <%= messages.error %>
-  </p>
-  <% } %>
-
     <div class="container">
-      <section class="wrapper">
-        <div class="heading">
-          <h1 class="text text-large">Sign In</h1>
-          <p class="text text-normal">New user? <span><a href="/register" class="text text-links">Create an account</a></span>
+      <section data-animate class="wrapper">
+          <h1>Prijavi se</h1>
+          <p>Novi korisnik? 
+            <span><a href="/register" class="text text-links">Stvorite račun</a></span>
           </p>
-        </div>
-        <form name="signin" action="/login" method="post" class="form">
+        <form name="signin" action="/login" method="POST" class="login_form">
+          <input type="hidden" name="redirect" value="<%= redirectUrl %>">
+            <input type="email" name="email" id="email" class="input-field" placeholder="Email" required  >
+            <div class="input-control">
+              <input type="password" name="password" id="password" class="input-field"  required placeholder="Lozinka" autocomplete="off">
+              <svg onclick="showPassword()"  id="eyeHidden" width="24" height="24" viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M13.354 2.354a.5.5 0 0 0-.708-.708L10.683 3.61A8.475 8.475 0 0 0 7.5 3C4.308 3 1.656 4.706.076 7.235a.5.5 0 0 0 0 .53c.827 1.323 1.947 2.421 3.285 3.167l-1.715 1.714a.5.5 0 0 0 .708.708l1.963-1.964c.976.393 2.045.61 3.183.61c3.192 0 5.844-1.706 7.424-4.235a.5.5 0 0 0 0-.53c-.827-1.323-1.947-2.421-3.285-3.167zm-3.45 2.035A7.517 7.517 0 0 0 7.5 4C4.803 4 2.53 5.378 1.096 7.5c.777 1.15 1.8 2.081 3.004 2.693zM5.096 10.61L10.9 4.807c1.204.612 2.227 1.543 3.004 2.693C12.47 9.622 10.197 11 7.5 11a7.518 7.518 0 0 1-2.404-.389" clip-rule="evenodd"/></svg>
+              <svg onclick="showPassword()"  id="eyeVisible" width="24" height="24" viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M7.5 11c-2.697 0-4.97-1.378-6.404-3.5C2.53 5.378 4.803 4 7.5 4s4.97 1.378 6.404 3.5C12.47 9.622 10.197 11 7.5 11m0-8C4.308 3 1.656 4.706.076 7.235a.5.5 0 0 0 0 .53C1.656 10.294 4.308 12 7.5 12s5.844-1.706 7.424-4.235a.5.5 0 0 0 0-.53C13.344 4.706 10.692 3 7.5 3m0 6.5a2 2 0 1 0 0-4a2 2 0 0 0 0 4" clip-rule="evenodd"/></svg>
+            </div>
           <div class="input-control">
-            <label for="email" class="input-label" hidden>Email Address</label>
-            <input type="email" name="email" id="email" class="input-field" placeholder="Email Address">
-          </div>
-          <div class="input-control">
-            <label for="password" class="input-label" hidden>Password</label>
-            <input type="password" name="password" id="password" class="input-field" placeholder="Password">
-          </div>
-          <div class="input-control">
-            <a href="/forgot-password" class="text text-links">Forgot Password</a>
-            <input type="submit" name="submit" class="input-submit" value="Sign In" >
+            <a href="/forgot-password" class="text text-links">Zaboravili ste lozinku?</a>
+            <button type="submit" name="submit" class="input-submit" >Prijavi se</button>
           </div>
         </form>
-        <div class="striped">
-          <span class="striped-line"></span>
-          <span class="striped-text">Or</span>
-          <span class="striped-line"></span>
-        </div>
-        <div class="method">
-          <div class="method-control">
-            <a href="#" class="method-action">
-              <i class="ion ion-logo-google"></i>
-              <span>Sign in with Google</span>
-            </a>
-          </div>
-        </div>
       </section>
     </div>
 
+<script>
+
+  function showPassword(){
+    password.type = (password.type === "password") ? "text" : "password";
+    eyeVisible.style.visibility = (password.type === "password") ? "hidden" : "visible";
+    eyeHidden.style.visibility = (password.type === "password") ? "visible" : "hidden";
+  }
+</script>

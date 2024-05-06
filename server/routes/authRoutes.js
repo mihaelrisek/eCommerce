@@ -7,7 +7,7 @@ const authMiddleware = require('../middleware/authenticationMiddleware');
 /**
  * Register routes
  */
-router.get('/register', authController.register);
+router.get('/register', authController.renderRegister);
 router.post('/register', authController.registerUser);
 
 /**
@@ -21,7 +21,7 @@ router.get('/logout', authController.logout);
  * Password reset routes
  * Based on email
  */
-router.get('/forgot-password', authController.forgotPassGET );
+router.get('/forgot-password', authController.forgotPassGET);
 router.post('/forgot-password', authController.forgotPassPOST);
 
 /**

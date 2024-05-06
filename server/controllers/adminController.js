@@ -1,57 +1,28 @@
-// adminController.js
+const mongoose = require('mongoose');
 const User = require('../models/User');  // User.js
 const Product = require('../models/Product');  // Product.js
-const Cart = require('../models/Cart');  // Product.js
-const mongoose = require('mongoose');
+const Order = require('../models/Order');  // Order.js
 
 
-// An asynchronous function to fetch product types and subcategories
+// An asynchronous function to fetch materials and categories
 const getCategories = async () => {
-  // Hardcoded default values for product types and subcategories
-  const PRODUCT_TYPE = ["Diamond", "Silver", "Gold"];
-  const SUBCATEGORIES = ["Necklace", "Ring", "Chain", "Earring", "Bracelet"];
+  // Fetch unique materials from the database
+  const materials = await Product.distinct('material');
 
-  // Fetch unique product types from the database
-  const product_types_found = await Product.distinct('product_type');
+  // Fetch unique categories from the database
+  const categories = await Product.distinct('category');
 
-  // Use the found product types if they exceed or equal the hardcoded defaults,
-  // otherwise, use the hardcoded defaults
-  // const product_types = product_types_found.length >= PRODUCT_TYPE.length
-  //   ? product_types_found
-  //   : PRODUCT_TYPE;
-  const product_types = product_types_found;
-  // Fetch unique subcategories from the database
-  const subcategories_found = await Product.distinct('subcategory');
-  const subcategories = subcategories_found;
-
-  // Use the found subcategories if they exceed or equal the hardcoded defaults,
-  // otherwise, use the hardcoded defaults
-  // const subcategories = subcategories_found.length >= SUBCATEGORIES.length
-  //   ? subcategories_found
-  //   : SUBCATEGORIES;
-
-  // Return an object containing the product types and subcategories
-  return { product_types, subcategories };
+  // Return an object containing the materials and categories
+  return { materials, categories };
 };
 
 
-
-
-
-
-
-exports.dashboard = (req, res) => {
-  let user = req.user;
-
-  res.render('admin/dashboard.ejs', { layout: 'layouts/admin', title: 'Dashboard', user })
-};
 
 exports.listUsers = async (req, res) => {
   try {
-    let user = await User.find({});
-    const user_roles = ['regular_user', 'admin'];
+    let users = await User.find({});
 
-    res.render('admin/list-users.ejs', { layout: 'layouts/admin', title: 'Users',  user, user_roles })
+    res.render('admin/users.ejs', { layout: 'layouts/admin', title: 'Users',  users })
 
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -59,22 +30,39 @@ exports.listUsers = async (req, res) => {
 
 };
 
+
+exports.renderUser = async ( req, res ) =>{
+  try {
+    let user_id = req.params.user_id;
+    let user = await User.findById(user_id);
+    const user_roles = ['regular_user', 'admin'];
+
+    res.render('admin/user.ejs', { layout: 'layouts/admin', title: 'Users',  user, user_roles })
+
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+}
+
+
+
 exports.updateUserRole = async (req, res) =>{
   try {
-    const userId = req.params.user_id;
-    const userToUpdate = await User.findById(userId);
+    const user_id = req.params.user_id;
+    const user = await User.findById(user_id);
     
-    if (!userToUpdate) {
+    if (!user) {
       return res.status(404).send('User not found');
     }
-    if (userToUpdate._id.toString() === req.user._id.toString()) {
+
+    if (user._id.toString() === req.user._id.toString()) {
       return res.status(403).send('You can\'t change your own role');
     }
 
-    userToUpdate.role = req.body.user_role;
-    userToUpdate.updated_at = new Date();
+    user.role = req.body.user_role;
+    user.updated_at = new Date();
 
-    await userToUpdate.save();
+    await user.save();
 
     res.status(200).send('User role updated successfully');
 
@@ -88,7 +76,7 @@ exports.updateUserRole = async (req, res) =>{
 exports.deleteUser = async (req, res) => {
   try {
     // Extract user ID from the request parameters
-    const userId = req.params.user_id;
+    const user_id = req.params.user_id;
 
     // Check if the logged-in user is an admin
     const loggedInUser = req.user; 
@@ -96,40 +84,73 @@ exports.deleteUser = async (req, res) => {
       return res.status(403).send('Permission denied');
     }
 
-    // Check if the user with the given userId exists
-    const userToDelete = await User.findById(userId);
+    // Check if the user with the given user_id exists
+    const userToDelete = await User.findById(user_id);
     if (!userToDelete) {
       return res.status(404).send('User not found');
     }
 
     // Remove the user from the database
-    await userToDelete.deleteOne({ _id: new mongoose.Types.ObjectId(userId) });
+    await userToDelete.deleteOne({ _id: new mongoose.Types.ObjectId(user_id) });
 
     res.status(200).send('User deleted successfully');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
 
 exports.listProducts = async (req, res) => {
-  let user = req.user;
+  try {
+    let user = req.user;
 
-  const products = await Product.find({})
+    const products = await Product.find({})
 
-  res.render('admin/list-products.ejs', { layout: 'layouts/admin', title: 'List Users', user , products})
+    res.render('admin/list-products.ejs', { layout: 'layouts/admin', title: 'List Users', user , products})
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
 };
 
+exports.sortProducts = async (req, res) =>{
+  try {
+    let query = {};
+
+    // Check for selected options in the request body
+    if (req.body.material) {
+      query.material = { $in: req.body.material }; // Use $in operator for multiple values
+    }
+    if (req.body.category) {
+      query.category = { $in: req.body.category }; // Use $in operator for multiple values
+    }
+    if (req.body.stock && req.body.stock[0] === 'true') {
+      query.stock_quantity = 0;
+    }
+
+    console.log("req.stock",req.body.stock)
+
+    console.log("query", query)
+
+    const products = await Product.find(query).lean();
+
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+}
 
 
 
-async function deleteEmptyFolders(product_type, subcategory, name) {
+
+async function deleteEmptyFolders(material, category, name) {
   try {
       const folderStructure = [
-          `${product_type}/${subcategory}/${name}`,
-          `${product_type}/${subcategory}`,
-          product_type
+          `${material}/${category}/${name}`,
+          `${material}/${category}`,
+          material
       ];
 
       // Check each folder for emptiness
@@ -181,20 +202,13 @@ exports.deleteProduct = async (req, res) => {
      // Remove the product from the database
      await Product.deleteOne({ _id: new mongoose.Types.ObjectId(product_id) });
      
-     // Delete associated cart items
-     await Cart.updateMany(
-      { 'items.product': new mongoose.Types.ObjectId(product_id) },
-      { $pull: { items: { product: new mongoose.Types.ObjectId(product_id) } } },
-      { multi: true }
-     );
-     
       // Delete associated images from Cloudinary
       if (product.images && product.images.length > 0) {
         await Promise.all(product.images.map(async (imageUrl) => {
           try {
             // Extract public_id from the Cloudinary URL
             const publicId = imageUrl.split('/').pop().split('.')[0];
-            const publicPath = `${product.product_type}/${product.subcategory}/${product.name.trim().toLowerCase()}/${publicId}`;
+            const publicPath = `${product.material}/${product.category}/${product.name.trim().toLowerCase()}/${publicId}`;
 
             // Delete image from Cloudinary
             await cloudinary.uploader.destroy(publicPath);
@@ -208,13 +222,13 @@ exports.deleteProduct = async (req, res) => {
       }
 
 
-    await deleteEmptyFolders(product.product_type, product.subcategory, product.name.trim().toLowerCase());
+    await deleteEmptyFolders(product.material, product.category, product.name.trim().toLowerCase());
         
 
     res.redirect('/admin/list-products');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
@@ -224,12 +238,12 @@ exports.renderAddProductForm = async (req, res) => {
   try {
     const user = req.user;
 
-    const { product_types, subcategories } = await getCategories(); 
+    const { materials, categories } = await getCategories(); 
 
-    res.render('admin/add-product.ejs', {layout: 'layouts/admin', title: "Add Product",  user, product_types, subcategories });
+    res.render('admin/add-product.ejs', {layout: 'layouts/admin', title: "Add Product",  user, materials, categories });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
@@ -249,12 +263,17 @@ exports.addProduct = async (req, res) => {
   try {
     
     const { name, description, price,
-            stock_quantity, check_new_product_type,
-            check_new_subcategory,
-            product_type,
-            subcategory,
-            new_product_type,
-            new_subcategory
+            stock_quantity,
+            check_new_material,
+            check_new_category,
+            material,
+            category,
+            new_material,
+            new_category,
+            percentage,
+            start_date,
+            end_date,
+            discount_active
              } = req.body;
 
     const detailsKey = req.body['detailsKey[]'];
@@ -263,10 +282,10 @@ exports.addProduct = async (req, res) => {
 
     console.log("newSize",sizes)
 
-    const selectedProductType = check_new_product_type ? new_product_type.trim() : product_type;
+    const selected_material = check_new_material ? new_material.trim() : material;
 
-    // Use the selected or newly entered subcategory
-    const selectedSubcategory = check_new_subcategory ? new_subcategory.trim() : subcategory;
+    // Use the selected or newly entered category
+    const selected_category = check_new_category ? new_category.trim() : category;
     
     const details = Array.isArray(detailsKey)
                   ? detailsKey.reduce((acc, key, index) => {
@@ -283,10 +302,16 @@ exports.addProduct = async (req, res) => {
       description,
       price,
       stock_quantity,
-      product_type: selectedProductType,
-      subcategory: selectedSubcategory,
+      material: selected_material,
+      category: selected_category,
       details: details,
-      sizes: sizes
+      sizes: sizes,
+      discount: {
+        active: req.body.discount_active === 'on' || false,
+        percentage: req.body.percentage || 0,
+        start_date: req.body.start_date || new Date(),
+        end_date: req.body.end_date || new Date()
+      }
     });
 
 
@@ -298,8 +323,8 @@ exports.addProduct = async (req, res) => {
    await Promise.all(images.map(async (image) => {
 
      const base64Data = image.data.toString('base64');
-     // Construct folder path based on product type and subcategory
-     const folder = `${selectedProductType}/${selectedSubcategory}/${name.trim().toLowerCase()}`;
+     // Construct folder path based on product type and category
+     const folder = `${selected_material}/${selected_category}/${name.trim().toLowerCase()}`;
 
      // Upload image to Cloudinary with the specified folder
      const result = await cloudinary.uploader.upload(`data:${image.mimetype};base64,${base64Data}`, {
@@ -318,7 +343,7 @@ exports.addProduct = async (req, res) => {
     res.redirect('/admin/dashboard');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
@@ -330,14 +355,14 @@ exports.renderUpdateProduct = async (req, res) => {
     const user = req.user;
 
     let productId = req.params.productId;
-    const { product_types, subcategories } = await getCategories(); 
+    const { materials, categories } = await getCategories(); 
 
     const product = await Product.findById(productId);
 
-    res.render('admin/update-product.ejs', {layout: 'layouts/admin', title: "Update Product", product, user, product_types, subcategories });
+    res.render('admin/update-product.ejs', {layout: 'layouts/admin', title: "Update Product", product, user, materials, categories });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
@@ -351,32 +376,32 @@ exports.updateProduct = async (req, res) => {
     // Fetch the existing product from the database
     const existingProduct = await Product.findById(productId);
 
-    const { check_new_product_type,
-            check_new_subcategory,
-            new_product_type,
-            new_subcategory
+    const { check_new_material,
+            check_new_category,
+            new_material,
+            new_category
        } = req.body;
 
     // Use the selected or newly entered produc
-    const selectedProductType = check_new_product_type ? new_product_type.trim() : req.body.product_type;
+    const selected_material = check_new_material ? new_material.trim() : req.body.material;
     // Use the selected or newly entered subcategory
-    const selectedSubcategory = check_new_subcategory ? new_subcategory.trim() : req.body.subcategory;
+    const selected_category = check_new_category ? new_category.trim() : req.body.category;
 
-    console.log("selectedProductType",selectedProductType)
-    console.log("selectedSubcategory",selectedSubcategory)
+    console.log("selected_material",selected_material)
+    console.log("selected_category",selected_category)
 
 
     // Determine changes in product details
-    const hasProductDetailsChanged = existingProduct.product_type != selectedProductType ||
-                                     existingProduct.subcategory != selectedSubcategory ||
+    const hasProductDetailsChanged = existingProduct.material != selected_material ||
+                                     existingProduct.category != selected_category ||
                                      existingProduct.name != req.body.name;
 
     // Array to hold updated image URLs
     let updatedImageUrls = [];
 
     // Construct old and new folder paths
-    const oldFolder = `${existingProduct.product_type}/${existingProduct.subcategory}/${existingProduct.name.trim().toLowerCase()}`;
-    const newFolder = `${selectedProductType}/${selectedSubcategory}/${req.body.name.trim().toLowerCase()}`;
+    const oldFolder = `${existingProduct.material}/${existingProduct.category}/${existingProduct.name.trim().toLowerCase()}`;
+    const newFolder = `${selected_material}/${selected_category}/${req.body.name.trim().toLowerCase()}`;
 
     if (hasProductDetailsChanged) {
       console.log("works")
@@ -403,7 +428,7 @@ exports.updateProduct = async (req, res) => {
  
              console.log('Deleted image from Cloudinary1:', oldPublicPath);
 
-             await deleteEmptyFolders(existingProduct.product_type, existingProduct.subcategory, existingProduct.name.trim().toLowerCase());
+             await deleteEmptyFolders(existingProduct.material, existingProduct.category, existingProduct.name.trim().toLowerCase());
              console.log("deleted old folder and image inside ",oldPublicPath)
 
         } catch (error) {
@@ -421,12 +446,18 @@ exports.updateProduct = async (req, res) => {
     existingProduct.name              =     req.body.name;
     existingProduct.price             =     req.body.price;
     existingProduct.stock_quantity    =     req.body.stock_quantity;
-    existingProduct.product_type      =     selectedProductType;
-    existingProduct.subcategory       =     selectedSubcategory;
+    existingProduct.material          =     selected_material;
+    existingProduct.category          =     selected_category;
     existingProduct.sizes             =     newSize;
 
-    console.log("newSize",newSize)
+    existingProduct.discount = {
+      active: req.body.discount_active === 'on' || false,
+      percentage: req.body.percentage || 0,
+      start_date: req.body.start_date || new Date(),
+      end_date: req.body.end_date || new Date()
+    }
 
+    console.log("existingProduct.discount", existingProduct.discount);
      // Update images
     const existingImages = req.body['existingImages[]'];
 
@@ -450,7 +481,6 @@ exports.updateProduct = async (req, res) => {
     const newImages = req.files && (Array.isArray(req.files.images)
     ? req.files.images
     : [req.files.images]) || [];
-    console.log("newImages", newImages)
 
     // Upload new images to Cloudinary
     await Promise.all(newImages.map(async (image) => {
@@ -459,14 +489,13 @@ exports.updateProduct = async (req, res) => {
         const base64Data = image.data.toString('base64');
 
         // Construct folder path based on product type and subcategory
-        const folder = `${selectedProductType}/${selectedSubcategory}/${req.body.name.trim().toLowerCase()}`;
+        const folder = `${selected_material}/${selected_category}/${req.body.name.trim().toLowerCase()}`;
 
         // Upload image to Cloudinary
         const result = await cloudinary.uploader.upload(`data:${image.mimetype};base64,${base64Data}`, {
           folder: folder,
           resource_type: 'image'
         });
-        console.log('Uploaded image:', result.secure_url);
         mergedImages.push(result.secure_url);
         updatedImageUrls.push(result.secure_url)
       } catch (error) {
@@ -498,12 +527,11 @@ exports.updateProduct = async (req, res) => {
     if (deletedImagesId.length !== 0) {
       deletedImagesId.forEach( async (imgId) =>{
         try {
-          const publicPath = `${selectedProductType}/${selectedSubcategory}/${req.body.name.trim().toLowerCase()}/${imgId}`;
+          const publicPath = `${selected_material}/${selected_category}/${req.body.name.trim().toLowerCase()}/${imgId}`;
   
          //Delete image from Cloudinary
           await cloudinary.uploader.destroy(publicPath);
   
-          console.log('Deleted image from Cloudinary3:', publicPath);
   
         } catch (error) {
           console.error('Error deleting image from Cloudinary:', error);  
@@ -513,34 +541,28 @@ exports.updateProduct = async (req, res) => {
        
 
     existingProduct.images = mergedImages || [];
-    console.log("existingProduct.imagesFinal", existingProduct.images)
 
  
 
     // Check if the folder is empty after deleting the image, then delete it
     if (mergedImages.length === 0) {
-     await deleteEmptyFolders(existingProduct.product_type, existingProduct.subcategory, existingProduct.name.trim().toLowerCase());
+     await deleteEmptyFolders(existingProduct.material, existingProduct.category, existingProduct.name.trim().toLowerCase());
     }
 
 
-    //////////////////////////////////////////////////////////////
     // Saving details to database based on user input 
 
     const detailsKeyRaw = req.body['detailsKey[]'];
     const detailsValueRaw = req.body['detailsValue[]'];
 
-    console.log("detailsKeyRaw", detailsKeyRaw)
-    console.log("detailsValueRaw", detailsValueRaw)
 
     const detailsKey = Array.isArray(detailsKeyRaw) && detailsKeyRaw.length > 0
       ? detailsKeyRaw.map(key => key.trim()) 
       : [];
-      console.log("detailsKey", detailsKey)
 
     const detailsValue = Array.isArray(detailsValueRaw) && detailsValueRaw.length > 0
       ? detailsValueRaw.map(value => value.trim()) 
       : [];
-      console.log("detailsValue", detailsValue)
 
     const mergedDetails = {};
 
@@ -548,10 +570,9 @@ exports.updateProduct = async (req, res) => {
       for (let i = 0; i < detailsKey.length; i++) {
         if (detailsKey[i]) {
           mergedDetails[detailsKey[i]] = detailsValue[i] || '';
-        }
+        } 
       }
     }
-    console.log("mergedDetails", mergedDetails)
 
     existingProduct.details = mergedDetails;
 
@@ -562,34 +583,39 @@ exports.updateProduct = async (req, res) => {
     res.redirect('/admin/update-product/' + productId);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
+const Image = require('../models/Images');  // Images.js
 
 exports.renderCategories = async (req, res) => {
   try {
     const user = req.user;
 
-    const { product_types, subcategories } = await getCategories(); 
 
-    res.render('admin/categories.ejs', {layout: 'layouts/admin', title: "Categories",  user, product_types, subcategories });
+    const { materials, categories } = await getCategories(); 
+
+    const material_data = await Image.find({});
+    // const imagesData = await Image.find({ material: { $in: materials } });
+
+    res.render('admin/categories.ejs', {layout: 'layouts/admin', title: "Categories",  user, material_data, materials, categories });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server Error');
+    res.status(500).send('Greška!');
   }
 };
 
-exports.updateProductType = async (req, res) => {
+exports.updateMaterial = async (req, res) => {
   try {
-    const originalProductType = req.params.product_type; // Original ProductType
-    const updatedProductType = req.body.product_type; // Updated ProductType from the form
+    const original_material = req.params.material; // Original material
+    const updated_material = req.body.material; // Updated material from the form
 
     // Fetch the existing products from the database based on the original category
-    const existingProducts = await Product.find({ product_type: originalProductType });  
+    const existingProducts = await Product.find({ material: original_material });  
 
     for (const existingProduct of existingProducts) {
-      existingProduct.product_type = updatedProductType;
+      existingProduct.material = updated_material;
 
       await existingProduct.save();
     }
@@ -599,23 +625,23 @@ exports.updateProductType = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: 'Greška!' });
   }
 };
 
 
 
-exports.updateSubcategory = async (req, res) => {
+exports.updateCategory = async (req, res) => {
   try {
-    const originalSubcategory = req.params.subcategory; // Original category
-    const updatedSubcategory = req.body.subcategory; // Updated category from the form
+    const original_category = req.params.category; // Original category
+    const updated_category = req.body.category; // Updated category from the form
 
     // Fetch the existing products from the database based on the original category
-    const existingProducts = await Product.find({ subcategory: originalSubcategory });  
+    const existingProducts = await Product.find({ category: original_category });  
 
     // Update the category and subcategory properties for each existing product based on the form data
     for (const existingProduct of existingProducts) {
-      existingProduct.subcategory = updatedSubcategory;
+      existingProduct.category = updated_category;
 
       await existingProduct.save();
     }
@@ -625,9 +651,274 @@ exports.updateSubcategory = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: 'Greška!' });
   }
 };
 
 
+exports.addCategoryImg = async (req, res) => {
+  try {
 
+    let description = req.body.description;
+    const material = req.body.material_img;
+
+    if (!description || typeof description !== 'string') {
+      throw new Error('Opis nije valjan!');
+    }
+
+    description = description.trim();
+
+    const material_desc = new Image({
+      material: material,
+      description: description
+     });
+
+     await material_desc.save();  
+
+     console.log("spremljeno",material_desc);
+
+    // const { materials } = await getCategories(); 
+
+    // const imagesData = await Image.find({ material: { $in: materials } });
+
+      // File upload
+      // if (req.files && req.files.images) {
+      //     const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+      //     const material = req.body.material_img; // Extract the selected material from the form
+
+      //     const imageDoc = new Image({ material }); // Create an image document with the selected material
+
+      //     // Upload each image to Cloudinary
+      //     await Promise.all(images.map(async (image) => {
+      //         const base64Data = image.data.toString('base64');
+      //         // Upload image to Cloudinary with the specified folder
+      //         const result = await cloudinary.uploader.upload(`data:${image.mimetype};base64,${base64Data}`, {
+      //             folder: 'public',
+      //             resource_type: 'image'
+      //         });
+      //         // Store the URL of the uploaded image in the database
+      //         imageDoc.images_url.push(result.secure_url);
+      //     }));
+
+      //     await imageDoc.save();
+
+
+      //     // res.redirect('/admin/categories?success');
+
+      //     res.json({
+      //       message: "Uspješno su dodane slike!",
+      //       materials: materials,
+      //       images: imagesData
+      //     })
+      // } else {
+      //   res.json({
+      //     message: "Nuspješno dodavanje slika!",
+      //     materials: materials,
+      //     images: imagesData
+      //   });
+      // }
+    res.json({
+              message: "Opis je uspješno dodan!",
+              material_desc
+            })
+
+  } catch (error) {
+      console.log("Greška!", error)
+      res.status(500).send('Greška!');
+  }
+}
+
+
+// let headerImageUrl = ''; 
+
+// exports.uploadHeaderImage = async (req, res) => {
+//   try {
+//     console.log("req.files", req.files);
+
+//       if (req.files && req.files.header_image) {
+//         headerImageUrl = req.files.header_image;
+//         const base64Data = headerImageUrl.data.toString('base64');
+//           // Upload header image to Cloudinary
+//           const result = await cloudinary.uploader.upload(`data:${headerImageUrl.mimetype};base64,${base64Data}`, {
+//               folder: 'header_img',
+//               resource_type: 'image'
+//           });
+//           headerImageUrl = result.secure_url; // Update header image URL with Cloudinary URL
+
+//           res.locals.header_image = headerImageUrl; 
+//           res.redirect('/admin/categories?success-header');
+//       } else {
+//           res.status(400).send('No header image uploaded.');
+//       }
+
+
+//       console.log("headerImageUrlheaderImageUrlheaderImageUrl", headerImageUrl)
+//   } catch (error) {
+//       console.log("Greška!", error);
+//       res.status(500).send('Greška!');
+//   }
+// };
+
+
+
+exports.renderOrders = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const orders = await Order.find();
+
+    res.render('admin/orders.ejs', {layout: 'layouts/admin', title: "Orders",  user, orders });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+};
+
+exports.renderOrder = async (req, res) => {
+  try {
+    const user = req.user;
+    const order_id = req.params.order_id;
+
+    const order = await Order.findById(order_id);
+
+    res.render('admin/order.ejs', {layout: 'layouts/admin', title: "Order",  user, order });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+};
+
+
+exports.changeOrderStatus = async (req, res) => {
+  try {
+    const order_id = req.params.order_id;
+    const order = await Order.findById(order_id);
+
+    const order_status = req.body.order_status;
+
+
+       // Check if the order status transition requires updating product quantities
+       if (order_status === 'Na putu') {
+       // Iterate through order items to update product quantities
+       for (const item of order.cart_items) {
+           const product = await Product.findById(item.product.id);
+
+           // If product exists and both quantity and stock_quantity are valid numbers
+           if (product && !isNaN(item.quantity) && !isNaN(product.stock_quantity)) {
+               // Update stock quantity
+               product.stock_quantity -= item.quantity;
+               await product.save();
+           }
+       }
+   }
+
+
+    order.status = order_status;
+    order.save();
+
+    res.json({ message: "Status promjenjen.", order });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+}
+
+
+exports.cancelOrder = async (req, res) =>{
+try {
+    const order_id = req.params.order_id;
+    const user = req.user;
+
+    // Check for valid order id
+    if (!order_id) 
+      return res.status(400).json({error: 'Narudžba već ne postoji!'});
+
+    // Check if order exists
+    const order = await Order.findById(order_id);
+    if (!order) 
+      return res.status(404).json({ error: 'Narudžba nije pronađena!' });
+    
+    // Delete target order
+    await order.deleteOne();
+    
+    // Fetch updated list of orders
+    const orders = await Order.find({'user.email' : user.email})
+    
+    // Respond with success message and updated list of orders
+    return res.json({
+      orders: orders || [],
+      message: 'Narudžba je uspješno poništena!'});
+
+  } catch (error) {
+    // Log the error
+    console.error(error);
+    return res.status(500).send('Greška!');
+  }
+
+}
+
+exports.deleteOrder = async (req, res) => {
+  try {
+    const order_id = req.params.order_id;
+
+    // Check for valid order id
+    if (!order_id) 
+      return res.status(400).json({ error: 'Nevažeći ID narudžbe!' });
+    
+
+    // Check if order exists
+    const order = await Order.findById(order_id);
+    if (!order) 
+      return res.status(404).json({ error: 'Narudžba nije pronađena!' });
+    
+
+    // Delete the order
+    await order.deleteOne();
+
+    // Fetch updated list of orders
+    const orders = await Order.find({});
+
+    // Respond with success message and updated list of orders
+    return res.json({
+      orders: orders || [],
+      message: 'Narudžba je uspješno poništena!'
+    });
+
+  } catch (error) {
+    // Log the error
+    console.error(error);
+    return res.status(500).send('Greška!');
+  }
+}
+
+
+exports.setDiscount = async (req, res) => {
+  try {
+
+    const { selectedProducts,
+            percentage,
+            start_date, end_date,
+            discount_active } = req.body;
+
+    
+    await Product.updateMany(
+      { _id: { $in: selectedProducts } },
+      {
+        discount: {
+          active: discount_active === 'on' || false,
+          percentage: percentage || 0,
+          start_date: start_date || new Date(),
+          end_date: end_date || new Date()
+        }
+      }
+    );
+
+    res.redirect('/admin/list-products?success');
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+}

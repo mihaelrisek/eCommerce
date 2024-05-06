@@ -5,13 +5,14 @@ module.exports = (passport) => {
   passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
-  }, async (email, password, done) => {
+  },
+  async (email, password, done) => {
     try {
       const user = await User.findOne({ email });
 
-      if (!user || !(await user.validPassword(password))) {
-        return done(null, false, { message: 'Invalid email or password' });
-      }
+      if (!user || !(await user.validPassword(password))) 
+        return done(null, false, { message: 'Nevažeća e-mail adresa ili lozinka' });
+      
 
       return done(null, user);
     } catch (error) {
@@ -32,3 +33,4 @@ module.exports = (passport) => {
     }
   });
 };
+

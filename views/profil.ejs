@@ -3,10 +3,6 @@
 <section class="profil">
 
   <form action="/profil/<%= user.id %>" method="POST"   >
-      <label for="profil_username">Username</label>
-      <input type="text" name="profil_username" id="profil_username" value="<%= user.username %>" placeholder="<%= user.username %>" disabled required>
-      <input type="checkbox" name="profil_username_checkbox" id="profil_username_checkbox">
-
       <label for="profil_first_name">First name</label>
       <input type="text" name="profil_first_name" id="profil_first_name" value="<%= user.first_name %>" placeholder="<%= user.first_name %>" disabled required>
       <input type="checkbox" name="profil_first_name_checkbox" id="profil_first_name_checkbox">
@@ -19,8 +15,11 @@
       <input type="text" name="profil_email" id="profil_email" value="<%= user.email %>" placeholder="<%= user.email %>" disabled required>
       <input type="checkbox" name="profil_email_checkbox" id="profil_email_checkbox">
   
-      <label for="profil_address">Address</label>
-      <input type="text" name="profil_address" id="profil_address" value="<%= user.address %>" placeholder="<%= user.address %>" disabled required>
+      <label for="profil_address_region">Address</label>
+      <input type="text" name="profil_hardcoded_region" id="profil_hardcoded_region" value="<%= user.address.region %>" placeholder="<%= user.address.region %>" disabled required>
+      <input type="text" name="profil_address_street" id="profil_address_street" value="<%= user.address.street %>" placeholder="<%= user.address.region %>" disabled required>
+      <input type="text" name="profil_address_city" id="profil_address_city" value="<%= user.address.city %>" placeholder="<%= user.address.region %>" disabled required>
+      <input type="text" name="profil_address_zip_code" id="profil_address_zip_code" value="<%= user.address.zip_code %>" placeholder="<%= user.address.region %>" disabled required>
       <input type="checkbox" name="profil_address_checkbox" id="profil_address_checkbox">
   
       <label for="profil_phone">Phone</label>
@@ -41,6 +40,49 @@
 
 </section>
 
+
+<section class="user_orders_section">
+
+
+
+
+  <h1>Narudzbe</h1>
+
+  <% if (orders && orders.length > 0){ %>
+     <table class="orders_table" >
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Korisnik</th>
+          <th>Datum narudzbe</th>
+          <th>Ukupni iznos</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach((order) => { %>
+          <tr <%= (order.status=='dostavljeno') ? "class=delivered" : "" %> >
+            <td><%= order._id %></td>
+            <td><%= order.user.first_name %> <%= order.user.last_name %></td>
+            <td><%= order.order_date.toDateString() %></td>
+            <td>$<%= order.total_amount.toFixed(2) %></td>
+            <td><%= order.status %></td>
+            <td><a href="/profil/order/<%= order._id %>">View Details</a></td>
+          </tr>
+       
+        <% }); %>
+      </tbody>
+    </table>
+  
+  <% } %>
+    
+
+
+</section>
+
+
+
+
 <script>
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -48,13 +90,89 @@ checkboxes.forEach(checkbox => {
   checkbox.addEventListener('change', function() {
     const inputId = checkbox.id.replace('_checkbox', '');
     const input = document.getElementById(inputId);
-    console.log(inputId)
-
-    if (this.checked) {
-      input.disabled = false;
+    
+    if (inputId.startsWith('profil_address')) {
+      const addressInputs = document.querySelectorAll('[id^="profil_address"]');
+      addressInputs.forEach(addressInput => {
+        if (checkbox.checked) {
+          addressInput.disabled = false;
+        } else {
+          addressInput.disabled = true;
+        }
+      });
     } else {
-      input.disabled = true;
+      if (this.checked) {
+        input.disabled = false;
+      } else {
+        input.disabled = true;
+      }
     }
   });
 });
+
+
+
+
+
+document.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const orderId = form.querySelector('button[type="submit"]').dataset.orderId;
+
+    try {
+        const response = await fetch(`/order/cancel-order/${orderId}`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Render updated orders
+            renderOrders(data.orders);
+            console.log(data.message); // Log success message
+        } else {
+            console.error('Failed to cancel order:', data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // Handle the error
+    }
+});
+
+
+function renderOrders(orders) {
+    const ordersSection = document.querySelector('.user_orders_section');
+    ordersSection.innerHTML = ''; 
+
+    orders.forEach(orderItem => { 
+
+        const article = document.createElement('article');
+
+        article.innerHTML = `
+            <form id="cancel_order_form" action="/order/cancel-order/${orderItem._id}" method="POST">
+                <h1>Order Details</h1>
+                <ul>
+                    <li><strong>User:</strong> ${orderItem.user.first_name} ${orderItem.user.last_name} (${orderItem.user.email})</li>
+                    <li><strong>Address:</strong> ${orderItem.address.street}, ${orderItem.address.city}, ${orderItem.address.region}, ${orderItem.address.zip_code}</li>
+                    <li><strong>Order Date:</strong> ${new Date(orderItem.order_date).toDateString()}</li>
+                    <li><strong>Total Amount:</strong> ${orderItem.total_amount} USD</li>
+                    <li><strong>Status:</strong> ${orderItem.status}</li>
+                    <li><strong>Payment Method:</strong> ${orderItem.payment_method}</li>
+                </ul>
+                <h2>Cart Items</h2>
+                <ul>
+                    ${orderItem.cart_items.map(item => `
+                        <li>
+                            <strong>Product:</strong> ${item.product.name} (${item.product.price} USD)<br>
+                            <strong>Total Price:</strong> ${item.total_price} USD
+                        </li>
+                    `).join('')}
+                </ul>
+                <button data-order-id="${orderItem._id}"  type="submit" >Prekini narudžbu</button>
+            </form>
+        `;
+
+        ordersSection.append(article);
+    });
+}
 </script>

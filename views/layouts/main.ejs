@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head >
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="/js/index.js" defer></script>
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/slider.css">
 
   <% switch (currentPath) {case '/login' : %>
       <link rel="stylesheet" href="/css/login.css">
@@ -15,50 +16,237 @@
       <link rel="stylesheet" href="/css/profil.css">
     <% break; case '/products' : %>
       <link rel="stylesheet" href="/css/products.css">
+      <% break; case '/product' : %>
+      <link rel="stylesheet" href="/css/product.css">
+      <% break; case '/forgot-password' : %>
+      <link rel="stylesheet" href="/css/register.css">
+      <% break; case '/reset' : %>
+      <link rel="stylesheet" href="/css/register.css">
       <% break; case '/register' : %>
       <link rel="stylesheet" href="/css/register.css">
     <% break; default: break; } %>
 
-    <% if (/\/products\/(.*)/.test(currentPath)) {%>
-        <link rel="stylesheet" href="/css/products.css">
-    <% }%>
+
     
             <title>
-              <%= typeof title !='undefined' ? title: 'eCommerce' %>
+              <%= typeof title !='undefined' ? title: 'Lato' %>
             </title>
+
+
+            <style>
+              .scrollable {
+  position: relative;
+  width: 100%;
+  height: 300px; /* Adjust height as needed */
+  overflow: hidden;
+}
+
+.content {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  padding-right: 20px; /* Ensure space for scrollbar */
+  box-sizing: content-box;
+}
+
+.scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  background-color: #ccc;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.5s;
+}
+
+.scrollbar:hover {
+  opacity: 1; /* Show scrollbar on hover */
+}
+
+.thumb {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  background-color: #888;
+  cursor: pointer;
+}
+
+            </style>
+        
 </head>
 
-<body>
-  <nav class="nav-main">
-    <li><a href="/">Lato</a></li>
-    <li><a href="/contact">Contact</a></li>
-    <li><a href="/about">About</a></li>
-    <li><a href="/products  ">Products</a></li>
+<body data-barba="wrapper"  >
+  <div class="noise"></div>
 
-    <div class="login-nav">
+  <nav class="nav_main">
+    
+    <div class="nav_left" >
+      <li class="menu_btn menu_open" aria-label="Open menu" >
+        <a class="underline_hover">MENI</a>
+      </li>
+      <li class="search_oppener" onclick="openSearch(this)" >
+        <a class="underline_hover">
+          <span>SEARCH</span>
+        </a>
+      </li>
+
+    </div>
+
+    <div class="nav_center">
+      <li class="content__title-main" ><a class="underline_hover" href="/">Lato</a></li>
+      <li class="content__title-main" ><a class="underline_hover" href="/products  ">Products</a></li>
+    </div>
+ 
+    <div class="nav_right">
       
       <% if (user && user.role && user.role === 'admin') { %>
-        <li><a href="/admin/dashboard"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></a></li>
+        <li><a  data-barba-prevent="self" href="/admin/list-products"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></a></li>
         <% } %>
       <% if (!user) { %>
-        <li><a href="/login">Login</a></li>
+        <li><a href="/login"><svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 20 20"><path fill="currentColor" d="M9.993 10.573a4.5 4.5 0 1 0 0-9a4.5 4.5 0 0 0 0 9M10 0a6 6 0 0 1 3.04 11.174c3.688 1.11 6.458 4.218 6.955 8.078c.047.367-.226.7-.61.745c-.383.045-.733-.215-.78-.582c-.54-4.19-4.169-7.345-8.57-7.345c-4.425 0-8.101 3.161-8.64 7.345c-.047.367-.397.627-.78.582c-.384-.045-.657-.378-.61-.745c.496-3.844 3.281-6.948 6.975-8.068A6 6 0 0 1 10 0"/></svg></a></li>
         <% } else { %>
-          <li><a href="/profil"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-circle" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" /></svg></a></li>
+          <li><a href="/profil"><svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 20 20"><path fill="currentColor" d="M9.993 10.573a4.5 4.5 0 1 0 0-9a4.5 4.5 0 0 0 0 9M10 0a6 6 0 0 1 3.04 11.174c3.688 1.11 6.458 4.218 6.955 8.078c.047.367-.226.7-.61.745c-.383.045-.733-.215-.78-.582c-.54-4.19-4.169-7.345-8.57-7.345c-4.425 0-8.101 3.161-8.64 7.345c-.047.367-.397.627-.78.582c-.384-.045-.657-.378-.61-.745c.496-3.844 3.281-6.948 6.975-8.068A6 6 0 0 1 10 0"/></svg></a></li>
           <% } %>
-          
 
-            <li><a class="cart-bag" href="/cart"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-shopping-bag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <li class="cart_bag_li" ><a class="cart-bag" href="/cart"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-shopping-bag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M6.331 8h11.339a2 2 0 0 1 1.977 2.304l-1.255 8.152a3 3 0 0 1 -2.966 2.544h-6.852a3 3 0 0 1 -2.965 -2.544l-1.255 -8.152a2 2 0 0 1 1.977 -2.304z" />
               <path d="M9 11v-5a3 3 0 0 1 6 0v5" />
-            </svg></a></li>
+            </svg></a>
+            <span><%= (cart_items_count == 0) ? "" : cart_items_count %></span>
+          </li>
 
     </div>
   </nav>
-  <main class="main">
 
+
+
+  <main class="main" data-barba="container">
     <%- body -%>
   </main>
+
+  <div class="scrollbar">
+    <div class="thumb"></div>
+  </div>
+
+
+  <div class="search_wrapper">
+    <h1 class="title">Lato</h1>
+    <input type="search" name="search" id="search" class="input-search" placeholder="Search products...">
+    <div class="image-track" id="image-track" ></div>
+  </div>
+    
+  <script >
+        const searchInput = document.getElementById('search');
+        const searchResults = document.getElementById('image-track');
+
+        searchInput.addEventListener('input', async () => {
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm.length === 0) {
+                searchResults.innerHTML = ''; 
+                return;
+            }
+
+            const response = await fetch(`/search?search=${encodeURIComponent(searchTerm)}`);
+            const products = await response.json();
+
+            searchResults.innerHTML = ''; 
+            products.forEach(product => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = "/product/" + product.name.trim().replace(/\s+/g, '-').toLowerCase()+ "-" + product._id;
+                a.draggable = false;
+                li.innerHTML = `<div class="image-item">
+                                  <div class="image-content">
+                                    <img class="image"  draggable="false" src="${product.images[0]}" alt="${product.name.toLowerCase()}">
+                                  </div>
+                                  <div class="details">
+                                    <span>
+                                      <h3>${product.name}</h3>
+                                      <strong>${product.price}€</strong>
+                                    </span>
+                                  <span class="category">${product.material}</span>
+                              </div>`;
+                a.append(li);
+                searchResults.append(a);
+            });
+        });
+
+        const openSearch = (el) => {
+          const search_wrapper = document.querySelector('.search_wrapper');
+          search_wrapper.classList.toggle('inView');
+          el.classList.toggle('inView');
+          document.body.style.overflow = 'hidden';
+          
+        }
+
+  </script>
+ 
+  <!-- <div class="menu-wrap">
+    <div class="tiles">
+      <div class="tiles__line">
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/4.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/5.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/6.jpg)"></div>
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/4.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/5.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/6.jpg)"></div>
+      </div>
+      <div class="tiles__line">
+        <div class="tiles__line-img" style="background-image:url(/img/1.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/2.jpg)"></div>
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/3.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/1.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/2.jpg)"></div>
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/3.jpg)"></div>
+      </div>
+      <div class="tiles__line">
+        <div class="tiles__line-img" style="background-image:url(/img/7.jpg)"></div>
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/8.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/9.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/7.jpg)"></div>
+        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/8.jpg)"></div>
+        <div class="tiles__line-img" style="background-image:url(/img/9.jpg)"></div>
+      </div>
+    </div>
+  
+  
+    <nav class="menu">
+      <a class="menu__item" href="/products">
+        <span class="menu__item-text">sve</span>
+      </a>
+
+      <% if (materials){ %>
+        <% materials.forEach((material) => { %>
+          <a class="menu__item" href="/products/<%=material.toLowerCase() %>">
+            <span class="menu__item-text"><%=material.toLowerCase() %></span>
+          </a>
+        <%  }) %>
+      <% } %>
+     
+    </nav>
+  
+    <div class="menu_btn menu_close">CLOSE</div>
+  
+  
+  </div>
+  
+  
+  <svg class="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <path class="overlay__path" vector-effect="non-scaling-stroke" d="M 0 100 V 100 Q 50 100 100 100 V 100 z" />
+  </svg> -->
+
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- <script src="https://unpkg.com/@barba/core"></script> -->
+  <!-- <script src="/js/barba.js"></script> -->
+  <script src="/js/script.js"></script>
+  <script src="/js/ImageSlider.js"></script>
+  <script src="/js/index.js" ></script>
+  <!-- <script>window.onbeforeunload = () => {window.scrollTo(0, 0);}</script> -->
+
 
   <footer>
       <h1>Footer</h1>

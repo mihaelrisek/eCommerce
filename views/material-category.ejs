@@ -1,21 +1,21 @@
 <a class="history_back" onclick="history.back()">Vrati se</a>
-<section>
+<section class="products_section" >
   <% if (product !== '') { %>
     <ul>
     <% product.forEach(product => { %>
       <li>
-        <a href="/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
+        <a href="/product/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
           <div class="img">
             <img src="<%- product.images[0] %>" alt="<%- product.name %>">
           </div>
 
           <div class="details">
             <span>
-              <h3><%= product.name %></h3>
+              <h3><%= product.name %></h3>  
               <strong><%= product.price %> €</strong>
             </span>
-            <% if (product.product_type) { %>
-              <span class="category"><%= product.product_type %></span>
+            <% if (product.material) { %>
+              <span class="category"><%= product.material %></span>
             <% } else { %>
               <span></span>
             <% } %>
