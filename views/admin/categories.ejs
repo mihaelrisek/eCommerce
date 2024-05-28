@@ -1,89 +1,59 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
-<section>
-  <h1>Materijal</h1>
-  <br>
-  <article class="form">
-
-    <table>
+<div class="setting_section">
+  <h2>Opisi materiala</h2>
+  <div class="category_images_preview">
+    <% if(materials) {%>
       <% materials.forEach(material => { %>
-        <tr>
-            <form action="/admin/update-material/<%= material %>" method="post">
-            <td>
-              <input name="material" type="text" value="<%= material %>" required>
-            </td>
-            <td>
-                <button type="submit">Update</button>
-            </td>
-          </form>
-        </tr>
+        <div class="wrap_p margin_b after">
+          <h2 style="padding-bottom: 0.5rem;" class="wrap_c"><%=material%></h2>
+        </div>
+          <% material_data.forEach((description) => { %>
+            <% if (description.material == material) {%>
+              <p animate data-material="<%= material %>"><%=description.description %></p>
+            <% } %>
+         <% }); %>
+       <% }); %>
+     <% } %>
+  </div>
+
+  <form style="margin-top: 2rem;" animate action="/admin/upload" id="imageUploadForm" method="POST">
+    <label for="description">Opis</label>
+    <textarea name="description" id="description" rows="10"></textarea>
+  
+    <label for="material_img">Odaberi material:</label>
+    <select name="material_img" id="material_img">
+      <% materials.forEach(material => { %>
+        <option value="<%= material %>">
+          <%= material %>
+        </option>
       <% }); %>
-    </table>
-  </article>
-
-</section>
-
-
-
-      <section>
-        <h1>Nakit</h1>
-  <br>
-
-    <article >
-
-          <table>
-          <% categories.forEach(category=> { %>
-            <tr>
-                <form class="form" action="/admin/update-category/<%= category %>" method="post">
-                <td>
-                  <input name="category" type="text" value="<%= category %>" required>
-                </td>
-                <td>
-                    <button type="submit">Update</button>
-                </td>
-              </form>
-            </tr>
-            <% }); %>
-            </table>
-      </article>
-      </section>
-
-
-      <h1>Category based images</h1>
-
-      <div class="category_images_preview">
-        <% if(materials) {%>
-          <% materials.forEach(material => { %>
-            <h1><%=material%></h1>
-              <% material_data.forEach((description) => { %>
-                <% if (description.material == material) {%>
-                  <p><%=description.description %></p>
-                <% } %>
-                
-             <% }); %>
-           <% }); %>
-           <% } %>
-      </div>
-
-      <form action="/admin/upload"  id="imageUploadForm" method="POST" >
-        <label for="description">Opis</label>
-        <textarea name="description" id="" rows="10"></textarea>
-      
-        <label for="material_img">Select Material:</label>
-        <select name="material_img" id="material_img">
-          <% materials.forEach(material=> { %>
-            <option value="<%= material %>">
-              <%= material %>
-            </option>
-            <% }); %>
-        </select>
-        <button type="submit">Upload</button>
-      </form>
-      <div id="message"></div>
-
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    </select>
+    <button type="submit">Spremi</button>
+  </form>
+  <div id="message"></div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('imageUploadForm');
   const messageDiv = document.getElementById('message');
+  const materialSelect = document.getElementById('material_img');
+  const descriptionTextarea = document.getElementById('description');
+
+  // Function to update the textarea based on the selected material
+  const updateDescription = () => {
+    const selectedMaterial = materialSelect.value;
+    const descriptionElement = document.querySelector(`p[data-material="${selectedMaterial}"]`);
+    if (descriptionElement) {
+      descriptionTextarea.value = descriptionElement.textContent;
+    } else {
+      descriptionTextarea.value = '';
+    }
+  };
+
+  // Update description when the page loads
+  updateDescription();
+
+  // Update description when a new material is selected
+  materialSelect.addEventListener('change', updateDescription);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -100,11 +70,8 @@
 
       // Handle server response
       if (response.ok) {
-        console.log(responseData)
+        console.log(responseData);
         messageDiv.textContent = responseData.message;
-        // Optionally update the page content with new data
-        // For example:
-        // - Update materials dropdown
         // - Update images preview
       } else {
         messageDiv.textContent = responseData.message;
@@ -115,4 +82,7 @@
     }
   });
 });
-      </script>
+</script>
+
+
+<script src="/js/reveal.js"></script>

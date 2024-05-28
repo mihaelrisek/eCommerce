@@ -40,6 +40,7 @@ const search = require('../controllers/searchController');
 
 router.post('/admin/multiple-discount', adminController.setDiscount);
 
+router.post('/admin/filter_orders', adminController.filterOrders);
 
 router.get('/admin/search', search.searchProducts);
 router.post('/admin/upload', adminController.addCategoryImg);

@@ -2,7 +2,7 @@
   <h1>Ponovno postavljanje lozinke</h1>
 
   <%if (!locals.error) { %>
-    <form id="reset_form"  action="/reset/<%= locals.token %>" method="post">
+    <form id="reset_form"  action="/reset-pass/<%= locals.token %>" method="POST">
       <input type="password" id="password" name="password" placeholder="Nova lozinka"  required>
       <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Potvrdi lozinku" required>
       <button type="submit">Postavi novu lozinku</button>
@@ -27,6 +27,8 @@
     const formData = new FormData(form);
 
     try {
+
+      console.log("form.action", form.action);
       const response = await fetch(form.action, {
         method: form.method,
         body: formData,
@@ -39,12 +41,12 @@
         else if (data.error) pop_message.textContent = data.error;
       } 
       else 
-        section.textContent = 'Greška, molimo pokušajte kasnije.';
+        section.append('Greška, molimo pokušajte kasnije.') ;
       
       
     } catch (error) {
       console.error('Greška:', error);
-      section.textContent = 'Greška, molimo pokušajte kasnije.';
+      section.append('Greška, molimo pokušajte kasnije.') ;
 
     }
 
@@ -52,21 +54,4 @@
   };
 
   document.getElementById('reset_form').addEventListener('submit', handleSubmission);
-  // document.getElementById('reset_form').addEventListener('submit', validateForm);
-
-
-  // const validateForm = () => {
-
-  //   const form = document.getElementById('reset_form');
-
-  //   let password = document.getElementById("password").value;
-  //   let confirmPassword = document.getElementById("confirmPassword").value;
-
-  //   if (password !== confirmPassword) {
-  //     pop_message.textContent = 'Lozinke se ne podudaraju.';
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
 </script>

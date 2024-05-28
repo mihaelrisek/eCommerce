@@ -4,25 +4,11 @@ const Product = require('../models/Product');  // Product.js
 const Order = require('../models/Order');  // Order.js
 
 
-// An asynchronous function to fetch materials and categories
-const getCategories = async () => {
-  // Fetch unique materials from the database
-  const materials = await Product.distinct('material');
-
-  // Fetch unique categories from the database
-  const categories = await Product.distinct('category');
-
-  // Return an object containing the materials and categories
-  return { materials, categories };
-};
-
-
-
 exports.listUsers = async (req, res) => {
   try {
     let users = await User.find({});
 
-    res.render('admin/users.ejs', { layout: 'layouts/admin', title: 'Users',  users })
+    res.render('admin/users.ejs', { layout: 'layouts/admin', title: 'Lato \u2022 Korisnici',  users })
 
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -37,7 +23,7 @@ exports.renderUser = async ( req, res ) =>{
     let user = await User.findById(user_id);
     const user_roles = ['regular_user', 'admin'];
 
-    res.render('admin/user.ejs', { layout: 'layouts/admin', title: 'Users',  user, user_roles })
+    res.render('admin/user.ejs', { layout: 'layouts/admin', currentPath:'/profil', title: 'Lato \u2022 Korisnik',  user, user_roles })
 
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -64,8 +50,7 @@ exports.updateUserRole = async (req, res) =>{
 
     await user.save();
 
-    res.status(200).send('User role updated successfully');
-
+    res.redirect('/admin/user/'+ user._id);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
@@ -93,7 +78,8 @@ exports.deleteUser = async (req, res) => {
     // Remove the user from the database
     await userToDelete.deleteOne({ _id: new mongoose.Types.ObjectId(user_id) });
 
-    res.status(200).send('User deleted successfully');
+    res.redirect('/admin/users');
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -103,11 +89,11 @@ exports.deleteUser = async (req, res) => {
 
 exports.listProducts = async (req, res) => {
   try {
-    let user = req.user;
+    // let user = req.user;
 
     const products = await Product.find({})
 
-    res.render('admin/list-products.ejs', { layout: 'layouts/admin', title: 'List Users', user , products})
+    res.render('admin/list-products.ejs', { layout: 'layouts/admin', title: 'Lato \u2022 Proizvodi',  products})
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -235,12 +221,9 @@ exports.deleteProduct = async (req, res) => {
 
 
 exports.renderAddProductForm = async (req, res) => {
-  try {
-    const user = req.user;
+  try { 
 
-    const { materials, categories } = await getCategories(); 
-
-    res.render('admin/add-product.ejs', {layout: 'layouts/admin', title: "Add Product",  user, materials, categories });
+    res.render('admin/add-product.ejs', {layout: 'layouts/admin', title: "Lato \u2022 Dodaj proizvod"});
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -287,12 +270,11 @@ exports.addProduct = async (req, res) => {
     // Use the selected or newly entered category
     const selected_category = check_new_category ? new_category.trim() : category;
     
-    const details = Array.isArray(detailsKey)
-                  ? detailsKey.reduce((acc, key, index) => {
-                      acc[key] = detailsValue && detailsValue[index] ? detailsValue[index] : '';
-                      return acc;
-                    }, {})
-                  : typeof detailsKey === 'string' && typeof detailsValue === 'string'
+    const details = Array.isArray(detailsKey) ?
+     detailsKey.reduce((acc, key, index) => {
+        acc[key] = detailsValue && detailsValue[index] ? detailsValue[index] : '';
+        return acc;
+        }, {}): typeof detailsKey === 'string' && typeof detailsValue === 'string'
                   ? { [detailsKey]: detailsValue }
                   : {};
 
@@ -307,10 +289,10 @@ exports.addProduct = async (req, res) => {
       details: details,
       sizes: sizes,
       discount: {
-        active: req.body.discount_active === 'on' || false,
-        percentage: req.body.percentage || 0,
-        start_date: req.body.start_date || new Date(),
-        end_date: req.body.end_date || new Date()
+        active: discount_active === 'on' || false,
+        percentage: percentage || 0,
+        start_date: start_date || new Date(),
+        end_date: end_date || new Date()
       }
     });
 
@@ -340,7 +322,7 @@ exports.addProduct = async (req, res) => {
     // // Save the new product to the database
     await newProduct.save();
 
-    res.redirect('/admin/dashboard');
+    res.redirect('/admin/list-products');
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -352,14 +334,12 @@ exports.addProduct = async (req, res) => {
 
 exports.renderUpdateProduct = async (req, res) => {
   try {
-    const user = req.user;
 
     let productId = req.params.productId;
-    const { materials, categories } = await getCategories(); 
 
     const product = await Product.findById(productId);
 
-    res.render('admin/update-product.ejs', {layout: 'layouts/admin', title: "Update Product", product, user, materials, categories });
+    res.render('admin/update-product.ejs', {layout: 'layouts/admin', title: "Lato \u2022 Ažuriraj", product });
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -369,7 +349,6 @@ exports.renderUpdateProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-
 
     const productId = req.params.productId;
 
@@ -387,9 +366,6 @@ exports.updateProduct = async (req, res) => {
     // Use the selected or newly entered subcategory
     const selected_category = check_new_category ? new_category.trim() : req.body.category;
 
-    console.log("selected_material",selected_material)
-    console.log("selected_category",selected_category)
-
 
     // Determine changes in product details
     const hasProductDetailsChanged = existingProduct.material != selected_material ||
@@ -404,7 +380,6 @@ exports.updateProduct = async (req, res) => {
     const newFolder = `${selected_material}/${selected_category}/${req.body.name.trim().toLowerCase()}`;
 
     if (hasProductDetailsChanged) {
-      console.log("works")
       // Move images from the old folder to the new folder
       await Promise.all(existingProduct.images.map(async (imageUrl) => {
         try {
@@ -436,7 +411,7 @@ exports.updateProduct = async (req, res) => {
         }
       }));
 
-     }
+     } 
 
      const newSize = req.body['newSize[]'] || [];
 
@@ -454,10 +429,11 @@ exports.updateProduct = async (req, res) => {
       active: req.body.discount_active === 'on' || false,
       percentage: req.body.percentage || 0,
       start_date: req.body.start_date || new Date(),
-      end_date: req.body.end_date || new Date()
+      end_date: req.body.end_date
     }
 
     console.log("existingProduct.discount", existingProduct.discount);
+
      // Update images
     const existingImages = req.body['existingImages[]'];
 
@@ -591,15 +567,13 @@ const Image = require('../models/Images');  // Images.js
 
 exports.renderCategories = async (req, res) => {
   try {
-    const user = req.user;
 
-
-    const { materials, categories } = await getCategories(); 
+    
 
     const material_data = await Image.find({});
     // const imagesData = await Image.find({ material: { $in: materials } });
 
-    res.render('admin/categories.ejs', {layout: 'layouts/admin', title: "Categories",  user, material_data, materials, categories });
+    res.render('admin/categories.ejs', {layout: 'layouts/admin', title: "Lato \u2022 Postavke", material_data });
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -658,7 +632,6 @@ exports.updateCategory = async (req, res) => {
 
 exports.addCategoryImg = async (req, res) => {
   try {
-
     let description = req.body.description;
     const material = req.body.material_img;
 
@@ -668,65 +641,36 @@ exports.addCategoryImg = async (req, res) => {
 
     description = description.trim();
 
-    const material_desc = new Image({
-      material: material,
-      description: description
-     });
+    // Check if a description already exists for the material
+    let material_desc = await Image.findOne({ material: material });
 
-     await material_desc.save();  
+    if (material_desc) {
+      // Update existing description
+      console.log(`Updating description for material: ${material}`);
+      material_desc.description = description;
+    } else {
+      // Create new description
+      console.log(`Creating new description for material: ${material}`);
+      material_desc = new Image({
+        material: material,
+        description: description
+      });
+    }
 
-     console.log("spremljeno",material_desc);
+    await material_desc.save();  
 
-    // const { materials } = await getCategories(); 
+    console.log("spremljeno", material_desc);
 
-    // const imagesData = await Image.find({ material: { $in: materials } });
-
-      // File upload
-      // if (req.files && req.files.images) {
-      //     const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
-      //     const material = req.body.material_img; // Extract the selected material from the form
-
-      //     const imageDoc = new Image({ material }); // Create an image document with the selected material
-
-      //     // Upload each image to Cloudinary
-      //     await Promise.all(images.map(async (image) => {
-      //         const base64Data = image.data.toString('base64');
-      //         // Upload image to Cloudinary with the specified folder
-      //         const result = await cloudinary.uploader.upload(`data:${image.mimetype};base64,${base64Data}`, {
-      //             folder: 'public',
-      //             resource_type: 'image'
-      //         });
-      //         // Store the URL of the uploaded image in the database
-      //         imageDoc.images_url.push(result.secure_url);
-      //     }));
-
-      //     await imageDoc.save();
-
-
-      //     // res.redirect('/admin/categories?success');
-
-      //     res.json({
-      //       message: "Uspješno su dodane slike!",
-      //       materials: materials,
-      //       images: imagesData
-      //     })
-      // } else {
-      //   res.json({
-      //     message: "Nuspješno dodavanje slika!",
-      //     materials: materials,
-      //     images: imagesData
-      //   });
-      // }
     res.json({
-              message: "Opis je uspješno dodan!",
-              material_desc
-            })
+      message: "Opis je uspješno dodan!",
+      material_desc
+    });
 
   } catch (error) {
-      console.log("Greška!", error)
-      res.status(500).send('Greška!');
+    console.log("Greška!", error);
+    res.status(500).send('Greška!');
   }
-}
+};
 
 
 // let headerImageUrl = ''; 
@@ -763,25 +707,42 @@ exports.addCategoryImg = async (req, res) => {
 
 exports.renderOrders = async (req, res) => {
   try {
-    const user = req.user;
 
     const orders = await Order.find();
 
-    res.render('admin/orders.ejs', {layout: 'layouts/admin', title: "Orders",  user, orders });
+    res.render('admin/orders.ejs', {layout: 'layouts/admin', title: "Lato \u2022 Narudžbe",  orders });
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
   }
 };
 
+
+exports.filterOrders = async (req, res) => {
+  try {
+    const { status } = req.body;
+    let orders = [];
+    if (status && status.length > 0) {
+      orders = await Order.find({ status: { $in: status } });
+    } else {
+      orders = await Order.find();
+    }
+
+    res.json({ orders });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Greška!');
+  }
+};
+
+
 exports.renderOrder = async (req, res) => {
   try {
-    const user = req.user;
     const order_id = req.params.order_id;
 
     const order = await Order.findById(order_id);
 
-    res.render('admin/order.ejs', {layout: 'layouts/admin', title: "Order",  user, order });
+    res.render('admin/order.ejs', {layout: 'layouts/admin', currentPath: '/admin/order', title: "Lato \u2022 Narudžba",  order });
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -798,7 +759,7 @@ exports.changeOrderStatus = async (req, res) => {
 
 
        // Check if the order status transition requires updating product quantities
-       if (order_status === 'Na putu') {
+       if (order_status === 'Otkazano') {
        // Iterate through order items to update product quantities
        for (const item of order.cart_items) {
            const product = await Product.findById(item.product.id);
@@ -806,12 +767,11 @@ exports.changeOrderStatus = async (req, res) => {
            // If product exists and both quantity and stock_quantity are valid numbers
            if (product && !isNaN(item.quantity) && !isNaN(product.stock_quantity)) {
                // Update stock quantity
-               product.stock_quantity -= item.quantity;
+               product.stock_quantity += item.quantity;
                await product.save();
-           }
-       }
-   }
-
+              }
+          }
+      }
 
     order.status = order_status;
     order.save();
@@ -824,39 +784,6 @@ exports.changeOrderStatus = async (req, res) => {
   }
 }
 
-
-exports.cancelOrder = async (req, res) =>{
-try {
-    const order_id = req.params.order_id;
-    const user = req.user;
-
-    // Check for valid order id
-    if (!order_id) 
-      return res.status(400).json({error: 'Narudžba već ne postoji!'});
-
-    // Check if order exists
-    const order = await Order.findById(order_id);
-    if (!order) 
-      return res.status(404).json({ error: 'Narudžba nije pronađena!' });
-    
-    // Delete target order
-    await order.deleteOne();
-    
-    // Fetch updated list of orders
-    const orders = await Order.find({'user.email' : user.email})
-    
-    // Respond with success message and updated list of orders
-    return res.json({
-      orders: orders || [],
-      message: 'Narudžba je uspješno poništena!'});
-
-  } catch (error) {
-    // Log the error
-    console.error(error);
-    return res.status(500).send('Greška!');
-  }
-
-}
 
 exports.deleteOrder = async (req, res) => {
   try {
@@ -873,17 +800,32 @@ exports.deleteOrder = async (req, res) => {
       return res.status(404).json({ error: 'Narudžba nije pronađena!' });
     
 
+    if (order.status !== 'Dostavljeno'){
+        const users_order = await User.findOne({ email: order.email });
+
+        if(users_order){
+          // Define email subject and message
+          const subject = 'Potvrda o Otkazivanju Narudžbe';
+
+          const message = `
+          Bok ${users_order.first_name} + ${users_order.last_name},
+          
+          Žao nam je što moramo javiti da je tvoja nedavna narudžba otkazana.
+          Iskreno se nadamo da nije bilo prevelike gnjavaže.
+          
+          Ako imaš pitanja ili nedoumica, slobodno nam se javi.
+          
+          Hvala na razumijevanju.`;
+          // Send email to user 
+          sendPasswordResetEmail(users_order.email, subject, message);
+        }
+    }
+
     // Delete the order
     await order.deleteOne();
 
-    // Fetch updated list of orders
-    const orders = await Order.find({});
-
     // Respond with success message and updated list of orders
-    return res.json({
-      orders: orders || [],
-      message: 'Narudžba je uspješno poništena!'
-    });
+    return res.redirect('/admin/orders');
 
   } catch (error) {
     // Log the error
@@ -906,13 +848,18 @@ exports.setDiscount = async (req, res) => {
       { _id: { $in: selectedProducts } },
       {
         discount: {
-          active: discount_active === 'on' || false,
+          active: (discount_active === true) ? true : false,
           percentage: percentage || 0,
           start_date: start_date || new Date(),
-          end_date: end_date || new Date()
+          end_date: end_date
         }
       }
     );
+
+    console.log("discount_active", discount_active)
+    console.log("percentage", percentage)
+    console.log("start_date", start_date)
+    console.log("end_date", end_date)
 
     res.redirect('/admin/list-products?success');
 

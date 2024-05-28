@@ -1,6 +1,6 @@
 <!-- views/login.ejs -->
 
-    <div class="container">
+    <div class="container login_container">
       <section data-animate class="wrapper">
           <h1>Prijavi se</h1>
           <p>Novi korisnik? 
@@ -18,6 +18,7 @@
             <a href="/forgot-password" class="text text-links">Zaboravili ste lozinku?</a>
             <button type="submit" name="submit" class="input-submit" >Prijavi se</button>
           </div>
+          <div class="pop_message"></div>
         </form>
       </section>
     </div>
@@ -29,4 +30,47 @@
     eyeVisible.style.visibility = (password.type === "password") ? "hidden" : "visible";
     eyeHidden.style.visibility = (password.type === "password") ? "visible" : "hidden";
   }
+
+
+  const sub_btn = document.querySelector('.input-submit');
+  
+
+
+  const loginUser = async (e) =>{
+    try {
+              e.preventDefault();
+
+              const pop_message = document.querySelector('.pop_message');
+              const form = document.querySelector('.login_form');
+              const email = form.querySelector('#email').value;
+              const password = form.querySelector('#password').value;
+
+
+              const response = await fetch(`/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+              });
+              const data = await response.json();
+
+              if (response.ok) {
+
+                if (data.success) window.location.href = data.redirectUrl;
+                else if (data.error) pop_message.textContent = data.error;
+              } 
+              else 
+                 pop_message.textContent = data.error;
+
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+  }
+
+  sub_btn.addEventListener('click', loginUser);
+  sub_btn.addEventListener('touch', loginUser);
+
 </script>

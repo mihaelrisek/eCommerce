@@ -1,0 +1,225 @@
+main {
+  margin-top: 10rem;
+}
+section.delivery_section{
+  display: flex;
+  position: relative;
+  margin-bottom: 1rem;
+  justify-content: space-evenly;
+}
+
+section.delivery_section article h1,
+.guest_shipping h1{
+  border-bottom: 0.2px solid rgba(var(--clr-fg), 0.5);
+  padding-bottom: 18px;
+  margin-bottom: 2rem;
+  height: 50px;
+  font-size: 1.5rem;
+}
+
+.guest_login{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 0 3rem 3rem 1rem;
+
+}
+.guest_login div{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.guest_login button{
+  width: 100%;
+}
+.guest_login a{
+  width: max-content;
+  color:rgba(var(--clr-fg), 0.8);;
+  text-decoration: none;
+}
+
+.delivery_section .wrapper{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 400px;
+  padding: 0 1rem 3rem 3rem;
+}
+.delivery_section .wrapper .login_form{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.delivery_section .wrapper .login_form input {
+  width: 100%;
+}
+.delivery_section .wrapper .login_form .input-control{
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+.delivery_section .wrapper  a{
+  color: rgba(var(--clr-fg), 0.8);
+  text-decoration: none;
+  height: max-content;
+}
+.input-control svg{
+  cursor: pointer;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.input-control #eyeVisible{
+  visibility: hidden;
+}
+.input-control svg path{
+  fill: rgba(var(--clr-fg),0.8);
+}
+
+
+
+
+.pop_message{
+  position: absolute;
+  bottom: 1.5rem;
+}
+
+.guest_shipping{
+  padding: 3rem;
+}
+.guest_shipping form{
+  display: flex;
+  gap: 3rem;
+}
+
+.guest_shipping .wrapper{
+  width: 100%;
+}
+.guest_shipping .wrapper .container{
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+.guest_shipping .wrapper article>div{
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  width: 100%;
+}
+.guest_shipping .wrapper article div div{
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+.guest_shipping .wrapper article div div input,
+.guest_shipping .wrapper article div div select{
+  width: inherit;
+  border: none;
+  border-bottom: 0.3px solid rgba(var(--clr-fg), 0.7);
+}
+.guest_shipping .shipping_cart{
+  width: 40%;
+}
+.guest_shipping .shipping_cart h1{
+  display: flex;
+  justify-content: space-between;
+}
+.guest_shipping .shipping_cart h1 a{
+  font-size: 1rem;  
+  color: rgba(var(--clr-fg), 0.8);
+}
+.guest_shipping .shipping_cart ul{
+  display: flex;
+  flex-direction: column;
+}
+.guest_shipping .shipping_cart ul li a{
+  display: flex;
+  gap: 1rem;
+}
+.guest_shipping .shipping_cart ul li img{
+  width: 100px;
+}
+
+.total{
+  display: flex;
+  flex-direction: column;
+}
+.total .subtotal{
+  margin: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+}
+.total .subtotal:nth-child(3) span:nth-child(2){
+  color: rgba(var(--clr-fg), 0.7);
+}
+#submitButton{
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.hidden_cart{
+  visibility: hidden;
+}
+
+.guest_shipping .wrapper article div div {
+  justify-content: flex-end;
+}
+.container input[type="checkbox"] {
+  width: 200px !important;
+  align-self: flex-end;
+  position: relative;
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+   appearance: none;
+   cursor: pointer;
+   border: 0 !important;
+  outline: 1px solid rgba(var(--clr-fg), 0.7);
+}
+.container input[type="checkbox"]:checked {
+  background: rgb(var(--clr-fg));
+  color: rgb(var(--clr-bg));
+}
+.container input[type="checkbox"]::before {
+  position: absolute;
+  content: 'Uredi';
+  width: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+
+
+
+
+@media only screen and (max-width: 900px) {
+  section.delivery_section {
+    flex-wrap: wrap;
+  }
+  .delivery_section .wrapper,
+  .delivery_section .guest_login{
+    padding: 2rem;
+  }
+  section.guest_shipping form {
+    flex-wrap: wrap;
+  }
+  .guest_shipping .shipping_cart {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 450px) {
+  .delivery_section .wrapper{
+    width: 100%;
+    min-width: 100%;
+  }
+  .delivery_section .wrapper,
+  .delivery_section .guest_login{
+    padding: 1rem;
+  }
+}

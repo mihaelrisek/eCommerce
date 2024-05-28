@@ -49,15 +49,35 @@ exports.renderByMaterial = async (req, res) => {
     const material = capitalizeFirstLetter(req.params.material);
     const user = req.user;
  
-    const product = await Product.find({ material: material });
+    const products = await Product.find({ material: material });
 
-    res.render('material.ejs', {  currentPath: '/products', title: 'Lato \u2022 ' + material, product, user });
+    res.render('material.ejs', {  currentPath: '/products', title: 'Lato \u2022 ' + material, products, user });
 
   } catch (error) {
     console.error(error);
     res.status(500).send(error);
   }
 };
+
+exports.renderByCategory = async (req, res) => {
+  try {
+
+    const category = capitalizeFirstLetter(req.params.category);
+    const user = req.user;
+ 
+    const products = await Product.find({ category: category });
+
+
+    res.render('material.ejs', {  currentPath: '/products', title: 'Lato \u2022 ' + category, products, user });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
+  }
+};
+
+
+
 
 exports.renderByMaterialAndCategory= async (req, res) => {
   try {
@@ -66,9 +86,9 @@ exports.renderByMaterialAndCategory= async (req, res) => {
     const material = capitalizeFirstLetter(req.params.material);
     const category = capitalizeFirstLetter(req.params.category);
 
-    const product = await Product.find( { material: material , category: category});
+    const products = await Product.find( { material: material , category: category});
 
-    res.render('material-category.ejs', { currentPath: '/products', title: 'Lato \u2022 ' + category, product, user });
+    res.render('material-category.ejs', { currentPath: '/products', title: 'Lato \u2022 ' + category, products, user });
 
   } catch (error) {
     console.error(error);
@@ -112,7 +132,7 @@ exports.viewOrder = async (req, res) => {
 
     const order = await Order.findById(order_id);
 
-    res.render('order.ejs', { title: "Order",  user, order });
+    res.render('order.ejs', { currentPath: '/order', title: "Lato \u2022 Narudzba",  user, order });
   } catch (error) {
     console.error(error);
     res.status(500).send('Greška!');
@@ -243,6 +263,7 @@ exports.loadMoreProducts = async (req, res) => {
     // Paginate products to load more
     const skip = parseInt(req.body.skip) || 0;
     const limit = 3; // Adjust as per your requirement
+    console.log("skiop", skip)
     // Find products based on the constructed query with pagination
     const products = await Product.find(query).skip(skip).limit(limit);
 
@@ -293,12 +314,9 @@ exports.filterProducts = async (req, res) =>{
 }
 
 
-
-
 exports.getSpecificProduct = async (req, res) => {
   try {
     const user = req.user;  
-
     const login_url = `/login?redirect=${req.originalUrl}`;
 
 
@@ -312,8 +330,18 @@ exports.getSpecificProduct = async (req, res) => {
     const review = await Review.find({ product_id: actualProductId })
                                .populate('user_id');
 
+    const similar_products = await Product.find({
+      $and:[
+        {_id: {$ne: actualProductId}},
+        {'material':product.material},
+        {'category':product.category}
+      ],
+    }).limit(3);
+
+
     
-    res.render('product.ejs', {currentPath: '/product', title: 'Lato \u2022 ' + product.name, product, user, review, login_url });
+    res.render('product.ejs', {currentPath: '/product', title: 'Lato \u2022 ' + product.name,
+    product, user, review, login_url, similar_products });
 
   } catch (error) {
     console.error(error);
@@ -329,7 +357,7 @@ exports.addComment = async (req, res) =>{
       return;
     }
 
-    const { comment, rating  } = req.body;
+    let { comment, rating  } = req.body;
 
 
     if (!comment || typeof comment !== 'string') {
@@ -661,16 +689,28 @@ exports.renderDelivery = async (req, res) => {
 
   try {
     const user = req.user;
+    const cart_products = [];
+    const cart_items = req.session.user_cart;
 
     const login_url = `/login?redirect=${encodeURIComponent(req.originalUrl)}`;
 
+
+    console.log("login_url", login_url)
     if (user){
-       const cart_items = req.session.user_cart;
-  
-      if (!cart_items || cart_items.length <= 0) return res.redirect('/cart');
+
+       if (!cart_items || cart_items.length <= 0) return res.redirect('/cart');
+
+
+       for (const item of cart_items) {
+        const product = await Product.findById(item.product_id).exec();
+        if (product) {
+          cart_products.push(product);
+        }
+      }
     }
+   
     
-    res.render('delivery.ejs', {currentPath: '/delivery', title: 'Lato \u2022 Narudzba', user, login_url });
+    res.render('delivery.ejs', {currentPath: '/delivery', title: 'Lato \u2022 Narudzba', user, cart_products, cart_items, login_url });
    
   } catch (error) {
     console.error(error);
@@ -683,10 +723,20 @@ exports.renderGuestDelivery = async (req, res) => {
   try {
     const user = req.user;
     const cart_items = req.session.guest_cart;
+    const cart_products = [];
 
     if (!cart_items || cart_items.length <= 0) return res.redirect('/cart');
 
-    res.render('guest_delivery.ejs', { currentPath: '/delivery', title: 'Lato \u2022 Gost narudzba', user });
+    console.log(cart_items);
+
+    for (const item of cart_items) {
+      const product = await Product.findById(item.product_id).exec();
+      if (product) {
+        cart_products.push(product);
+      }
+    }
+
+    res.render('guest_delivery.ejs', { currentPath: '/delivery', title: 'Lato \u2022 Gost narudzba', user, cart_items, cart_products });
    
   } catch (error) {
     console.error(error);
@@ -726,6 +776,8 @@ exports.processUserDelivery = async (req, res) => {
       let total_price = 0;
 
       const cart_items = req.session.user_cart;
+
+      console.log("cart_items", cart_items);
       const user_cart_items = []
 
       if (cart_items && cart_items.length > 0) {
@@ -740,6 +792,7 @@ exports.processUserDelivery = async (req, res) => {
             user_cart_items.push({
               product: {
                 id: product._id,
+                image: product.images[0],
                 name: product.name,
                 price: product.price,
                 discount:{
@@ -750,13 +803,14 @@ exports.processUserDelivery = async (req, res) => {
                 category: product.category
               },
               quantity: item.quantity,
-              sizes: item.sizes,
+              sizes: item.size,
               total_price: total_price
             });
           }
         }
       }
-  
+      
+      console.log(" user_cart_items",  user_cart_items);
       
 
       const default_address = {
@@ -782,7 +836,7 @@ exports.processUserDelivery = async (req, res) => {
 
       const user_data = {
         first_name: user.first_name,
-        last_name: user.first_name,
+        last_name: user.last_name,
         phone: user.phone,
         email: user.email
       }
@@ -818,7 +872,7 @@ exports.processUserDelivery = async (req, res) => {
   }
   
       req.session.user_cart = [];
-      res.redirect('/delivery?success');
+      res.redirect('/profil/order/' + order._id);
     }
 
   }catch (error) {
@@ -867,6 +921,7 @@ exports.proccesGuestDelivery = async (req, res) => {
     await guest_user.save();
 
 
+    
   
     let total_price = 0;
   
@@ -882,6 +937,7 @@ exports.proccesGuestDelivery = async (req, res) => {
           guest_cart_items.push({
             product: {
               id: product._id,
+              image: product.images[0],
               name: product.name,
               price: product.price,
               discount:{
@@ -892,7 +948,7 @@ exports.proccesGuestDelivery = async (req, res) => {
               category: product.category
             },
             quantity: item.quantity,
-            sizes: item.sizes,
+            sizes: item.size,
             total_price: total_price
           });
         }
@@ -989,7 +1045,8 @@ exports.cancelOrder = async (req, res) =>{
     await order.save();
     
     return res.json({
-      message: 'Narudžba je uspješno poništena!'});
+      message: 'Narudžba je uspješno poništena!', success: true,
+      redirect_url: '/profil'});
 
   } catch (error) {
     // Log the error
@@ -998,24 +1055,3 @@ exports.cancelOrder = async (req, res) =>{
   }
 }
 
-
-
-
-/**
- * GET /contact
- * Contact
- */
-exports.contact = async (req, res) => {
-  const user = req.user;
-  res.render('contact.ejs', { title: 'Lato \u2022 Kontakt', user });
-}
-
-/**
- * GET /about
- * About
- */
-exports.about = async (req, res) => {
-  const user = req.user;
-
-  res.render('about.ejs', { title: 'Lato \u2022 O nama', user });
-}

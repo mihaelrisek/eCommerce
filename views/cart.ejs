@@ -1,3 +1,4 @@
+<section class="cart_section">
 
 <% if (user) { %>
 
@@ -6,8 +7,9 @@
     <%- include ('partials/user_cart.ejs')%>
 
   <% } else { %>
-    <p>Nema proizvoda u kartici.</p>
-    <a href="/products">Odaberite neki od proizvoda iz naše ponude i dodajte u košaricu.</a>
+      <div class="no_articles">
+        <p>Trenutno nema proizvoda u košarici.</p>
+      </div>
   <% } %>
 
 
@@ -19,6 +21,8 @@
 
     
 <% } else { %>
-  <p>Nema proizvoda u kartici.</p>
-  <a href="/products">Odaberite neki od proizvoda iz naše ponude i dodajte u košaricu.</a>
+    <div class="no_articles">
+      <p>Trenutno nema proizvoda u košarici.</p>
+    </div>
 <% } %>
+</section>

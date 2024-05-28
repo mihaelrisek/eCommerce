@@ -24,6 +24,10 @@
       <link rel="stylesheet" href="/css/register.css">
       <% break; case '/register' : %>
       <link rel="stylesheet" href="/css/register.css">
+      <% break; case '/delivery' : %>
+      <link rel="stylesheet" href="/css/delivery.css">
+      <% break; case '/order' : %>
+      <link rel="stylesheet" href="/css/order.css">
     <% break; default: break; } %>
 
 
@@ -32,77 +36,36 @@
               <%= typeof title !='undefined' ? title: 'Lato' %>
             </title>
 
-
-            <style>
-              .scrollable {
-  position: relative;
-  width: 100%;
-  height: 300px; /* Adjust height as needed */
-  overflow: hidden;
-}
-
-.content {
-  width: 100%;
-  height: 100%;
-  overflow-y: scroll;
-  padding-right: 20px; /* Ensure space for scrollbar */
-  box-sizing: content-box;
-}
-
-.scrollbar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 100%;
-  background-color: #ccc;
-  opacity: 0; /* Initially hidden */
-  transition: opacity 0.5s;
-}
-
-.scrollbar:hover {
-  opacity: 1; /* Show scrollbar on hover */
-}
-
-.thumb {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  background-color: #888;
-  cursor: pointer;
-}
-
-            </style>
-        
 </head>
 
-<body data-barba="wrapper"  >
+<body>
   <div class="noise"></div>
 
-  <nav class="nav_main">
+  <nav animate class="nav_main">
     
     <div class="nav_left" >
-      <li class="menu_btn menu_open" aria-label="Open menu" >
-        <a class="underline_hover">MENI</a>
-      </li>
-      <li class="search_oppener" onclick="openSearch(this)" >
-        <a class="underline_hover">
-          <span>SEARCH</span>
+      <li class="content__title-main" >
+        <a class="main_menu">
+          <div class="bar bar--top"></div>
+          <div class="bar bar--middle"></div>
+          <div class="bar bar--bottom"></div>
         </a>
       </li>
-
     </div>
 
     <div class="nav_center">
-      <li class="content__title-main" ><a class="underline_hover" href="/">Lato</a></li>
-      <li class="content__title-main" ><a class="underline_hover" href="/products  ">Products</a></li>
+     
+      <li class="content__title-main logo" ><a class="underline_hover" href="/">Lato</a></li>
+    
     </div>
- 
-    <div class="nav_right">
+    
+    <div class="nav_right content__title-main">
       
       <% if (user && user.role && user.role === 'admin') { %>
-        <li><a  data-barba-prevent="self" href="/admin/list-products"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></a></li>
+        <li ><a  data-barba-prevent="self" href="/admin/list-products"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg></a></li>
         <% } %>
+        <li class="menu_btn menu_open" onclick="openSearch(this)" ><a><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg></a></li>
+
       <% if (!user) { %>
         <li><a href="/login"><svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 20 20"><path fill="currentColor" d="M9.993 10.573a4.5 4.5 0 1 0 0-9a4.5 4.5 0 0 0 0 9M10 0a6 6 0 0 1 3.04 11.174c3.688 1.11 6.458 4.218 6.955 8.078c.047.367-.226.7-.61.745c-.383.045-.733-.215-.78-.582c-.54-4.19-4.169-7.345-8.57-7.345c-4.425 0-8.101 3.161-8.64 7.345c-.047.367-.397.627-.78.582c-.384-.045-.657-.378-.61-.745c.496-3.844 3.281-6.948 6.975-8.068A6 6 0 0 1 10 0"/></svg></a></li>
         <% } else { %>
@@ -119,137 +82,294 @@
 
     </div>
   </nav>
+  <ul class="dropdown">
+    <li>
+      <h4><a>MATERIAL</a></h4>
+      <ul>
+        <% materials.forEach((material) => { %>
+        <li><a class="underline_hover" href="/products/<%= material.toLowerCase() %>"><%= material %></a></li>
+        <%}); %>
+      </ul>
+
+    </li>
+
+    <li>
+      <h4><a>NAKIT</a></h4>
+      <ul>
+        <% categories.forEach((category) => { %>
+        <li><a class="underline_hover" href="/products-category/<%= category.toLowerCase() %>"><%= category %></a></li>
+        <%}); %>
+      </ul>
+    </li>
+
+    <li>
+      <h4><a>OSTALO</a></h4>
+      <ul>
+        <li><a class="underline_hover" href="/products">Svi proizvodi</a></li>
+        <li><a class="underline_hover" href="#">Novi proizvodi</a></li>
+        <li><a class="underline_hover" href="#">Akcija</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <h4><a>O NAMA</a></h4>
+      <ul>
+        <li><a class="underline_hover" href="#">Kontakt</a></li>
+        <li><a class="underline_hover" href="#">Lokacija</a></li>
+      </ul>
+    </li>
+
+  </ul>
 
 
 
-  <main class="main" data-barba="container">
+
+  <main class="main">
     <%- body -%>
   </main>
 
-  <div class="scrollbar">
-    <div class="thumb"></div>
-  </div>
 
-
-  <div class="search_wrapper">
-    <h1 class="title">Lato</h1>
-    <input type="search" name="search" id="search" class="input-search" placeholder="Search products...">
-    <div class="image-track" id="image-track" ></div>
-  </div>
     
-  <script >
-        const searchInput = document.getElementById('search');
-        const searchResults = document.getElementById('image-track');
-
-        searchInput.addEventListener('input', async () => {
-            const searchTerm = searchInput.value.trim();
-            if (searchTerm.length === 0) {
-                searchResults.innerHTML = ''; 
-                return;
-            }
-
-            const response = await fetch(`/search?search=${encodeURIComponent(searchTerm)}`);
-            const products = await response.json();
-
-            searchResults.innerHTML = ''; 
-            products.forEach(product => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.href = "/product/" + product.name.trim().replace(/\s+/g, '-').toLowerCase()+ "-" + product._id;
-                a.draggable = false;
-                li.innerHTML = `<div class="image-item">
-                                  <div class="image-content">
-                                    <img class="image"  draggable="false" src="${product.images[0]}" alt="${product.name.toLowerCase()}">
-                                  </div>
-                                  <div class="details">
-                                    <span>
-                                      <h3>${product.name}</h3>
-                                      <strong>${product.price}€</strong>
-                                    </span>
-                                  <span class="category">${product.material}</span>
-                              </div>`;
-                a.append(li);
-                searchResults.append(a);
-            });
-        });
-
-        const openSearch = (el) => {
-          const search_wrapper = document.querySelector('.search_wrapper');
-          search_wrapper.classList.toggle('inView');
-          el.classList.toggle('inView');
-          document.body.style.overflow = 'hidden';
-          
-        }
-
-  </script>
  
-  <!-- <div class="menu-wrap">
+ 
+  <div class="menu-wrap">
     <div class="tiles">
-      <div class="tiles__line">
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/4.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/5.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/6.jpg)"></div>
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/4.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/5.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/6.jpg)"></div>
-      </div>
-      <div class="tiles__line">
-        <div class="tiles__line-img" style="background-image:url(/img/1.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/2.jpg)"></div>
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/3.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/1.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/2.jpg)"></div>
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/3.jpg)"></div>
-      </div>
-      <div class="tiles__line">
-        <div class="tiles__line-img" style="background-image:url(/img/7.jpg)"></div>
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/8.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/9.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/7.jpg)"></div>
-        <div class="tiles__line-img tiles__line-img--large" style="background-image:url(/img/8.jpg)"></div>
-        <div class="tiles__line-img" style="background-image:url(/img/9.jpg)"></div>
-      </div>
-    </div>
-  
+        <div class="tiles__line">
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+
+
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+
+
+
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-prsteni-1.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/diamant-narukvica-2.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-nausnice-115.jpg)"></div>
+
+        </div>
+
+        <div class="tiles__line">
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-4.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/diamant-narukvica-3.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/sreberni-narukvica-26.jpg)"></div>
+
+        </div>
+
+        <div class="tiles__line">
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+          
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/sreberni-nausnice-68.jpg)"></div>
+          <div class="tiles__line-img " style="background-image:url(/img/zlatni-narukvice-2.jpg)"></div>
+          <div class="tiles__line-img" style="background-image:url(/img/zlatni-ogrlice-54.jpg)"></div>
+       </div>
+   </div>
   
     <nav class="menu">
-      <a class="menu__item" href="/products">
-        <span class="menu__item-text">sve</span>
-      </a>
+        <input type="search" name="search" id="search" class="input-search  menu__item" placeholder="Pretraži proizvode...">
+      <!-- <div class="search_wrapper">
 
-      <% if (materials){ %>
-        <% materials.forEach((material) => { %>
-          <a class="menu__item" href="/products/<%=material.toLowerCase() %>">
-            <span class="menu__item-text"><%=material.toLowerCase() %></span>
-          </a>
-        <%  }) %>
-      <% } %>
+        
+        <input type="search" name="search" id="search" class="input-search  menu__item" placeholder="Search products...">
+        <div class="image-track" id="image-track" ></div>
+      </div> -->
+
      
     </nav>
+    <div class="image-track" id="image-track" ></div>
   
-    <div class="menu_btn menu_close">CLOSE</div>
+    <div class="menu_btn menu_close">ZATVORI</div>
   
   
+    </div>
   </div>
   
   
   <svg class="overlay" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
     <path class="overlay__path" vector-effect="non-scaling-stroke" d="M 0 100 V 100 Q 50 100 100 100 V 100 z" />
-  </svg> -->
+  </svg>
 
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <!-- <script src="https://unpkg.com/@barba/core"></script> -->
-  <!-- <script src="/js/barba.js"></script> -->
   <script src="/js/script.js"></script>
   <script src="/js/ImageSlider.js"></script>
   <script src="/js/index.js" ></script>
   <!-- <script>window.onbeforeunload = () => {window.scrollTo(0, 0);}</script> -->
+  <script >
+    const searchInput = document.getElementById('search');
+    const searchResults = document.getElementById('image-track');
 
 
-  <footer>
-      <h1>Footer</h1>
+    searchInput.addEventListener('focus', () =>{
+        document.querySelector('.menu').classList.add('isBlured');
+    })
+    searchInput.addEventListener('blur', () =>{
+        document.querySelector('.menu').classList.remove('isBlured');
+    })
+
+    searchInput.addEventListener('input', async () => {
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm.length === 0) {
+            searchResults.innerHTML = ''; 
+            return;
+        }
+
+        const response = await fetch(`/search?search=${encodeURIComponent(searchTerm)}`);
+        const products = await response.json();
+
+        searchResults.innerHTML = ''; 
+        products.forEach(product => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = "/product/" + product.name.trim().replace(/\s+/g, '-').toLowerCase()+ "-" + product._id;
+            a.draggable = false;
+            li.innerHTML = `<div class="image-item">
+                              <div class="image-content">
+                                <img class="image"  draggable="false" src="${product.images[0]}" alt="${product.name.toLowerCase()}">
+                              </div>
+                              <div class="details">
+                                <span>
+                                  <h3>${product.name}</h3>
+                                  <strong>${product.price}€</strong>
+                                </span>
+                              <span class="category">${product.material}</span>
+                          </div>`;
+            a.append(li);
+            searchResults.append(a);
+        });
+    });
+
+    const openSearch = (el) => {
+      // const search_wrapper = document.querySelector('.search_wrapper');
+      // search_wrapper.classList.toggle('inView');
+      el.classList.toggle('inView');
+      document.body.style.overflow = 'hidden';
+      
+    }
+
+
+    const main_menu = document.querySelector('.main_menu');
+    const drop_down = document.querySelector('.dropdown');
+    main_menu.addEventListener('click', () => {
+      drop_down.classList.toggle('inView');
+
+     if (drop_down.classList.contains('inView'))
+      main_menu.classList.add('close');
+     else
+       main_menu.classList.remove('close');
+
+     
+    })
+
+    let lastScrollTop = 0;
+
+    document.addEventListener('scroll', () => {
+        let currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        let deltaY = currentScrollTop - lastScrollTop;
+
+        if ( (deltaY > 10 || deltaY < -10) && drop_down.classList.contains('inView')){
+          drop_down.classList.remove('inView');
+          main_menu.classList.remove('close');
+        }
+
+        lastScrollTop = currentScrollTop;
+    });
+
+
+</script>
+<script src="/js/reveal.js"></script>
+
+  <footer class="footer">
+    <div class="footer__addr">
+      <h1 class="footer__logo"><a class="underline_hover" href="/">Lato</a></h1>
+    </div>
+    
+    <ul class="footer__nav">
+      <li class="nav__item">
+        <h2 class="nav__title">Media</h2>
+  
+        <ul class="nav__ul">
+          <li>
+            <a class="underline_hover" href="#">Instagram</a>
+          </li>
+  
+          <li>
+            <a class="underline_hover" href="#">Facebook</a>
+          </li>
+              
+          <li>
+            <a class="underline_hover" href="#">Twitter</a>
+          </li>
+        </ul>
+      </li>
+ 
+      
+      <li class="nav__item">
+        <h2 class="nav__title">Ostalo</h2>
+        
+        <ul class="nav__ul">
+          <li>
+            <a class="underline_hover" href="#">GitHub</a>
+          </li>
+          
+          <li>
+            <a class="underline_hover" href="#">SŠ Krapina</a>
+          </li>
+          
+          <li>
+            <a class="underline_hover" href="#">Lokacija</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    
+    <div class="legal">
+      <p>&copy; Mihael Risek. Sva prava podržana.</p>
+      
+    </div>
   </footer>
 </body>
 

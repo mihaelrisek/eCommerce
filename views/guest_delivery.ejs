@@ -1,53 +1,145 @@
-<section>
-
+<section class="guest_shipping" >
   <form action="/delivery/guest" method="post">
 
-    <label for="first_name">Ime</label>
-    <input type="text" id="first_name" name="first_name">
+  <div class="wrapper">
 
-    <label for="last_name">Prezime</label>
-    <input type="text" id="last_name" name="last_name">
+   <div class="container">
+    <article>
+      <h1>Osobni podatci</h1>
+      <div>
+       <div>
+        <input type="text" id="first_name" placeholder="Ime" name="first_name">
+        <input type="text" id="last_name" placeholder="Prezime" name="last_name">
+       </div>
+      <div>
+        <input type="email" id="email" name="email" placeholder="E-mail" required>
+        <input type="text" id="phone" placeholder="Broj mobitelja" name="phone">
+      </div>
+      </div>
+    </article>
 
-    <label for="city">Mjesto</label>
-    <input type="text" id="city" name="city">
+    <article>
+      <h1>Mjesni podatci</h1>
+      <div>
+        <div>
+          <select name="region" id="region">
+            <option value="Hrvatska" placeholder="Drzava" selected >Hrvatska</option>
+          </select>
+          <input type="text" id="street" placeholder="Ulica" name="street" required>
 
-    <label for="zip_code">Postanski broj</label>
-    <input type="text" id="zip_code" name="zip_code" required>
+         
+        </div>
+        <div>
+          <input type="text" id="city" placeholder="Mjesto" name="city">
+          <input type="text" id="zip_code" name="zip_code" placeholder="Postanski broj" required>
+        </div>
+      </div>
+    </article>
 
-    <label for="street">Ulica</label>
-    <input type="text" id="street" name="street" required>
+  <article>
+    <h1>Način plaćanja</h1>
+    <div class="cart_payment" >
+      <div>
+        <select id="payment_method" name="payment_method">
+          <option value="credit_card">Kartica</option>
+          <option value="cod">Pouzeće</option>
+        </select>
+      </div>
+      <div id="credit_card_fields">
+        <div>
+            <input type="text" placeholder="Naziv kartice">
+            <input type="password" placeholder="Broj kartice" maxlength="16">
 
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <input type="text" placeholder="CVC" maxlength="3">
+            <input type="month" id="expires_date" placeholder="Datum isteka">
 
-    <label for="phone">Telefon</label>
-    <input type="text" id="phone" name="phone">
-
-    <label for="region">Drzava </label>
-    <input type="text" id="region" name="region" disabled placeholder="Hrvatska">
-
-    <label for="payment_method">Odaberi naćin plaćanja</label>
-      <select id="payment_method" name="payment_method">
-        <option value="credit_card">Kartica</option>
-        <option value="cod">Pouzeće</option>
-      </select>
+        </div>
+    </div>
+     </div>
+  </article>
       
-    <button type="submit" class="register-btn" id="submitButton">Register</button>
-    <button type="button" class="order-btn" id="orderButton" style="display: none;">Place Order</button>
+   </div>
+  
+  </div>
 
-  </form>
+  <div class="wrapper shipping_cart" >
+    <h1>
+      <span>Košarica</span>
+      <span><a class="underline_hover" href="\cart">Uredi</a></span>
+    </h1>
+    <ul>
+    <% let totalPrice = 0; %>
+    <% cart_products.forEach((item, itemIndex) => { %>
+        <% if (item) { %>
+            <li>
+                <a href="/product/<%= item.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= item._id %>">
+                    <div class="img" >
+                        <img src="<%- item.images[0] %>" alt="<%- item.name %>">
+                    </div>
+                    <div class="details">
+                      <div class="name">
+                        <h4><%= item && item.name %></h4>
+                      </div>
+                      <div class="size" >
+                        <% if (cart_items[itemIndex].size) { %>
+                            Velicina: <%= cart_items[itemIndex].size %>
+                        <% } %>  
+                      </div>
+                      <div class="quantity">
+                          Kolicina: <%= cart_items[itemIndex].quantity %> 
+                      </div>
+                    
+                      <div>
+                          <%= (cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price)).toFixed(2) %> € 
+                          <% totalPrice += cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price); %>
+                      </div>
+                    </div>
+                </a>
+            </li>
+        <% } %>
+    <% }); %>
+  </ul>
+  <div class="total">
+    <h1>Ukupno</h1>
+
+    <div class="subtotal">
+      <span>Ukupno</span>
+      <span class="total_price"><strong><%= totalPrice.toFixed(2) %> €</strong></span>
+    </div>
+    <div class="subtotal">
+      <span>Dostava</span>
+      <span>Dostava je besplatana</span>
+    </div>
+    <button type="submit" class="register-btn" id="submitButton">Završi narudžbu</button>
+
+  </div>
+  </div>
+</form>
 
 </section>
 
-
 <script>
-  document.getElementById('submitButton').addEventListener('click', function () {
-    // Show the "Place Order" button
-    document.getElementById('orderButton').style.display = 'block';
-  });
+    const renderCartInputs = (event) => {
+            let creditCardFields = document.getElementById('credit_card_fields');
 
-  document.getElementById('orderButton').addEventListener('click', function () {
-    // Submit the form for order placement
-    document.querySelector('form').submit();
-  });
+            if (event.target.value === 'credit_card') {
+                creditCardFields.classList.remove('hidden_cart');
+            } else {
+                creditCardFields.classList.add('hidden_cart');
+            }
+        }
+
+      document.getElementById('payment_method').addEventListener('change', renderCartInputs);
+      document.getElementById('payment_method').addEventListener('input', renderCartInputs);
+
+      const startInput = document.getElementById('expires_date');
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
+
+      const minDate = `${currentYear}-${currentMonth}`;
+
+      startInput.min = minDate;
 </script>

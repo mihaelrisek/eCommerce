@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const authMiddleware = require('../middleware/authenticationMiddleware');
+// const  = require('../middleware/authenticationMiddleware');
 
 /**
  * Register routes
@@ -29,7 +29,7 @@ router.post('/forgot-password', authController.forgotPassPOST);
  * Based on token
  */
 router.get('/reset/:token', authController.resetPassGET);
-router.post('/reset/:token', authController.resetPassPOST);;
+router.post('/reset-pass/:token', authController.resetPassPOST);;
 
 
 module.exports = router;

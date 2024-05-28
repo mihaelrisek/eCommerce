@@ -6,12 +6,7 @@
 
 <div class="form_container" >
   <form id="filterForm" action="/admin/sort-products" method="POST">
-    <div>
-      <label class="select_label" for="resetFiltersBtn">
-        <input type="checkbox" id="resetFiltersBtn" >
-        Svi
-      </label>
-    </div>
+ 
     <div>
       <% materials.forEach(material => { %>
         <label class="select_label">
@@ -43,29 +38,40 @@
 </section>
 
 <section class="discount_section">
-  <h1>Popust &#9660;</h1>
- <form action="/admin/multiple-discount" method="POST">
+  
+  <h1>
+    Popust
+    <span >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 15 15"><path fill="none" stroke="currentColor" stroke-linecap="square" d="m14 5l-6.5 7L1 5"/></svg>
+    </span>
+  </h1>
+
+
+ <form class="discount_wapper"  action="/admin/multiple-discount" method="POST">
   <label for="percentage">Postotak popusta (%)</label>
   <input type="number" id="percentage" name="percentage" min="0" max="100" required>
   
-  <label for="start_date">Od</label>
-  <input type="date" id="start_date" name="start_date" required>
-  
-  <label for="end_date">Do</label>
-  <input type="date" id="end_date" name="end_date" required>
+  <div>
+    <label for="start_date">Od</label>
+    <input type="date" id="start_date" name="start_date" required>
+    
+    <label for="end_date">Do</label>
+    <input type="date" id="end_date" name="end_date" required>
+  </div>
   
   <label for="discount_active">Aktivnost</label>
-  <input type="checkbox" id="discount_active" name="discount_active" checked>
+  <input type="checkbox" id="discount_active" name="discount_active">
   
   <button id="discount_btn">Spremi</button>
  </form>
 </section>
 
 <section class="products_section">
+  <button id="reverseButton" style="align-self: flex-end;">Suprotni raspored</button>
   <ul id="products_container">
     <% if (products.length > 0) { %>
       <% products.forEach(product => { %>
-        <li class="inView">
+        <li animate >
           <input type="checkbox" class="product_discount_checkbox" data-product-id="<%= product._id %>" value="<%= product._id %>">
           <a href="/admin/update-product/<%= product._id %>">
             <div class="img">
@@ -74,7 +80,12 @@
             <div class="details">
               <span>
                 <h3><%= product.name %></h3>
-                <strong><%= product.price %> €</strong>
+                <strong>
+                  € <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %>
+                  <% if (product.discount.active) {%>
+                    <span style="text-decoration: line-through;">€ <%= product.price %></span>
+                    <% } %>
+                </strong>
               </span>
               <% if (product.material) { %>
                 <span class="category"><%= product.material %></span>
@@ -86,17 +97,34 @@
         </li>
       <% }); %>
     <% } else { %>
-      <p>No products found.</p>
+      <p>Proizvodi ne postoje!</p>
     <% } %>
   </ul>
+</section>
 
 
 <script>
+
+
+
  document.addEventListener('DOMContentLoaded', () => {
 
+    const reverseButton = document.getElementById('reverseButton');
+    const productsContainer = document.getElementById('products_container');
+
+    reverseButton.addEventListener('click', () => {
+      const productItems = Array.from(productsContainer.querySelectorAll('li'));
+      productItems.reverse();
+      productsContainer.innerHTML = '';
+      productItems.forEach(item => {
+        productsContainer.appendChild(item);
+      });
+    });
+
+
+
     const filterForm = document.getElementById('filterForm');
-    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-    const checkboxes = document.querySelectorAll('.search_container input[type="checkbox"]');
+    const checkboxes = document.querySelectorAll('.form_container input[type="checkbox"]');
     const radios = document.querySelectorAll('input[type="radio"]');
 
     const filterProducts = async (event) =>{
@@ -163,8 +191,6 @@
     });
     // Event listener for reset button
 
-    resetFiltersBtn.addEventListener('change', showAll);
-    resetFiltersBtn.addEventListener('touch', showAll);
 
     function displayProducts(products) {
       const products_container = document.getElementById('products_container');
@@ -173,6 +199,7 @@
       products.forEach(product => {
         const li = document.createElement('li');
         li.classList.add('inView');
+        li.setAttribute('animate','')
         li.innerHTML = `
         <input type="checkbox" class="product_discount_checkbox" data-product-id="${product._id}" value="${product._id}">
           <a href="/admin/update-product/${product._id}">
@@ -214,19 +241,6 @@
 
         const selectSelected = () => {
           const select_inputs = document.querySelectorAll('.select_label input');
-          const show_all = document.querySelector('.select_label input[id="resetFiltersBtn"]');
-
-          // Add event listener to the "Show All" button to toggle the class when clicked
-          show_all.addEventListener('click', () => {
-              select_inputs.forEach(input => {
-                  if (input.parentElement.classList.contains('selected'))
-                    input.parentElement.classList.remove('selected');
-                  else 
-                    input.parentElement.classList.add('selected');
-
-              });
-        });
-
           // Add event listeners to each select input to toggle the class when changed
           select_inputs.forEach(input => {
               input.addEventListener('change', () => {
@@ -247,6 +261,7 @@
       const selectedProducts = Array.from(document.querySelectorAll('.product_discount_checkbox:checked'))
                                      .map(checkbox => checkbox.dataset.productId);
 
+       console.log("selectedProducts",selectedProducts)
       const percentage = document.getElementById('percentage').value;
       const start_date = document.getElementById('start_date').value;
       const end_date = document.getElementById('end_date').value;
@@ -259,6 +274,7 @@
         discount_active: discount_active,
         selectedProducts: selectedProducts
       }; 
+
 
       console.log("requestBody", requestBody)
       
@@ -294,3 +310,5 @@
     document.querySelector('.discount_section h1').addEventListener('touch',openCloseDiscount);
  
 </script>
+
+<script src="/js/reveal.js"></script>

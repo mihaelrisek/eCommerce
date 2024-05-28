@@ -1,72 +1,239 @@
-<h1>Delivery</h1>
 
 <% if (!user) { %>
 
-
-
-  <div class="container">
-    <section class="wrapper">
-      <div class="heading">
-        <h1 class="text text-large">Log in to your account</h1>
-        <p class="text text-normal">New user? <span><a href="/register" class="text text-links">Create an account</a></span>
-        </p>
+  <section class="delivery_section">
+      <article data-animate class="wrapper">
+        <h1>Prijavi se</h1>
+         
+        <form name="signin" action="<%=login_url%>" method="POST" class="login_form">
+            <input type="email" name="email" id="email" class="input-field" placeholder="Email" required  >
+            <div class="input-control">
+              <input type="password" name="password" id="password" class="input-field"  required placeholder="Lozinka" autocomplete="off">
+              <svg onclick="showPassword()"  id="eyeHidden" width="24" height="24" viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M13.354 2.354a.5.5 0 0 0-.708-.708L10.683 3.61A8.475 8.475 0 0 0 7.5 3C4.308 3 1.656 4.706.076 7.235a.5.5 0 0 0 0 .53c.827 1.323 1.947 2.421 3.285 3.167l-1.715 1.714a.5.5 0 0 0 .708.708l1.963-1.964c.976.393 2.045.61 3.183.61c3.192 0 5.844-1.706 7.424-4.235a.5.5 0 0 0 0-.53c-.827-1.323-1.947-2.421-3.285-3.167zm-3.45 2.035A7.517 7.517 0 0 0 7.5 4C4.803 4 2.53 5.378 1.096 7.5c.777 1.15 1.8 2.081 3.004 2.693zM5.096 10.61L10.9 4.807c1.204.612 2.227 1.543 3.004 2.693C12.47 9.622 10.197 11 7.5 11a7.518 7.518 0 0 1-2.404-.389" clip-rule="evenodd"/></svg>
+              <svg onclick="showPassword()"  id="eyeVisible" width="24" height="24" viewBox="0 0 15 15"><path fill="currentColor" fill-rule="evenodd" d="M7.5 11c-2.697 0-4.97-1.378-6.404-3.5C2.53 5.378 4.803 4 7.5 4s4.97 1.378 6.404 3.5C12.47 9.622 10.197 11 7.5 11m0-8C4.308 3 1.656 4.706.076 7.235a.5.5 0 0 0 0 .53C1.656 10.294 4.308 12 7.5 12s5.844-1.706 7.424-4.235a.5.5 0 0 0 0-.53C13.344 4.706 10.692 3 7.5 3m0 6.5a2 2 0 1 0 0-4a2 2 0 0 0 0 4" clip-rule="evenodd"/></svg>
+            </div>
+          <div class="input-control">
+            <a href="/forgot-password" class="text text-links">Zaboravili ste lozinku?</a>
+            <button type="submit" name="submit" class="input-submit" >Prijavi se</button>
+          </div>
+          <div class="pop_message"></div>
+        </form>
+      </article>
+  
+  <article class="guest_login">
+      <h1>Novi korisnik ?</h1>
+      <div>
+        <button onclick="location.href='/register'" >Registriraj se</button>
+        <a class="underline_hover" href="/delivery/guest">Nastavi kao gost</a>
       </div>
-      <form name="signin" action="<%= login_url %> " method="post" class="form">
-        <div class="input-control">
-          <label for="email" class="input-label" hidden>Email Address</label>
-          <input type="email" name="email" id="email" class="input-field" placeholder="Email Address">
+  </article>
+  
+  </section>
+
+<script>
+
+function showPassword(){
+    password.type = (password.type === "password") ? "text" : "password";
+    eyeVisible.style.visibility = (password.type === "password") ? "hidden" : "visible";
+    eyeHidden.style.visibility = (password.type === "password") ? "visible" : "hidden";
+  }
+
+  
+const sub_btn = document.querySelector('.input-submit');
+
+  const loginUser = async (e) =>{
+    try {
+              e.preventDefault();
+
+              const pop_message = document.querySelector('.pop_message');
+              const form = document.querySelector('.login_form');
+              const email = form.querySelector('#email').value;
+              const password = form.querySelector('#password').value;
+
+              console.log(email, password)
+
+              const response = await fetch(`<%=login_url%>`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+              });
+              const data = await response.json();
+              console.log("data", data);
+
+              if (response.ok) {
+
+                if (data.success) window.location.href = data.redirectUrl;
+                else if (data.error) pop_message.textContent = data.error;
+              } 
+              else 
+                 pop_message.textContent = 'Greška, molimo pokušajte kasnije.';
+
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+  }
+
+  sub_btn.addEventListener('click', loginUser);
+  sub_btn.addEventListener('touch', loginUser);
+
+</script>
+
+
+  
+  <% } else if (user) { %>
+    <section class="guest_shipping">
+      <form action="/delivery" method="POST">
+  
+        <div class="wrapper">
+          <div class="container">
+            <article>
+              <h1>Mjesni podaci</h1>
+             <div>
+             <div>
+              <input type="text" id="address_city" name="city" placeholder="Mjesto" value="<%= user.address.city %>" disabled>
+    
+              <input type="text" id="address_zip_code" name="zip_code" placeholder="Postanski broj" value="<%= user.address.zip_code %>" required disabled>
+          
+             </div>
+            <div>
+              <input type="text" id="address_street" name="street" placeholder="Ulica" value="<%= user.address.street %>" required disabled>
+              
+              <input type="text" id="region" name="region" disabled placeholder="Hrvatska">
+        
+            </div>
+            
+            <div>
+              
+              <input type="checkbox" onchange="updateAdress(this)"  name="update_checkbox" id="update_checkbox">
+            </div>
+             </div>
+            </article>
+      
+          <article>
+            <h1>Način plaćanja</h1>
+
+           <div class="cart_payment" >
+            <div>
+              <select id="payment_method" name="payment_method">
+                <option value="credit_card">Kartica</option>
+                <option value="cod">Pouzeće</option>
+              </select>
+            </div>
+            <div id="credit_card_fields">
+              <div>
+                  <input type="text" placeholder="Naziv kartice">
+                  <input type="password" placeholder="Broj kartice" maxlength="16">
+              </div>
+              <div>
+                  <input type="text" placeholder="CVC" maxlength="3"  >
+                  <input type="month" id="expires_date" placeholder="Vrijeme isteka">
+              </div>
+          </div>
+           </div>
+          </article>
+          </div>
+      </div>
+
+
+
+        <div class="wrapper shipping_cart" >
+          <h1>
+            <span>Košarica</span>
+            <span><a class="underline_hover" href="\cart">Uredi</a></span>
+          </h1>
+          <ul>
+          <% let totalPrice = 0; %>
+          <% cart_products.forEach((item, itemIndex) => { %>
+              <% if (item) { %>
+                  <li>
+                      <a href="/product/<%= item.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= item._id %>">
+                          <div class="img" >
+                              <img src="<%- item.images[0] %>" alt="<%- item.name %>">
+                          </div>
+                          <div class="details">
+                            <div class="name">
+                              <h4><%= item && item.name %></h4>
+                            </div>
+                            <div class="size" >
+                              <% if (cart_items[itemIndex].size) { %>
+                                  Velicina: <%= cart_items[itemIndex].size %>
+                              <% } %>  
+                            </div>
+                            <div class="quantity">
+                                Kolicina: <%= cart_items[itemIndex].quantity %> 
+                            </div>
+                          
+                            <div>
+                                <%= (cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price)).toFixed(2) %> € 
+                                <% totalPrice += cart_items[itemIndex].quantity * (item.discount.active ? (item.price - (item.price * (item.discount.percentage / 100))) : item.price); %>
+                            </div>
+                          </div>
+                      </a>
+                  </li>
+              <% } %>
+          <% }); %>
+        </ul>
+        <div class="total">
+          <h1>Ukupno</h1>
+      
+          <div class="subtotal">
+            <span>Ukupno</span>
+            <span class="total_price"><strong><%= totalPrice.toFixed(2) %> €</strong></span>
+          </div>
+          <div class="subtotal">
+            <span>Dostava</span>
+            <span>Dostava je besplatana</span>
+          </div>
+          <button type="submit" class="register-btn" id="submitButton">Završi narudžbu</button>
+      
         </div>
-        <div class="input-control">
-          <label for="password" class="input-label" hidden>Password</label>
-          <input type="password" name="password" id="password" class="input-field" placeholder="Password">
         </div>
-        <div class="input-control">
-          <a href="/forgot-password" class="text text-links">Forgot Password</a>
-          <input type="submit" name="submit" class="input-submit" value="Sign In" >
-        </div>
+
+
+
+
+
+
+
+
+
       </form>
-      
     </section>
-  </div>
-
-
-  <a href="/delivery/guest">Nastavi kao gost</a>
-
-<% } else { %>
-  <% if (user){ %>
-    <form action="/delivery" method="POST">
-
-      <label for="city">Mjesto</label>
-      <input type="text" id="address_city" name="city" value="<%= user.address.city %>" disabled>
   
-      <label for="zip_code">Postanski broj</label>
-      <input type="text" id="address_zip_code" name="zip_code" value="<%= user.address.zip_code %>" required disabled>
   
-      <label for="street">Ulica</label>
-      <input type="text" id="address_street" name="street" value="<%= user.address.street %>" required disabled>
-      
-      <label for="region">Drzava </label>
-      <input type="text" id="region" name="region" disabled placeholder="Hrvatska">
-
-      <input type="checkbox" onchange="updateAdress(this)"  name="update_checkbox" id="update_checkbox">
-
-      <label for="payment_method">Odaberi naćin plaćanja</label>
-      <select id="payment_method" name="payment_method">
-        <option value="credit_card">Kartica</option>
-        <option value="cod">Pouzeće</option>
-      </select>
-
-      <button type="submit" >Spremi</button>
-    </form>
-
-
-    <script>
-      function updateAdress(checkbox){
-        const addressInputs = document.querySelectorAll('input[type="text"][id^="address_"]');
-        for (let i = 0; i < addressInputs.length; i++) {
-            addressInputs[i].disabled = !checkbox.checked;
+      <script>
+        function updateAdress(checkbox){
+          const addressInputs = document.querySelectorAll('input[type="text"][id^="address_"]');
+          for (let i = 0; i < addressInputs.length; i++) {
+              addressInputs[i].disabled = !checkbox.checked;
+          }
         }
-      }
-    </script>
-    <% } %>
-<% } %>
+
+        const renderCartInputs = (event) => {
+            let creditCardFields = document.getElementById('credit_card_fields');
+
+            if (event.target.value === 'credit_card') {
+                creditCardFields.classList.remove('hidden_cart');
+            } else {
+                creditCardFields.classList.add('hidden_cart');
+            }
+        }
+
+      document.getElementById('payment_method').addEventListener('change', renderCartInputs);
+      document.getElementById('payment_method').addEventListener('input', renderCartInputs);
+
+
+      const startInput = document.getElementById('expires_date');
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
+
+      const minDate = `${currentYear}-${currentMonth}`;
+
+      startInput.min = minDate;
+      </script>
+  <% } %>  

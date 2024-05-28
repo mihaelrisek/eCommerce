@@ -1,89 +1,133 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
-<form action="/admin/add-product" method="POST" enctype="multipart/form-data">
-  <label for="name">Naziv proizvoda</label>
-  <input type="text" id="name" name="name" required>
+<div class="add_product_section">
+  <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
+    <div class="wrap_p margin_b after">
+      <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Općenito</h2>
+    </div> 
+    <article animate class="basic_details_article" >
+   
 
-  <label for="description">Kratak opis</label>
-  <textarea id="description" name="description" required></textarea>
+        <label for="name">Naziv proizvoda</label>
+        <input type="text" id="name" name="name" required>
+   
+      <div>
+        <div>
+          <label for="price">Cijena (€)</label>
+          <input type="number" id="price" name="price" required>
+        
+        </div>
+        <div>
+          <label for="stock_quantity">Kolicina</label>
+          <input type="number" id="stock_quantity" name="stock_quantity" required>
+        </div>
+      </div>
+      <label for="description">Kratak opis</label>
+      <textarea id="description" name="description" required></textarea>
+   
 
-  <label for="price">Cijena (€)</label>
-  <input type="number" id="price" name="price" required>
+    </article>
+    
+    <div class="wrap_p margin_b after">
+      <h2 style="padding-bottom: 0.5rem;" class="wrap_c">Kategorije</h2>
+    </div> 
+   <article animate class="category_article">
+  
+    <div>
+      <label for="size">Velicina</label>
+      <div class="sizes" id="sizesContainer"></div>
+      <button type="button" onclick="addSize()">Dodaj</button>
+    </div>
 
-  <label for="stock_quantity">Kolicina</label>
-  <input type="number" id="stock_quantity" name="stock_quantity" required>
+    <div>
+      <label for="details">Detalji</label>
+      <div class="details" id="detailsContainer"></div>
+      <button type="button" onclick="addDetailsField()">Dodaj detalj</button>
+    
+    </div>
+   </article>
+    
+  
+  <article animate class="category_article">
+    <div>
+      <label for="material">Materijal</label>
+      <select name="material" id="material">
+        <% materials.forEach(material=> { %>
+          <option value="<%= material %>">
+            <%= material %>
+          </option>
+          <% }); %>
+      </select>
+      <div id="productTypeContainer">
+        <input type="checkbox" onclick="addNewProductType()" name="check_new_material" id="check_new_material">
+        <input type="text" class="new_material new_category" id="new_material" name="new_material"
+          placeholder="Upiši novi materijal" disabled>
+      </div>
+    </div>
+  
+  
+      <div>
+        <label for="category">Nakit</label>
+    <select name="category" id="category">
+      <% categories.forEach(category=> { %>
+        <option value="<%= category %>">
+          <%= category %>
+        </option>
+        <% }); %>
+    </select>
+    <div id="subcategoryContainer">
+      <input type="checkbox" onclick="addNewSubcategory()" name="check_new_category" id="check_new_category">
+      <input type="text" class="new_category new_category" id="new_category" name="new_category"
+        placeholder="Upiši novi nakit" disabled>
+    </div>
+      </div>
+  </article>
+  
+  <div class="wrap_p margin_b after">
+    <h2 style="padding-bottom: 0.5rem;" class="wrap_c">Slike</h2>
+  </div> 
+  <article animate>
 
-  <label for="size">Velicina</label>
-  <div class="sizes" id="sizesContainer"></div>
-  <button type="button" onclick="addSize()">Dodaj</button>
+    
+      <div class="uploadOuter">
+        <button type="button" id="uploadFile" onclick="triggerFileInput()">Postavi sliku</button>
+        <strong>OR</strong>
+        <span class="dragBox">
+          Drag and Drop
+          <input type="file" onChange="dragNdrop(event)" ondragover="drag()" ondrop="drop()" id="images" name="images"
+            accept="image/*" multiple />
+        </span>
+      </div>
+      <div id="preview"></div>
+  </article>
+  
+  
+    <article >
+        <div class="wrap_p margin_b after">
+          <h1 style="padding-bottom: 0.5rem;" class="wrap_c">Popust</h1>
+        </div> 
 
+        <div animate  class="discount_wapper" >
+          <label for="percentage">Postotak popusta (%)</label>
+          <input type="number" id="percentage" name="percentage"  min="0" max="100">
+        
+          <div>
+            <label for="start_date">Od</label>
+          <input type="date" id="start_date"  name="start_date">
+        
+          <label for="end_date">Do</label>
+          <input type="date" id="end_date" name="end_date">
+          </div>
+        
+          <label for="discount_active">Aktivnost</label>
+          <input type="checkbox" id="discount_active" name="discount_active" >
+        </div>
 
-  <label for="image">Slike proizvoda:</label>
-  <div class="uploadOuter">
-    <button type="button" id="uploadFile" onclick="triggerFileInput()">Upload image</button>
-    <strong>OR</strong>
-    <span class="dragBox">
-      Drag and Drop image here
-      <input type="file" onChange="dragNdrop(event)" ondragover="drag()" ondrop="drop()" id="images" name="images"
-        accept="image/*" multiple />
-    </span>
-  </div>
-  <div id="preview"></div>
+    </article>
+  
+    <button type="submit">Dodaj proizvod</button>
+  </form>
+</div>
 
-  <label for="material">Materijal</label>
-  <select name="material" id="material">
-    <% materials.forEach(material=> { %>
-      <option value="<%= material %>">
-        <%= material %>
-      </option>
-      <% }); %>
-  </select>
-  <div id="productTypeContainer">
-    <input type="text" class="new_material new_category" id="new_material" name="new_material"
-      placeholder="Enter new material" disabled>
-    <input type="checkbox" onclick="addNewProductType()" name="check_new_material" id="check_new_material">
-  </div>
-
-
-  <label for="category">Nakit</label>
-  <select name="category" id="category">
-    <% categories.forEach(category=> { %>
-      <option value="<%= category %>">
-        <%= category %>
-      </option>
-      <% }); %>
-  </select>
-  <div id="subcategoryContainer">
-    <input type="text" class="new_category new_category" id="new_category" name="new_category"
-      placeholder="Enter new subcategory" disabled>
-    <input type="checkbox" onclick="addNewSubcategory()" name="check_new_category" id="check_new_category">
-  </div>
-
-
-  <label for="details">Detalji</label>
-  <div class="details" id="detailsContainer">
-
-  </div>
-
-
-  <button type="button" onclick="addDetailsField()">Dodaj detalj</button>
-
-
-  <h1>Popust</h1>
-
-  <label for="percentage">Postotak popusta (%)</label>
-  <input type="number" id="percentage" name="percentage"  min="0" max="100">
-
-  <label for="start_date">Od</label>
-  <input type="date" id="start_date"  name="start_date">
-
-  <label for="end_date">Do</label>
-  <input type="date" id="end_date" name="end_date">
-
-  <label for="discount_active">Aktivnost</label>
-  <input type="checkbox" id="discount_active" name="discount_active" >
-
-  <button type="submit">Add Product</button>
-</form>
+<script src="/js/reveal.js"></script>
 
 <script>
 
@@ -127,17 +171,17 @@
     newInputKey.required = true;
     newInputKey.name = 'detailsKey[]';
     newInputKey.pattern = '^[a-zA-Z0-9]+$';
-    newInputKey.placeholder = 'Enter detail key';
+    newInputKey.placeholder = 'Upiši naslov detalja';
 
     const newInputValue = document.createElement('input');
     newInputValue.type = 'text';
     newInputValue.required = true;
     newInputValue.name = 'detailsValue[]';
-    newInputValue.placeholder = 'Enter detail value';
+    newInputValue.placeholder = 'Upiši detalj';
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
-    removeButton.textContent = 'Remove';
+    removeButton.textContent = 'Izbriši';
     removeButton.onclick = function () {
       newDetailsField.remove();
     };
@@ -162,7 +206,7 @@
       fileContainer.appendChild(previewText);
 
       const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
+      deleteButton.textContent = 'Izbriši';
       deleteButton.onclick = function () {
         fileContainer.remove();
       };
@@ -192,13 +236,13 @@
     const newSize = document.createElement('input');
     newSize.type = 'text';
     newSize.name = 'newSize[]';
-    newSize.placeholder = 'Enter new size';
+    newSize.placeholder = 'Upiši novu veličinu';
 
     const newSizeWrapper = document.createElement('div');
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
-    removeButton.textContent = 'Remove';
+    removeButton.textContent = 'Izbriši';
     removeButton.onclick = function () {
       newSizeWrapper.remove();
     };

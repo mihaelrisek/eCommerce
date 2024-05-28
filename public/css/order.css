@@ -1,0 +1,82 @@
+main{
+  margin-top: 10rem;
+}
+.order_section{
+  padding: 3rem;
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+
+}
+.order_section form{
+  /* background: #fff;  */
+  width: 100%;
+  border: 1px solid #ddd;
+
+}
+.order {
+  padding: 2rem;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.order-item {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-label {
+  font-weight: bold;
+}
+
+.order-value {
+  color: rgba(var(--clr-fg), 0.8);
+  padding-left: 1rem;
+}
+
+.order-product {
+  margin-top: 15px;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  
+}
+.order-product h3{
+  padding-bottom: 1rem;
+}
+.order-product .product-wrapper{
+  display: flex;
+  border-top: 1px solid #ddd;
+  padding: 1rem 0;
+  gap: 3rem;
+}
+
+.order-product img{
+  width: 100px;
+  
+}
+.order_line{
+  display: flex;
+  justify-content: center;
+  gap: 4vw;
+  flex-wrap: wrap;
+  margin: 0 0 2rem 0;
+  padding: 2rem;
+}
+.order_line div{
+  text-align: center;
+}
+.order_line div h4{
+  color: rgba(var(--clr-fg), 0.6);
+  margin-bottom: 0.5rem;
+}
+.input-submit {
+  align-self: flex-end;
+}
+.input-submit::before {
+  background: red;
+}

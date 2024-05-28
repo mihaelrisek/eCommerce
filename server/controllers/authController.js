@@ -10,24 +10,15 @@ const {validateEmail, checkPassword } = require('../functions/func');
 
 
 
-
-
 /**
  * GET /register
  * Page where user gives its data for an account
  */
 exports.renderRegister = (req, res) => {
   try {
-    // Ensure the user is authenticated before rendering the register page
-    if (!req.isAuthenticated()) {
-      // Redirect to the login page if the user is not authenticated
-      return res.redirect('/login');
-    }
-
+    const user = req.user;
     // Pass only necessary user data to the template to enhance security
-    const { email, username } = req.user; 
-
-    res.render('register.ejs', { title: 'Register', email, username });
+    res.render('register.ejs', { title: 'Lato \u2022 Registracija', user });
 
   } catch (error) {
     console.error('Greška prilikom prikazivanja sadržaja:', error);
@@ -106,7 +97,7 @@ exports.login = (req, res) => {
     const redirectUrl = req.query.redirect || '/'; 
     
     const user = req.user;
-    res.render('login.ejs', { title: 'Login', user , redirectUrl});
+    res.render('login.ejs', { currentPath: '/login',  title: 'Lato \u2022 Prijavi se', user , redirectUrl});
 
   } catch (error) {
     console.error(error);
@@ -120,6 +111,8 @@ exports.loginUser = (req, res, next) => {
 
   let redirectUrl = req.query.redirect || '/';
 
+  console.log("redirectUrl", redirectUrl)
+
   if (req.body.redirect) {
     redirectUrl = req.body.redirect;
   }
@@ -132,7 +125,9 @@ exports.loginUser = (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.redirect('/login');
+      // Authentication failed, send JSON object with error message
+      return res.status(401).json(
+      { error: 'Nevažeća e-mail pošta ili lozinka' });
     }
 
     req.logIn(user, (err) => {
@@ -147,7 +142,8 @@ exports.loginUser = (req, res, next) => {
       }
 
       // Redirect to the stored last URL or to the root page
-      return res.redirect(redirectUrl);
+      return res.status(200).json(
+        {success: true, redirectUrl});
     });
   })(req, res, next);
 };
@@ -168,7 +164,7 @@ exports.logout = (req, res) => {
 exports.forgotPassGET = async (req, res) =>{
   try {
     let user = req.user;
-    res.render('forgot-password.ejs', {user});
+    res.render('forgot-password.ejs', { title: 'Lato \u2022 Oporavak lozinke', user});
 
   } catch (error) {
     console.error(error);
@@ -190,14 +186,20 @@ exports.forgotPassPOST = async (req, res) =>{
     // Generate and save a reset token
     const token = crypto.randomBytes(20).toString('hex');
 
+    const message = `Otvorite poveznicu da biste ponovno
+    postavili lozinku: http://localhost:3000/reset/${token}`;
+    
+    const subject = 'Password Reset - Lato';
+
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000; // Token expires in one hour
 
     await user.save();
     // Send the reset link to the user's email
-    sendPasswordResetEmail(user.email, token);
+    sendPasswordResetEmail(user.email, subject, message);
 
-    return res.status(200).json({message: 'Da biste ponovno postavili lozinku provjerite poštanski pretinac.'})
+    return res.status(200).json(
+      {message: 'Da biste ponovno postavili lozinku provjerite poštanski pretinac.'})
 
   } catch (error) {
     console.error(error);
@@ -216,7 +218,9 @@ exports.resetPassGET = async (req, res) => {
 
     if (!user) {
       return res.render('reset.ejs',
-      { error: 'Vaš token nije valjan ili je istekao.', user });
+      { error: 'Vaš token nije valjan ili je istekao.',
+        title: 'Lato \u2022 Oporavak lozinke',
+       user });
     }
 
     // Render the reset password form
@@ -245,17 +249,17 @@ exports.resetPassPOST = async (req, res) => {
     const confirmPassword = req.body.confirmPassword.trim();
 
     // Check if the passwords are empty or consist only of spaces
-    if (!newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) 
       return res.status(400).json({ error: 'Lozinke ne mogu biti prazne.' });
-    }
+    
 
     // Check if the passwords match
-    if (newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword) 
       return res.status(400).json({ error: 'Lozinke se ne podudaraju.' });
-    }
+    
 
     // Check if the passwords meet the complexity requirements
-    if (!checkPassword(password)) {
+    if (!checkPassword(newPassword)) {
       return res.status(400).json({
         error: `Lozinka mora sadržavati barem jedno veliko slovo,
                 jedno malo slovo, jedan poseban znak i biti dugačka barem 6 znakova.`
@@ -269,7 +273,7 @@ exports.resetPassPOST = async (req, res) => {
 
     // Save the updated user to the database
     await user.save();
-
+    console.log("Succccccses", newPassword)
     // Redirect to the login page
     return res.json({ success: true, redirectUrl: '/login' });
   } catch (error) { 
@@ -279,7 +283,7 @@ exports.resetPassPOST = async (req, res) => {
 }
 
 
-async function sendPasswordResetEmail(email, token) {
+async function sendPasswordResetEmail(email, subject, message) {
   try {
     // Nodemailer transporter
     const transporter = nodemailer.createTransport({
@@ -294,9 +298,8 @@ async function sendPasswordResetEmail(email, token) {
     const mailOptions = {
       from: 'latosuppport@gmail.com',
       to: email,
-      subject: 'Password Reset - Lato',
-      text: `Otvorite poveznicu da biste ponovno
-             postavili lozinku: http://localhost:3000/reset/${token}`,
+      subject: subject,
+      text: message,
     };
 
     // Send the email

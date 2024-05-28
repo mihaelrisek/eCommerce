@@ -13,6 +13,7 @@ const orderSchema = new mongoose.Schema({
     product: {
       id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
       name: String, price: Number,
+      image: String,
       discount:{ active: Boolean, percentage: Number
       },
       material: String, category: String

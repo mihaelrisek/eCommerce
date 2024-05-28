@@ -1,34 +1,90 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
-<section class="section__users">
-  <ul>
-        <h1> <%= user.first_name %> <%= user.last_name %>  </h1>
-        <table>
-          <tr><td>Id</td><td><%= user._id %></td></tr>
-          <tr><td>First name</td><td><%= user.first_name %></td></tr>
-          <tr><td>Last name</td><td><%= user.last_name %></td></tr>
-          <tr><td>Email</td><td><%= user.email %></td></tr>
-          <tr><td>Phone</td><td><%= user.phone %></td></tr>
-          <tr><td>Address</td><td><%= user.address %></td></tr>
-          <tr><td>Created at</td><td><%= (user.created_at).toLocaleDateString()  %></td></tr>
-          <tr><td>Updated at</td><td><%= (user.updated_at).toLocaleString()  %></td></tr>
-          <% if (user.role !=='guest') {%>
-            <form action="/admin/update-role/<%= user._id %>" method="post">
-              <tr><td>Role</td><td><select name="user_role" >
-                <% user_roles.forEach(role => { %>
-                  <option value="<%= role%>" <%= user.role === role ? 'selected' : ''%> ><%= role%></option>
-                <% }) %>
-              </select></td></tr>
-            </table>
-              <button type="submit">Update</button>
-            </form>
-          <% }else{ %>
-            <tr><td>Role</td><td>Gost</td></tr>
-            <% } %>
-            <% if (user.role == 'regular_user'){ %>
-              <form action="/admin/delete-users/<%= user._id %>" method="post">
-                <button type="submit">Remove User</button>
-              </form>
-            <% } %> 
-        
-  </ul>
+<section class="profil">
+  <style>
+    main{
+      margin-top: 0 !important;
+    }
+  </style>
+
+<div class="formm">
+  <article>
+    <div class="wrap_p margin_b after">
+      <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Osobni podaci</h2>
+    </div> 
+    <div animate>
+      <div>
+        <input type="text" title="Ime" name="profil_first_name" id="profil_first_name" value="<%= user.first_name %>" placeholder="<%= user.first_name %>" disabled required>
+        <input type="text" title="Prezime" name="profil_last_name" id="profil_last_name" value="<%= user.last_name %>" placeholder="<%= user.last_name %>" disabled required>
+      </div>
+
+      <div>
+        <input type="text" name="profil_email" title="E-mail" id="profil_email" value="<%= user.email %>" placeholder="<%= user.email %>" disabled required>
+    
+        <input type="tel" name="profil_phone" title="Telefon" maxlength="20"  id="profil_phone" value="<%= user.phone %>" placeholder="<%= user.phone %>" disabled required>
+      </div>
+    </div>
+  </article>
+  <div class="wrap_p margin_b after">
+    <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Mjesni podaci</h2>
+  </div> 
+  <article animate>
+  
+    <div>
+     <div>
+      <input type="text" name="profil_hardcoded_region" title="Država" id="profil_hardcoded_region" value="<%= user.address.region %>" placeholder="<%= user.address.region %>" disabled required>
+      <input type="text" name="profil_address_street" title="Ulica" id="profil_address_street" value="<%= user.address.street %>" placeholder="<%= user.address.region %>" disabled required>
+     </div>
+     <div>
+      <input type="text" name="profil_address_city" title="Grad" id="profil_address_city" value="<%= user.address.city %>" placeholder="<%= user.address.region %>" disabled required>
+      <input type="text" name="profil_address_zip_code" title="Poštanski broj" id="profil_address_zip_code" value="<%= user.address.zip_code %>" placeholder="<%= user.address.region %>" disabled required>
+     </div>
+ 
+    </div>
+  </article>
+ 
+  <div class="wrap_p margin_b after">
+    <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Ostalo</h2>
+  </div> 
+<article animate>
+
+  <div>
+    <div>
+      <label for="profil_created_at">Kreiran</label>
+      <input type="text" id="profil_created_at"  placeholder="<%= (user.created_at).toLocaleDateString() %>" disabled>
+
+      <label for="profil_updated_at">Ažuriran</label>
+      <input type="text" id="profil_updated_at"  placeholder="<%= (user.updated_at).toLocaleString() %>" disabled>
+  
+    </div>
+  </div>
+</article>
+</div>
+  
+<div class="wrap_p margin_b after">
+  <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Uloga</h2>
+</div> 
+ <article animate style="display: flex; gap: 1rem;">
+  <% if (user.role !=='guest') {%>
+    <form style="width: 100%;" action="/admin/update-role/<%= user._id %>" method="post">
+      <select name="user_role" >
+        <% user_roles.forEach(role => { %>
+          <option value="<%= role%>" <%= user.role === role ? 'selected' : ''%> ><%= role%></option>
+        <% }) %>
+      </select>
+      <button type="submit">Spremi promjene</button>
+    </form>
+  <% }else{ %>
+    <div>
+   
+    <p style="margin-bottom: 1rem;" >Korisnik je prijavljen kao gost</p>
+    <% } %>
+    <% if (user.role == 'regular_user' || user.role == "guest"){ %>
+      <form style="width: 100%;" action="/admin/delete-users/<%= user._id %>" method="post">
+        <button class="input-delete" type="submit">Izbriši</button>
+      </form>
+         
+    </div>  
+    <% } %> 
+
+ </article>
 </section>
+<script src="/js/reveal.js"></script>

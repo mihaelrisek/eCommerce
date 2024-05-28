@@ -1,33 +1,63 @@
-    
-.section__users ul {
+.section_users{
+  margin-top: 4rem;
+}
+.section_users >p{
+  margin-bottom: 1rem;
+}
+.section_users ul {
   display: flex;
   width: 100%;
   flex-direction: column;
   gap: 1rem;
 }
-.section__users ul table{
+.section_users ul table{
   width: 100%;
   text-align: left;
   border-collapse: collapse;
 }
-.section__users ul table th{
+.section_users ul table th{
   letter-spacing: 0.5px;
   font-variant: small-caps;
 }
-.section__users ul table tr{
+.section_users ul table tr{
   border-bottom: 1px solid rgba(var(--clr-fg), 0.3);
 }
-.section__users ul table tr[data-role="admin"]{
+.section_users ul table tr[data-role="admin"]{
   color: black;
 }
-.section__users ul table tr[data-role="regular_user"]{
-  color: blue;
+.section_users ul table tr[data-role="regular_user"]{
+  color: #60a2d8;
 }
-.section__users ul table tr[data-role="guest"]{
-  color: red;
+.section_users ul table tr[data-role="guest"]{
+  color: rgba(var(--clr-fg), 0.6);
 }
-.section__users ul table td,
-.section__users ul table th {
+.section_users ul table td,
+.section_users ul table th {
   padding: 1rem;
 
+}
+
+
+.section_users table{
+  width: 100%;
+  border-collapse:collapse ;
+  /* margin-top: 2rem; */
+}
+.section_users table th{
+  text-align: left;
+  padding: 1rem;
+  border-top: 0.3px solid rgba(var(--clr-fg), 0.7);
+  background: rgba(var(--clr-fg), 1);
+  color: rgb(var(--clr-bg));
+
+}
+.section_users table td{
+  padding: 1rem;
+  border-bottom: 0.3px solid rgba(var(--clr-fg), 0.7);
+}
+
+.section_users table tbody tr:hover{
+  cursor: pointer;
+  background: rgba(var(--clr-fg), 0.9);
+  color: rgba(var(--clr-bg), 1);
 }

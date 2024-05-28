@@ -19,8 +19,18 @@ body {
   z-index: 2;
   top: 2rem;
   color: var(--clr-fg2);
-}
+  font-family: "Erotique";
 
+}
+.order_search {
+  background-color: transparent;
+  color: rgb(var(--clr-fg));
+  border: 1px solid currentColor;
+  padding: 1rem;
+  outline: none;
+  width: 100%;
+  margin: 2rem 0;
+}
 .admin-nav ul {
   position: fixed;
   display: flex;
@@ -91,7 +101,6 @@ strong {
 form, .form {
   display: flex;
   flex-direction: column;
-  width: 70%;
   gap: 1rem;
 }
 
@@ -105,11 +114,13 @@ button#submit {
   align-self: flex-end;
 }
 
+.input-delete::before {
+  background: red;
+}
 
 .details{
   display: flex;
   flex-direction: column;
-  gap: .5rem;
 }
 
 .new_category{
@@ -154,7 +165,9 @@ button#submit {
 .order_select_status{
   display: flex;
   gap: 2rem;
+  justify-content: center;
   margin: 1rem;
+  z-index: 1;
 }
 .order_select_status .order_select{
   position: relative;
@@ -206,14 +219,236 @@ button#submit {
 cursor:  not-allowed;
 }
 
+.orders_section{
+  margin: 2rem 0;
+}
+.setting_section{
+  margin: 3rem 2rem;
+}
+
+.table_wrap{
+  width: 100%;
+  overflow-x: auto;
+}
 
 
 .orders_table .delivered td{
   color: #00000079;
-  
 }
+.orders_table .delivered:hover td{
+  color: #ccc;
+}
+
+.add_product_section{
+  margin: 3rem 2rem;
+}
+
+
+
+.orders_table{
+  width: 100%;
+  border-collapse:collapse ;
+}
+.orders_table th{
+  text-align: left;
+  text-transform: lowercase;
+  padding: 1rem;
+  border-top: 0.3px solid rgba(var(--clr-fg), 0.7);
+  background: rgba(var(--clr-fg), 1);
+  color: rgb(var(--clr-bg));
+  letter-spacing: 0.5px;
+  font-variant: small-caps;
+}
+
+.orders_table td{
+  padding: 1rem;
+  border-bottom: 0.3px solid rgba(var(--clr-fg), 0.7);
+}
+
+.orders_table tbody tr:hover{
+  cursor: pointer;
+  background: rgba(var(--clr-fg), 0.9);
+  color: rgba(var(--clr-bg), 1);
+}
+
 
 
 .category_images_preview img{
   width: 300px;
+}
+
+#filterForm{
+  width: 100%;
+  padding: 1rem;
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+
+#checklist {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+#checklist label {
+  color: rgba(var(--clr-fg), 0.8);
+  position: relative;
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  transition: color 0.3s ease;
+  margin-right: 20px;
+  user-select: none;
+}
+
+#checklist label::before, #checklist label::after {
+  content: "";
+  position: absolute;
+}
+
+#checklist label::before {
+  height: 2px;
+  width: 8px;
+  left: -27px;
+  background: rgb(var(--clr-fg));
+  border-radius: 2px;
+  transition: background 0.3s ease;
+  opacity: 0;
+}
+
+
+#checklist input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  height: 15px;
+  width: 15px;
+  outline: none;
+  border: 0;
+  margin: 0 15px 0 0;
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  margin-right: 20px;
+}
+
+
+
+#checklist input[type="checkbox"]::after {
+  width: 0px;
+  left: 40%;
+  transform-origin: left bottom;
+}
+
+
+#checklist input[type="checkbox"]:checked + label {
+  color: rgba(var(--clr-fg), .5);
+  animation: move 0.3s ease 0.1s forwards;
+}
+
+
+#checklist input[type="checkbox"]:checked + label::before {
+  background: rgba(var(--clr-fg), .5);
+  animation: slice 0.4s ease forwards;
+}
+
+
+@keyframes move {
+  50% {
+    padding-left: 8px;
+    padding-right: 0px;
+  }
+
+  100% {
+    padding-right: 4px;
+    opacity: 1;
+  }
+}
+
+@keyframes slice {
+  60% {
+    width: 100%;
+    left: 4px;
+  }
+
+  100% {
+    width: 100%;
+    left: -2px;
+    padding-left: 0;
+    opacity: 1;
+
+  }
+}
+#sizesContainer, #detailsContainer{
+  display: flex;
+  flex-direction: column;
+}
+#sizesContainer div, #detailsContainer div{
+  display: flex;
+  gap: 1rem;
+}
+
+.basic_details_article{
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+.basic_details_article div{
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+}
+.basic_details_article div div{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.category_article{
+  display: flex;
+  gap: 1rem;
+}
+.category_article > div{
+  flex:1;
+  width: 100%;
+}
+.category_article > div *,
+.basic_details_article > div *{
+  width: inherit;
+  margin: 0.5rem 0;
+}
+.category_article div input[type="checkbox"] {
+  width: 200px;
+  align-self: flex-end;
+  position: relative;
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+   appearance: none;
+   cursor: pointer;
+  outline: 1px solid rgb(var(--clr-fg));
+}
+.category_article div input[type="checkbox"]:checked {
+  background: rgb(var(--clr-fg));
+  color: rgb(var(--clr-bg));
+}
+.category_article div input[type="checkbox"]::before {
+  position: absolute;
+  content: 'Uredi';
+  width: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+.discount_wapper{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.discount_wapper div{
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }

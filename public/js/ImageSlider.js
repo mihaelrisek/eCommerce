@@ -3,7 +3,6 @@ class ImageSlider {
     this.track = document.getElementById("image-track");
     this.itemContent = document.querySelectorAll('.image-item');
     this.trackItem = document.querySelectorAll('.image-content');
-    this.title = document.querySelector(".title");
     this.speedWheel = 0.02;
     this.speedDrag = -0.1;
     this.progress = 0;
@@ -33,7 +32,6 @@ class ImageSlider {
 
     this.track.animate({ transform: `translate(-${this.progress}%, -50%)` }, { duration: 1200, fill: "forwards" });
     
-    this.title.animate({ transform: `translateX(-${this.progress * 3}px`}, { duration: 1200, fill: "forwards" });
 
     for (const image of this.track.querySelectorAll(".image")) {
       image.animate({ objectPosition: `${this.progress}% center` }, { duration: 1200, fill: "forwards" });

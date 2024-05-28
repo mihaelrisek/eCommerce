@@ -9,9 +9,6 @@ const authMiddleware = require('../middleware/authenticationMiddleware');
  * Shop routes
  */
 router.get('/', shopController.home);
-router.get('/contact', shopController.contact);
-router.get('/about', authMiddleware, shopController.about); // Route requiring authentication
-
 
 /**
  * Profile route
@@ -23,6 +20,7 @@ router.post('/profil/:user_id', shopController.updateUser);
  * Product routes
  */
 router.get('/products/:material', shopController.renderByMaterial);
+router.get('/products-category/:category', shopController.renderByCategory);
 router.get('/products/:material/:category', shopController.renderByMaterialAndCategory);
 
 router.get('/products', shopController.getAllProducts);

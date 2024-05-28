@@ -1,5 +1,9 @@
-
-
+/* body{
+  height: 100%;
+  width: 100%;
+  position: fixed !important;
+  overflow: hidden !important;
+} */
 
 .forgot_password-section{
   position: absolute;
@@ -16,8 +20,10 @@
   transition: 0.3s ease;
   border: 0.2px solid rgb(var(--clr-fg));
 }
-.forgot_password-section.isResized{
-  padding-bottom: 5rem;
+.forgot_password-section.isResized form{
+  visibility: hidden;
+  opacity: 0;
+  height: 0;
 }
 .forgot_password-section form{
   display: flex;
@@ -39,21 +45,39 @@
 .register_section {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
 }
 
 .register_section form{
-  border: 0.3px solid rgb(var(--clr-fg)) ;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.register_section form section{
+  display: flex;
+
+}
+.register_section form article{
+  width: 100%;
   padding: 3rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-.register_section form article{
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.register_section form article h1{
+  margin-bottom: 2rem;
+  padding-bottom: 18px;
+  font-size: 1.5rem;
+  border-bottom: 0.2px solid rgba(var(--clr-fg), 0.5);
+}
+.register_section form article button{
+  width: calc(50% - 0.5rem);
+  align-self: flex-end;
+}
+.register_section form article button[disabled]{
+  user-select: none;
+  /* pointer-events: none; */
+  cursor: not-allowed;
 }
 .register_section form article div{
   width: 100%;
@@ -63,4 +87,18 @@
 .register_section form article div select,
 .register_section form article div input{
   width: 100%;
+  border: none;
+  border-bottom: 1px solid rgba(var(--clr-fg), 0.7);
+}
+
+@media only screen and (max-width: 900px) {
+  .register_section {
+    margin-top: 5rem;
+  }
+  .register_section form section{
+    flex-wrap: wrap;
+  }
+  .register_section form article button{
+    width: 100%;
+  }
 }

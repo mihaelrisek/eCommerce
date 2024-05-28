@@ -1,42 +1,74 @@
-<h1>Profil</h1>
-
 <section class="profil">
 
-  <form action="/profil/<%= user.id %>" method="POST"   >
-      <label for="profil_first_name">First name</label>
-      <input type="text" name="profil_first_name" id="profil_first_name" value="<%= user.first_name %>" placeholder="<%= user.first_name %>" disabled required>
-      <input type="checkbox" name="profil_first_name_checkbox" id="profil_first_name_checkbox">
+  <form class="formm" action="/profil/<%= user.id %>" method="POST"   >
+      <article>
+        <div class="wrap_p margin_b after">
+          <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Osobni podaci</h2>
+        </div> 
+        <div animate>
+          <div>
+            <input type="text" title="Ime" name="profil_first_name" id="profil_first_name" value="<%= user.first_name %>" placeholder="<%= user.first_name %>" disabled required>
+            <input type="checkbox" title="Uredi"  name="profil_first_name_checkbox" id="profil_first_name_checkbox">
+            <input type="text" title="Prezime" name="profil_last_name" id="profil_last_name" value="<%= user.last_name %>" placeholder="<%= user.last_name %>" disabled required>
+            <input type="checkbox" title="Uredi"  name="profil_last_name_checkbox" id="profil_last_name_checkbox">
+          </div>
 
-      <label for="profil_last_name">Last name</label>
-      <input type="text" name="profil_last_name" id="profil_last_name" value="<%= user.last_name %>" placeholder="<%= user.last_name %>" disabled required>
-      <input type="checkbox" name="profil_last_name_checkbox" id="profil_last_name_checkbox">
-  
-      <label for="profil_email">Email</label>
-      <input type="text" name="profil_email" id="profil_email" value="<%= user.email %>" placeholder="<%= user.email %>" disabled required>
-      <input type="checkbox" name="profil_email_checkbox" id="profil_email_checkbox">
-  
-      <label for="profil_address_region">Address</label>
-      <input type="text" name="profil_hardcoded_region" id="profil_hardcoded_region" value="<%= user.address.region %>" placeholder="<%= user.address.region %>" disabled required>
-      <input type="text" name="profil_address_street" id="profil_address_street" value="<%= user.address.street %>" placeholder="<%= user.address.region %>" disabled required>
-      <input type="text" name="profil_address_city" id="profil_address_city" value="<%= user.address.city %>" placeholder="<%= user.address.region %>" disabled required>
-      <input type="text" name="profil_address_zip_code" id="profil_address_zip_code" value="<%= user.address.zip_code %>" placeholder="<%= user.address.region %>" disabled required>
-      <input type="checkbox" name="profil_address_checkbox" id="profil_address_checkbox">
-  
-      <label for="profil_phone">Phone</label>
-      <input type="tel" name="profil_phone" maxlength="20"  id="profil_phone" value="<%= user.phone %>" placeholder="<%= user.phone %>" disabled required>
-      <input type="checkbox" name="profil_phone_checkbox" id="profil_phone_checkbox">
-  
-      <label for="profil_created_at">Created at</label>
-      <input type="text" id="profil_created_at"  placeholder="<%= (user.created_at).toLocaleDateString() %>" disabled>
+          <div>
+            <input type="text" name="profil_email" title="E-mail" id="profil_email" value="<%= user.email %>" placeholder="<%= user.email %>" disabled required>
+            <input type="checkbox" title="Uredi"  name="profil_email_checkbox" id="profil_email_checkbox">
+        
+            <input type="tel" name="profil_phone" title="Telefon" maxlength="20"  id="profil_phone" value="<%= user.phone %>" placeholder="<%= user.phone %>" disabled required>
+            <input type="checkbox" title="Uredi"  name="profil_phone_checkbox" id="profil_phone_checkbox">
+          </div>
+        </div>
+      </article>
 
-      <label for="profil_updated_at">Updated at</label>
-      <input type="text" id="profil_updated_at"  placeholder="<%= (user.updated_at).toLocaleString() %>" disabled>
+      <article animate>
+        <div class="wrap_p margin_b after">
+          <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Mjesni podaci</h2>
+        </div> 
+        <div>
+         <div>
+          <input type="text" name="profil_hardcoded_region" title="Država" id="profil_hardcoded_region" value="<%= user.address.region %>" placeholder="<%= user.address.region %>" disabled required>
+          <input type="text" name="profil_address_street" title="Ulica" id="profil_address_street" value="<%= user.address.street %>" placeholder="<%= user.address.region %>" disabled required>
+         </div>
+         <div>
+          <input type="text" name="profil_address_city" title="Grad" id="profil_address_city" value="<%= user.address.city %>" placeholder="<%= user.address.region %>" disabled required>
+          <input type="text" name="profil_address_zip_code" title="Poštanski broj" id="profil_address_zip_code" value="<%= user.address.zip_code %>" placeholder="<%= user.address.region %>" disabled required>
+         </div>
+         <div>
+          <input type="checkbox" title="Uredi"  name="profil_address_checkbox" id="profil_address_checkbox">
+         </div>
+        </div>
+      </article>
+     
   
+    <article animate>
+      <div class="wrap_p margin_b after">
+        <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Ostalo</h2>
+      </div> 
+      <div>
+        <div>
+          <label for="profil_created_at">Kreiran</label>
+          <input type="text" id="profil_created_at"  placeholder="<%= (user.created_at).toLocaleDateString() %>" disabled>
+    
+          <label for="profil_updated_at">Ažuriran</label>
+          <input type="text" id="profil_updated_at"  placeholder="<%= (user.updated_at).toLocaleString() %>" disabled>
+      
+        </div>
+      </div>
+    </article>
 
-    <button type="submit" >Update</button>
+   <article animate>
+    <div>
+      <div>
+        <button type="submit" >Spremi promjene</button>
+        <a class="logout" href="/logout"><button onclick="location.href='/logout'">Odjavi se</button></a>
+      </div>
+    </div>
+   </article>
   </form>
 
-  <a href="/logout"><button>Logout</button></a>
 
 </section>
 
@@ -44,15 +76,18 @@
 <section class="user_orders_section">
 
 
-
-
-  <h1>Narudzbe</h1>
-
+<div class="wrap_p margin_b after">
+  <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Vaše narudžbe</h2>
+</div> 
+<article animate>
+  <p>Narudžbe je moguće otkazati ukoliko narudžba nije procesirana, odnosno ako je status narudžbe jednak "U tijeku"</p>
   <% if (orders && orders.length > 0){ %>
+    <input type="text" id="orderSearch" class="order_search" placeholder="Pretraži narudžbe">
      <table class="orders_table" >
       <thead>
         <tr>
-          <th>Order ID</th>
+          <th>Redni broj</th>
+          <th>Šifra narudžbe</th>
           <th>Korisnik</th>
           <th>Datum narudzbe</th>
           <th>Ukupni iznos</th>
@@ -60,14 +95,14 @@
         </tr>
       </thead>
       <tbody>
-        <% orders.forEach((order) => { %>
-          <tr <%= (order.status=='dostavljeno') ? "class=delivered" : "" %> >
-            <td><%= order._id %></td>
-            <td><%= order.user.first_name %> <%= order.user.last_name %></td>
-            <td><%= order.order_date.toDateString() %></td>
-            <td>$<%= order.total_amount.toFixed(2) %></td>
-            <td><%= order.status %></td>
-            <td><a href="/profil/order/<%= order._id %>">View Details</a></td>
+        <% orders.reverse().forEach((order, orderIndex) => { %>
+          <tr onclick="location.href='/profil/order/<%= order._id %>'" class="order-row <%= (order.status == 'Dostavljeno') ? 'delivered' : '' %>">
+            <td class="order-num"><%= orders.length - orderIndex %></td>
+            <td class="order-id"><%= order._id %></td>
+            <td class="order-user"><%= order.user.first_name %> <%= order.user.last_name %></td>
+            <td class="order-date"><%= order.order_date.toDateString() %></td>
+            <td class="order-amount"><%= order.total_amount.toFixed(2) %>€</td>
+            <td class="order-status"><%= order.status %></td>
           </tr>
        
         <% }); %>
@@ -75,13 +110,10 @@
     </table>
   
   <% } %>
+</article>
     
 
-
 </section>
-
-
-
 
 <script>
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -111,68 +143,29 @@ checkboxes.forEach(checkbox => {
 });
 
 
+const searchTerm = document.getElementById('orderSearch');
+    const rows = document.querySelectorAll('table.orders_table tbody tr');
 
+    searchTerm.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
 
+        rows.forEach(row => {
+            const orderNum = row.querySelector('.order-num').textContent.toLowerCase();
+            const orderId = row.querySelector('.order-id').textContent.toLowerCase();
+            const orderUser = row.querySelector('.order-user').textContent.toLowerCase();
+            const orderDate = row.querySelector('.order-date').textContent.toLowerCase();
+            const orderAmount = row.querySelector('.order-amount').textContent.toLowerCase();
+            const orderStatus = row.querySelector('.order-status').textContent.toLowerCase();
 
-document.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const orderId = form.querySelector('button[type="submit"]').dataset.orderId;
+            const rowText = `${orderNum} ${orderId} ${orderUser} ${orderDate} ${orderAmount} ${orderStatus}`;
 
-    try {
-        const response = await fetch(`/order/cancel-order/${orderId}`, {
-            method: 'POST'
+            if (rowText.includes(searchTerm)) {
+                row.style.visibility = 'visible';
+                row.style.display = ''; 
+            } else {
+                row.style.visibility = 'hidden';
+                row.style.display = 'none'; 
+            }
         });
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Render updated orders
-            renderOrders(data.orders);
-            console.log(data.message); // Log success message
-        } else {
-            console.error('Failed to cancel order:', data.error);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        // Handle the error
-    }
-});
-
-
-function renderOrders(orders) {
-    const ordersSection = document.querySelector('.user_orders_section');
-    ordersSection.innerHTML = ''; 
-
-    orders.forEach(orderItem => { 
-
-        const article = document.createElement('article');
-
-        article.innerHTML = `
-            <form id="cancel_order_form" action="/order/cancel-order/${orderItem._id}" method="POST">
-                <h1>Order Details</h1>
-                <ul>
-                    <li><strong>User:</strong> ${orderItem.user.first_name} ${orderItem.user.last_name} (${orderItem.user.email})</li>
-                    <li><strong>Address:</strong> ${orderItem.address.street}, ${orderItem.address.city}, ${orderItem.address.region}, ${orderItem.address.zip_code}</li>
-                    <li><strong>Order Date:</strong> ${new Date(orderItem.order_date).toDateString()}</li>
-                    <li><strong>Total Amount:</strong> ${orderItem.total_amount} USD</li>
-                    <li><strong>Status:</strong> ${orderItem.status}</li>
-                    <li><strong>Payment Method:</strong> ${orderItem.payment_method}</li>
-                </ul>
-                <h2>Cart Items</h2>
-                <ul>
-                    ${orderItem.cart_items.map(item => `
-                        <li>
-                            <strong>Product:</strong> ${item.product.name} (${item.product.price} USD)<br>
-                            <strong>Total Price:</strong> ${item.total_price} USD
-                        </li>
-                    `).join('')}
-                </ul>
-                <button data-order-id="${orderItem._id}"  type="submit" >Prekini narudžbu</button>
-            </form>
-        `;
-
-        ordersSection.append(article);
     });
-}
 </script>

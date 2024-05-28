@@ -21,20 +21,6 @@ app.use((err, req, res, next) => {
 });
 
 
-
-
-
-
-  // Middleware to set global variables
-  app.use((req, res, next) => {
-    // Set the current path as a global variable
-    app.locals.currentPath = req.path;
-    next();
-  });
-
-
-
-
 const passport = require('passport');
 require('./server/config/passport')(passport);
 
@@ -56,7 +42,7 @@ app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 
 
-const fetchMaterials = async (req, res, next) => {
+const setData = async (req, res, next) => {
   try {
     const Product = require('./server/models/Product'); 
 
@@ -75,13 +61,14 @@ const fetchMaterials = async (req, res, next) => {
      (req.session.user_cart !== undefined ? req.session.user_cart.length : 0);
 
      res.locals.cart_items_count = cart_items_count;
-
+     app.locals.currentPath = req.path;
+     res.locals.user = req.user;
     next();
   } catch (error) {
     res.status(500).send({ message: error.message || 'Greška u dohvaćanju podataka!' });
   }
 };
-app.use(fetchMaterials);
+app.use(setData);
 
 
 const shopRoutes = require('./server/routes/shopRoutes.js')

@@ -1,32 +1,134 @@
-<h1>Narudzbe</h1>
+<section class="orders_section">
+  <div class="wrap_p margin_b after">
+    <h1 style="padding-bottom: 0.5rem;" class="wrap_c">Narudzbe</h1>
+  </div> 
+  <input animate type="text" id="orderSearch" class="order_search" placeholder="Pretraži narudžbe">
 
-<% if (orders && orders.length > 0){ %>
-   <table class="orders_table" >
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Korisnik</th>
-        <th>Datum narudzbe</th>
-        <th>Ukupni iznos</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% orders.forEach((order) => { %>
-        <tr <%= (order.status=='Dostavljeno') ? "class=delivered" : "" %> >
-          <td><%= order._id %></td>
-          <td><%= order.user.first_name %> <%= order.user.last_name %></td>
-          <td><%= order.order_date.toDateString() %></td>
-          <td>$<%= order.total_amount.toFixed(2) %></td>
-          <td><%= order.status %></td>
-          <td><a href="/admin/orders/<%= order._id %>">View Details</a></td>
-        </tr>
+  
+  <form animate id="filterForm">
+    <div id="checklist" class="filters">
+      <input type="checkbox" id="utijeku" name="status" value="U tijeku" />
+      <label for="utijeku"> U tijeku</label>
+      <input type="checkbox" name="status" id="naputu" value="Na putu" />
+      <label for="naputu"> Na putu</label>
+      <input type="checkbox" name="status" id="dostavljeno" value="Dostavljeno" /> 
+      <label for="dostavljeno">Dostavljeno</label>
+      <input type="checkbox" name="status" id="otkazano" value="Otkazano" /> 
+      <label for="otkazano" >Otkazano</label>
+    </div>
+  </form>
 
-     
-      <% }); %>
-    </tbody>
-  </table>
 
-<% } else { %>
-  <p>Ne postoji niti jedna narudzba</p>
-  <% } %>
+
+  <div animate id="ordersContainer">
+    <div class="table_wrap">
+      <table class="orders_table">
+        <thead>
+          <tr>
+            <th>Šifra</th>
+            <th>Korisnik</th>
+            <th>Datum narudzbe</th>
+            <th>Ukupni iznos</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <% orders.reverse().forEach((order) => { %>
+            <tr onclick="location.href='/admin/orders/<%= order._id %>'" <%= (order.status=='Dostavljeno') ? "class=delivered" : "" %> >
+              <td class="order-id"><%= order._id %></td>
+              <td class="order-user"><%= order.user.first_name %> <%= order.user.last_name %></td>
+              <td class="order-date"><%= order.order_date.toDateString() %></td>
+              <td class="order-amount">$<%= order.total_amount.toFixed(2) %></td>
+              <td class="order-status"><%= order.status %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="/js/reveal.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[name="status"]').forEach(checkbox => {
+      checkbox.addEventListener('change', filterOrders);
+    });
+  });
+
+  async function filterOrders() {
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    
+    const statusArray = [];
+    formData.forEach((value, key) => {
+      if (key === 'status') {
+        statusArray.push(value);
+      }
+    });
+
+    try {
+      const response = await fetch('/admin/filter_orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: statusArray })
+      });
+
+      const data = await response.json();
+      const orders = data.orders;
+
+      const ordersTableBody = document.getElementById('ordersTableBody');
+      ordersTableBody.innerHTML = '';
+
+      orders.reverse().forEach(order => {
+        const row = document.createElement('tr');
+        row.setAttribute('onclick', `location.href='/admin/orders/${order._id}'`);
+        if (order.status === 'Dostavljeno') {
+          row.classList.add('delivered');
+        }
+
+        row.innerHTML = `
+          <td>${order._id}</td>
+          <td>${order.user.first_name} ${order.user.last_name}</td>
+          <td>${new Date(order.order_date).toDateString()}</td>
+          <td>$${order.total_amount.toFixed(2)}</td>
+          <td>${order.status}</td>
+        `;
+
+        ordersTableBody.appendChild(row);
+      });
+
+    } catch (error) {
+      console.error('Error fetching filtered orders:', error);
+    }
+  }
+
+
+  const searchTerm = document.getElementById('orderSearch');
+    const rows = document.querySelectorAll('table.orders_table tbody tr');
+
+    searchTerm.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+
+        rows.forEach(row => {
+            const orderId = row.querySelector('.order-id').textContent.toLowerCase();
+            const orderUser = row.querySelector('.order-user').textContent.toLowerCase();
+            const orderDate = row.querySelector('.order-date').textContent.toLowerCase();
+            const orderAmount = row.querySelector('.order-amount').textContent.toLowerCase();
+            const orderStatus = row.querySelector('.order-status').textContent.toLowerCase();
+
+            const rowText = `${orderId} ${orderUser} ${orderDate} ${orderAmount} ${orderStatus}`;
+
+            if (rowText.includes(searchTerm)) {
+                row.style.visibility = 'visible';
+                row.style.display = ''; 
+            } else {
+                row.style.visibility = 'hidden';
+                row.style.display = 'none'; 
+            }
+        });
+    });
+</script>

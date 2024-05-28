@@ -1,117 +1,112 @@
 <% if (product != null) { %>
 
-  <a class="history_back" onclick="history.back()">Vrati se</a>
+<div class="add_product_section">
+  <form id="form" action="/admin/update-product/<%= product._id %>" method="POST" enctype="multipart/form-data">
+    <div class="wrap_p margin_b after">
+      <h2 style="padding-bottom: 0.4rem;" class="wrap_c">Općenito</h2>
+    </div> 
 
-  <h1><%=product.name%></h1>
+    <article animate class="basic_details_article" >
 
-  <article class="img_container">
-    <% product.images.forEach((img) => {%>
-      <div class="img_wrapper">
-        <img src="<%-img%>" alt="<%-product.name%>">
-      </div>
-    <% } );%>
-  </article>
-
-  <p><%=product.description%></p>
-  <strong><%=product.price%> €</strong>
-  <h2><%= product.material %></h2>
-  <h2><%= product.category %></h2>
-  <h3>Details</h3>
-  <% const displayDetails = (details) => { %>
-    <% if (details && typeof details === 'object') { %>
-      <% Object.entries(details).forEach(([key, value]) => { %>
+      <label for="name">Naziv proizvoda</label>
+      <input type="text" id="name" name="name" value="<%= product.name %>" required>
+      
+      <div>
         <div>
-          <strong><%= key %>:</strong>
-          <% if (typeof value === 'object') { %>
-            <div style="margin-left: 10px;">
-              <% displayDetails(value); %>
-            </div>
-          <% } else { %>
-            <%= value %>
+          <label for="price">Cijena (€)</label>
+          <input type="number" id="price" name="price" value="<%= product.price %>" required>
+        </div>
+        <div>
+          <label for="stock_quantity">Kolicina</label>
+          <input type="number" id="stock_quantity" name="stock_quantity" value="<%= product.stock_quantity %>" required>
+      
+        </div>
+      </div>
+      <label for="description">Kratak opis</label>
+      <textarea id="description" name="description" required><%= product.description %></textarea>
+      
+    </article>
+
+    <div class="wrap_p margin_b after">
+      <h2 style="padding-bottom: 0.5rem;" class="wrap_c">Kategorije</h2>
+    </div> 
+
+   <article animate class="category_article">
+      <div>
+        <label for="size">Velicina</label>
+        <div class="sizes" id="sizesContainer">
+        <% if (product.sizes && product.sizes.length > 0){ %>
+            <% product.sizes.forEach((size) => { %>
+              <div>
+                <input type="text" name="newSize[]" id="newSize[]" placeholder="<%= size  %>" value="<%= size %>">
+                <button type="button" onclick="removeSize(this)">Izbriši</button>
+              </div>
+            <%  }) %>
+            <% } %>
+          </div>
+         <button type="button" onclick="addSize()">Dodaj</button>
+      </div>
+
+      <div>
+        <label for="details">Detalji</label>
+        <div class="details" id="detailsContainer">
+          <% if (product.details && typeof product.details === 'object') { %>
+            <% Object.entries(product.details).forEach(([key, value]) => { %>
+              <div class="detailsField">
+                <input type="text" name="detailsKey[]" value="<%= key %>" placeholder="Upiši naslov detalja">
+                <input type="text" name="detailsValue[]" value="<%= value %>" placeholder="Upiši detalj">
+                <button type="button" onclick="removeDetailsField(this)">Izbriši</button>
+              </div>
+            <% }); %>
           <% } %>
         </div>
-      <% }); %>
-    <% } else { %>
-      <p>No details available.</p>
-    <% } %>
-  <% }; %>
-  
-  <% displayDetails(product.details); %>
-
-  <form id="form" action="/admin/update-product/<%= product._id %>" method="POST" enctype="multipart/form-data">
-    <label for="name">Naziv proizvoda</label>
-    <input type="text" id="name" name="name" value="<%= product.name %>" required>
-
-    <label for="description">Kratak opis</label>
-    <textarea id="description" name="description" required><%= product.description %></textarea>
+        <button type="button" onclick="addDetailsField()">Dodaj</button>
     
-
-    <label for="price">Cijena (€)</label>
-    <input type="number" id="price" name="price" value="<%= product.price %>" required>
-
-    <label for="stock_quantity">Kolicina</label>
-    <input type="number" id="stock_quantity" name="stock_quantity" value="<%= product.stock_quantity %>" required>
-
-    <label for="size">Velicina</label>
-    <div class="sizes" id="sizesContainer">
-    <% if (product.sizes && product.sizes.length > 0){ %>
-        <% product.sizes.forEach((size) => { %>
-          <div>
-            <input type="text" name="newSize[]" id="newSize[]" placeholder="<%= size  %>" value="<%= size %>">
-            <button type="button" onclick="removeSize(this)">Remove</button>
-          </div>
-        <%  }) %>
-        <% } %>
       </div>
-     <button type="button" onclick="addSize()">Dodaj</button>
 
-    <label for="material">Materijal</label>
-    <select name="material" id="material">
-      <% materials.forEach(material => { %>
-        <option value="<%= material%>" <%= product.material === material ? 'selected' : ''%> ><%= material%></option>
-      <% }) %>
-    </select>
-    <div id="productTypeContainer">
-      <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_material new_category" id="new_material"
-       name="new_material"  placeholder="Enter new product type" disabled>
-      <input type="checkbox" onclick="addNewProductType()" name="check_new_material" id="check_new_material">
+  </article>
+  
+  <article animate class="category_article">
+    <div>
+      <label for="material">Materijal</label>
+      <select name="material" id="material">
+        <% materials.forEach(material => { %>
+          <option value="<%= material%>" <%= product.material === material ? 'selected' : ''%> ><%= material%></option>
+        <% }) %>
+      </select>
+      <div id="productTypeContainer">
+        <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_material new_category" id="new_material"
+         name="new_material"  placeholder="Upiši novi material" disabled>
+        <input type="checkbox" onclick="addNewProductType()" name="check_new_material" id="check_new_material">
+      </div>
     </div>
+   
+  
 
-    <label for="category">Nakit</label>
-    <select name="category" id="category">
-      <% categories.forEach(category => { %>
-        <option value="<%= category%>" <%= product.category === category ? 'selected' : ''%>> <%= category %></option>
-      <% }) %>
-    </select>
-    <div id="categoryContainer">
-      <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_category new_category" id="new_category" name="new_category"  placeholder="Enter new category" disabled>
-      <input type="checkbox" onclick="addNewcategory()" name="check_new_category" id="check_new_category">
+    <div>
+      <label for="category">Nakit</label>
+      <select name="category" id="category">
+        <% categories.forEach(category => { %>
+          <option value="<%= category%>" <%= product.category === category ? 'selected' : ''%>> <%= category %></option>
+        <% }) %>
+      </select>
+      <div id="categoryContainer">
+        <input pattern="^(?=.*[a-zA-Z0-9])[a-zA-Z0-9\s]+$" type="text" class="new_category new_category" id="new_category" name="new_category"  placeholder="Upiši novi nakit" disabled>
+        <input type="checkbox" onclick="addNewcategory()" name="check_new_category" id="check_new_category">
+      </div>
     </div>
     
+  </article>
 
-    <label for="details">Detalji</label>
-    <div class="details" id="detailsContainer">
-      <% if (product.details && typeof product.details === 'object') { %>
-        <% Object.entries(product.details).forEach(([key, value]) => { %>
-          <div class="detailsField">
-            <input type="text" name="detailsKey[]" value="<%= key %>" placeholder="Enter detail key">
-            <input type="text" name="detailsValue[]" value="<%= value %>" placeholder="Enter detail value">
-            <button type="button" onclick="removeDetailsField(this)">Remove</button>
-          </div>
-        <% }); %>
-      <% } %>
-    </div>
-
-    <button type="button" onclick="addDetailsField()">Add Details Field</button>
-
-
-
-    <h1>Slike proizvoda</h1>
+  <div class="wrap_p margin_b after">
+    <h2 style="padding-bottom: 0.5rem;" class="wrap_c">Slike</h2>
+  </div>
+  <article animate>
     <div class="uploadOuter">
-      <button type="button" id="uploadFile" onclick="triggerFileInput()">Upload image</button>
+      <button type="button" id="uploadFile" onclick="triggerFileInput()">Postavi sliku</button>
       <strong>OR</strong>
       <span class="dragBox">
-        Drag and Drop image here
+        Drag and Drop
         <input type="file" onChange="dragNdrop(event)" ondragover="drag()" ondrop="drop()" id="images" name="images" accept="image/*" multiple />
       </span>
     </div>
@@ -121,35 +116,46 @@
         <p><%= img %></p>
         <img src="<%= img %>" alt="Img">
         <input type="hidden" name="existingImages[]" value="<%= img %>">
-        <button type="button" onclick="removeImageField(this)">Delete</button>
+        <button type="button" onclick="removeImageField(this)">Izbriši</button>
       </div>
       <% }); %>
     </div>
-    <h1>Popust</h1>
 
+  </article>
 
+  <article >
+    <div class="wrap_p margin_b after">
+      <h1 style="padding-bottom: 0.5rem;" class="wrap_c">Popust</h1>
+    </div> 
+
+    <div animate  class="discount_wapper" >
       <label for="percentage">Postotak popusta (%)</label>
       <input type="number" id="percentage" name="percentage" value="<%=product.discount.percentage %>" min="0" max="100" >
 
+      <div>
       <label for="start_date">Od <%= product.discount.start_date ? product.discount.start_date.toLocaleString() : '' %></label>
       <input type="date" id="start_date" value="<%= product.discount ? product.discount.start_date : '' %>" name="start_date" >
       
       <label for="end_date">Do <%= product.discount.end_date ? product.discount.end_date.toLocaleString() : '' %></label>
       <input type="date" id="end_date" value="<%= product.discount ? product.discount.end_date : '' %>" name="end_date" >
-      
+    </div>
       <label for="discount_active">Aktivnost</label>
-      <input type="checkbox" id="discount_active" <%= product.discount.active ? "checked" : "" %> name="discount_active" >
+      <%= product %>
+      <input type="checkbox" name="discount_active"  id="discount_active" <%= product.discount.active ? "checked" : "nije" %> >
+    </div>
 
-
-    <button type="submit">Update Product</button>
+  </article>
+    <button style="margin-bottom: 1rem;" type="submit">Spremi promjene</button>
   </form>
 
   <form action="/admin/delete-product/<%= product._id %>" method="POST">
-    <button type="submit" >Delete</button>
+    <button class="input-delete" type="submit" >Izbriši</button>
   </form>
+
+</div>
 <%}%>
 
-
+<script src="/js/reveal.js"></script>
 
 
 <script>
@@ -168,7 +174,7 @@
       fileContainer.appendChild(previewText);
 
       const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
+      deleteButton.textContent = "Izbriši";
       deleteButton.onclick = function () {
         fileContainer.remove();
       };
@@ -209,17 +215,17 @@
     newInputKey.required = true;
     newInputKey.name = 'detailsKey[]';
     newInputKey.pattern = '^[a-zA-Z0-9]+$';
-    newInputKey.placeholder = 'Enter detail key';
+    newInputKey.placeholder = 'Upiši naslov detalja';
 
     const newInputValue = document.createElement('input');
     newInputValue.type = 'text';
     newInputValue.required = true;
     newInputValue.name = 'detailsValue[]';
-    newInputValue.placeholder = 'Enter detail value';
+    newInputValue.placeholder = 'Upiši detalj';
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
-    removeButton.textContent = 'Remove';
+    removeButton.textContent = 'Izbriši';
     removeButton.onclick = function () {
       newDetailsField.remove();
     };
@@ -278,13 +284,13 @@
     const newSize = document.createElement('input');
     newSize.type = 'text';
     newSize.name = 'newSize[]';
-    newSize.placeholder = 'Enter new size';
+    newSize.placeholder = 'Upiši veličinu';
 
     const newSizeWrapper = document.createElement('div');
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
-    removeButton.textContent = 'Remove';
+    removeButton.textContent = 'Izbriši';
     removeButton.onclick = function () {
       newSizeWrapper.remove();
     };

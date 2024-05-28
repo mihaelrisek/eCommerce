@@ -1,68 +1,38 @@
 
-<div class="btn_filter_menu"></div>
 
 <aside class="filter_wrapper">
 
 
   <form data-filter-url-reset="<%=currentPath%>" id="filterForm"  action="/filter_products" method="POST">
-    <h3>Material</h3>
+    <h4>MATERIAL</h4>
     <article>
       <% materials.forEach((material, index) => { %>
-    <div class="checkbox-wrapper-15">
 
-          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=material%>" type="checkbox" name="material" value="<%= material %>"> 
-          <label class="cbx" for="cbx-<%=index%>-<%=material%>">
-            <span>
-              <svg width="12px" height="9px" viewbox="0 0 12 9">
-                <polyline points="1 5 4 8 11 1"></polyline>
-              </svg>
-            </span>
-            <span><%= material %></span>
-          </label>
-    </div>
+        <div id="checklist">
+          <input  value="<%= material %>" name="material" type="checkbox" id="<%=index%>-<%=material%>">
+          <label for="<%=index%>-<%=material%>"><%= material %></label>
+        </div>
+
       <% }); %>
     </article>
 
   
 
-    <h3>Nakit</h3>
+    <h4>NAKIT</h4>
 
     <article>
 
       <% categories.forEach((category, index) => { %>
-        <div class="checkbox-wrapper-15">
 
-          <input style="display: none;" class="inp-cbx" id="cbx-<%=index%>-<%=category%>" type="checkbox" name="category" value="<%= category %>" > 
-          <label class="cbx" for="cbx-<%=index%>-<%=category%>">
-            <span>
-              <svg width="12px" height="9px" viewbox="0 0 12 9">
-                <polyline points="1 5 4 8 11 1"></polyline>
-              </svg>
-            </span>
-            <span><%= category %></span>
-          </label>
-      </div>
+          <div id="checklist">
+            <input  value="<%= category %>" name="category" type="checkbox" id="<%=index%>-<%=category%>">
+            <label for="<%=index%>-<%=category%>"><%= category %></label>
+          </div>
+       
       <% }); %>
     </article>
-
-    <h3>Akcije</h3>
-    <article>
-      <div class="checkbox-wrapper-15">
-
-        <input style="display: none;" class="inp-cbx" id="cbx-s-b" type="checkbox" name="category" value="" > 
-        <label class="cbx" for="cbx-s-b">
-          <span>
-            <svg width="12px" height="9px" viewbox="0 0 12 9">
-              <polyline points="1 5 4 8 11 1"></polyline>
-            </svg>
-          </span>
-          <span>Akcija</span>
-        </label>
-    </div>
-    </article>
-
     
-    <button type="button" onclick="resetFilters()">Reset</button>
+    <!-- <button type="button" onclick="resetFilters()">Reset</button> -->
   </form>
 </aside>
 
@@ -81,7 +51,13 @@
               <div class="details">
                 <span>
                   <h3><%= product.name %></h3>
-                  <strong><%= product.price %> €</strong>
+                  <strong>
+                    € <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %>
+                    <% if (product.discount.active) {%>
+                      <span style="text-decoration: line-through;">€ <%= product.price %></span>
+                      <% } %>
+                  </strong>
+                
                 </span>
                 <% if (product.material) { %>
                   <span class="category"><%= product.material %></span>
@@ -95,7 +71,7 @@
 
       <% } %>
     <% } else { %>
-      <p>No products found.</p>
+      <p>Proizvodi nisu pronađeni.</p>
     <% } %>
   
         
@@ -104,34 +80,35 @@
 
 </section>
 <script defer>
+
+
+
+
+
+
  
-let isLoading = false;
-let limit = 3; // Initial limit
+let limit = 6; 
 
-let maxYOffset = 0; // Initialize maximum Y offset from top
+let scrollIncrement = window.innerHeight / 2; 
+let currentScroll = 0; // Current scroll position
 
-let lastScrollY = 0; // Store the last scroll position
-const viewportHeight = window.innerHeight ;
-
-window.addEventListener('scroll', () => {
-  const currentYOffset = window.scrollY;
-  const product =  document.querySelectorAll('.reveal_img_item');
-
-  // Update maximum Y offset
-  maxYOffset = Math.max(maxYOffset, currentYOffset);
-  // Check if the user is scrolling down and product is in view
-  console.log("lastScrollY + viewportHeight", lastScrollY + viewportHeight);
-
-  console.log("currentYOffset",currentYOffset)
-  if (currentYOffset === maxYOffset && product && !isLoading) {
-    // if (currentYOffset >= lastScrollY + viewportHeight) {
-    isLoading = true;
+// Function to handle scroll event
+function handleScroll() {
+  // Calculate new scroll position
+  const newScroll = window.scrollY + window.innerHeight;
+  
+  // Check if new scroll position is greater than or equal to the current scroll position plus the increment
+  if (newScroll >= currentScroll + scrollIncrement) {
+    // Increment current scroll position
+    currentScroll += scrollIncrement;
+    
     loadMoreProducts(limit); // Load more products
-    lastScrollY = currentYOffset; // Update the last fetch position
-  // }
   }
-  lastScrollY = maxYOffset;
-});
+}
+
+// Add scroll event listener
+window.addEventListener("scroll",handleScroll);
+
 
 const loadMoreProducts = (limit) => {
 
@@ -187,19 +164,7 @@ const appendProducts = (newProducts, emptyContainer) => {
   });
 }
 
-// Intersection Observer setup
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('inView');
-    }
-  });
-}, { threshold: 0.2 });
 
-// Initial observation of existing products
-document.querySelectorAll('.reveal_img_item').forEach(product => {
-  observer.observe(product);
-});
 
 
 
@@ -237,34 +202,5 @@ const filterProducts = () => {
 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
   checkbox.addEventListener('change', filterProducts);
 });
-
-
-
-const toggleFilterMenu = () => {
-    document.querySelector('.filter_wrapper').classList.toggle('inView');
-}
-
-
-document.querySelector('.btn_filter_menu').addEventListener('click', toggleFilterMenu);
-document.querySelector('.btn_filter_menu').addEventListener('touch', toggleFilterMenu);
-
-
-// const section = document.querySelector('section');
-
-// let currentPos = window.pageYOffset;
-
-// const update = () => {
-//   const newPos = window.pageYOffset;
-//   const diff = newPos - currentPos;
-//   const speed = diff * 0.1;
-  
-//   section.style.transform = `skewY(${ speed }deg)`;  
-  
-//   currentPos = newPos;
-  
-//   requestAnimationFrame(update);
-// }
-
-// update();
 
 </script>

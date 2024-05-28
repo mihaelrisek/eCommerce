@@ -1,27 +1,42 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
 <% if (product != null) { %>
 <section class="section_product" >
 
 
-    <article class="article_img">
+
+    <article animate class="article_img">
+
       <article class="img_container">
-        <% product.images.forEach((img) => {%>
-          <div class="img_wrapper">
-            <img src="<%= img%>" alt="<%= product.name%>">
-          </div>
-        <% } );%>
+
+        <swiper-container class="mySwiper" >
+
+          <% product.images.forEach((img,index) => {%>
+            <swiper-slide>
+              <img src="<%= img%>" alt="<%= product.name%>">  
+            </swiper-slide>
+          <% } );%>
+
+        </swiper-container>
       </article>
-    </article>
-  
+  </article>
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
     
     <article class="article_txt">
-      <h1><%= product.name%></h1>
-      <h3><%= product.description %></h3>
-      <h3>
-        <strong>€ <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %></strong>
+      <div class="wrap_p small">
+        <h4 class="wrap_c" ><%= product.material%></h4>
+      </div>
+      <div class="wrap_p small">
+        <h1 class="wrap_c" ><%= product.name%></h1>
+      </div>
+     
+      <div class="wrap_p small">
+        <h1 class="wrap_c" >€ <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %></h1>
+      </div>
        
+      <p animate>
         <% if (product.discount.active) {%>
-          <span style="text-decoration: line-through;">€ <%= product.price %></span>
+          <span style="text-decoration: line-through;">€ <%= product.price.toFixed(2) %></span>
           <span><%= product.discount.percentage %>% off</span>
           <span> 
             <% 
@@ -31,63 +46,135 @@
               let daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
               if (daysDifference > 0) {
             %>
+            <br>
             <%= "Požurite jer popust vrijedi još "+  daysDifference %>  dan<%= daysDifference !== 1 ? 'a' : '' %> 
             <% } %>
           </span>
         <% } %>
-      </h3>
+      </p>
 
-      <div class="details_wrapper">
-      <h3>Details</h3>
-
-        <% const displayDetails = (details) => { %>
-          <% if (details && typeof details === 'object') { %>
-            <% Object.entries(details).forEach(([key, value]) => { %>
-              <div style="margin-left: 10px;">
-                <strong><%= key %>:</strong>
-                <% if (typeof value === 'object') { %>
-                  <div style="margin-left: 10px;">
-                    <% displayDetails(value); %>
-                  </div>
-                <% } else { %>
-                  <%= value %>
-                <% } %>
-              </div>
-            <% }); %>
-          <% } else { %>
-            <p>No details available.</p>
-          <% } %>
-        <% }; %>
-      
-      <% displayDetails(product.details); %>
-    </div>
+     
   
-    <form action="/add-to-cart" method="post" >
+    <form animate action="/add-to-cart" method="post" >
       <% if (product.sizes && product.sizes.length > 0){ %>
+   <label animate for="size">Velicina</label>
+
+        <div class="sizes">
         <% product.sizes.forEach((size) => { %>
-          <label for="size"><%= size  %></label>
-          <input type="radio" name="size" id="size" value="<%= size  %>" required>
+          <label class="size_select" for="size">
+            <span><%= size  %></span>
+            <input type="radio" name="size" id="size" value="<%= size  %>" required>
+          </label>
+        
         <% }) %>
+      </div>
       <% } %>
 
       <input type="hidden" name="product_id" value="<%= product._id %>">
 
 
       <% if (product.stock_quantity > 0) {%>
-        <label for="quantity">Quantity:</label>
+        <label for="quantity">Kolicina</label>
         <input type="number" name="quantity" value="1" min="1" max="999" required>
-        <button class="latest-link-txt add-to-cart-btn" type="submit">Add to Cart</button>
+        <button class="latest-link-txt add-to-cart-btn" type="submit">Kupi</button>
       <% } else { %>
         <p>Trenutno nema dostupnih u skladištu!</p>
       <% } %>
 
     </form>
+
+    <h4 animate class="show_more" onclick="showMore()" >DETALJI 
+      <span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"/></svg>
+      </span>
+   </h4>
+  <div class="details_wrapper">
+   
+
+
+<% const displayDetails = (details) => { %>
+  <% if (details && typeof details === 'object') { %>
+    <p ><%= product.description %></p>
+    <div>
+    <% Object.entries(details).forEach(([key, value]) => { %>
+      <div style="margin-left: 10px;">
+        <span><%= key %>:</span>
+        <% if (typeof value === 'object') { %>
+          <div style="margin-left: 10px;">
+            <% displayDetails(value); %>
+          </div>
+        <% } else { %>
+          <%= value %>
+        <% } %>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <p>Za ovaj proizvod nema detalja.</p>
+  <% } %>
+</div>
+<% }; %>
+<% displayDetails(product.details); %>
+</div>
 </article>
 </section>
 
+
+<% if (similar_products.length > 0 && similar_products !== '') { %>
+<section class="products_section reveal" >
+
+  <div class="wrap_p margin_b after">
+    <h1 class="wrap_c" >Slični proizvodi</h1>
+  </div> 
+
+<ul id="productsContainer" class="reveal_img">
+
+      <% similar_products.forEach(product => { %>
+        <li id="product"  data-animate class="reveal_img_item product" >
+          <a href="/product/<%=product.name.trim().replace(/\s+/g, '-').toLowerCase()%>-<%=product._id%>" class="reveal_img_inner">
+            <div class="img reveal_img_bl ">
+                <img class="reveal_img_img" src="<%= product.images[0] %>" alt="<%= product.name %>">
+            </div>
+
+            <div class="details">
+              <span>
+                <h3><%= product.name %></h3>
+                <strong>
+                  € <%= (product.price - (product.price * (product.discount.active ? product.discount.percentage / 100 : 0))).toFixed(2) %>
+                  <% if (product.discount.active) {%>
+                    <span style="text-decoration: line-through;">€ <%= product.price %></span>
+                    <% } %>
+                </strong>
+              
+              </span>
+              <% if (product.material) { %>
+                <span class="category"><%= product.material %></span>
+              <% } else { %>
+                <span></span>
+              <% } %>
+              </div>
+          </a>
+        </li>
+      <% }); %>
+
+    
+      
+  
+</ul>
+
+</section>
+<% }%>
+
+
+
 <section class="comments">
+  
+  <div class="wrap_p margin_b after">
+    <h1 class="wrap_c" >Recenzije</h1>
+  </div>
+
     <% if (user){ %>
-      <form id="commentForm" action="/products/<%= product._id %>/comments" method="POST" onsubmit="event.preventDefault(); addComment()">
+      <h5>Pošalji svoje osobno mišljenje o proizvodu.</h5>
+      <form class="comment_form"  id="commentForm" action="/products/<%= product._id %>/comments" method="POST" onsubmit="event.preventDefault(); addComment()">
         <article class="comment">
           <textarea name="comment" id="comment" cols="30" rows="10"></textarea>
         </article>
@@ -98,14 +185,17 @@
           <input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
           <input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
         </div>
+     
+      
         <button type="submit" onclick="validateForm()">Pošalji</button>
       </form>
     <%} else if (!user && review.length > 0) {%>
-      <h5>Log in to add comments!</h5>
-      <a href="<%=login_url%>">Log in</a>
-      <%} %>
+        <div class="login_message" >
+          <h5>Prijavite  kako bi mogli dodati recenziju!</h5>
+          <a class="underline_hover" href="<%=login_url%>">PRIJAVI SE</a>  
+        </div>
+      <%} %>  
 
-    <h1>Product Reviews</h1>
 
   <div class="container">
 
@@ -113,24 +203,33 @@
     <% if (review.length > 0) { %>
       <%  review.reverse().forEach((comment) => { %>
         <% if (comment.user_id){ %>
-          <article id="comment-<%= comment._id %>">
-            <h2><%= comment.user_id.first_name %> <%= comment.user_id.last_name %></h2>
-            <p>Comment: <%= comment.comment %></p>
-            <p>Rating: <span class="rating"><%= comment.rating %></span></p>
-            <% if (user) { %>
-              <% if (user._id.toString() === comment.user_id._id.toString() || user.role === 'admin') { %>
-                <form action="/products/<%= product._id %>/comments/<%= comment._id %>/delete" onsubmit="event.preventDefault(); deleteComment('<%= comment._id %>') " method="POST" >
-                  <button type="submit">Izbriši</button>
-                </form>
+          <article animate class="comment_wapper"  id="comment-<%= comment._id %>">
+            <div class="comment_left">
+              <h2><%= comment.user_id.first_name %> <%= comment.user_id.last_name %></h2>
+              <p><%= comment.created_at.toLocaleDateString() %></p>
+            </div>
+            <div class="comment_right">
+             <p>
+              <% for (let i=1; i<=comment.rating; i++ ){%>
+                <span>&#9733;</span>
+              <%}%>
+              </p>
+              <p><%= comment.comment %></p>
+              <% if (user) { %>
+                <% if (user._id.toString() === comment.user_id._id.toString() || user.role === 'admin') { %>
+                  <form action="/products/<%= product._id %>/comments/<%= comment._id %>/delete" onsubmit="event.preventDefault(); deleteComment('<%= comment._id %>') " method="POST" >
+                    <button type="submit">Izbriši</button>
+                  </form>
+                <% } %>
               <% } %>
-            <% } %>
+           </div>
           </article>
         <% } %>
       <% }); %>
     <% } else { %>
-      <h5 id="message_default" >Be the first one to leave a comment!</h5>
+      <h5 id="message_default" >Budite prvi koji će komentirati.</h5>
       <% if (!user) { %>
-        <a href="<%=login_url%>">Log in</a>
+        <a class="underline_hover" href="<%=login_url%>">PRIJAVI SE</a>
       <% } %>
     <% } %>
 
@@ -147,36 +246,54 @@
     const formData = new FormData(form);
 
     fetch(form.action, {
-      method: 'POST',
-      body: formData,
-      credentials: 'same-origin' // Include this line if you are using sessions for authentication
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      form.reset();
-      return response.json();
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        form.reset();
+        return response.json();
     })
     .then(data => {
-      // Assuming the response includes the newly added comment data
-      // Update the UI to display the newly added comment
-      const comment_container = document.querySelector('.comments .container');
-      const new_comment_article = document.createElement('article');
-      new_comment_article.id = 'comment-' + data._id;
-      new_comment_article.innerHTML = `
-          <h2>${data.user_id.first_name} ${data.user_id.last_name}</h2>
-          <p>Comment: ${data.comment}</p>
-          <p>Rating: <span class="rating">${data.rating}</span></p>
-          <form action="/products/${data.product_id}/comments/${data._id}/delete" id="delete-${data._id}" onsubmit="event.preventDefault(); deleteComment('${data._id}') " method="POST">
-            <button type="submit">Izbriši</button>
-          </form>
-      `;
-      comment_container.prepend(new_comment_article);
-      document.getElementById('message_default').remove();
-    })  
+        const commentContainer = document.querySelector('.comments .container');
+        const newCommentArticle = document.createElement('article');
+        newCommentArticle.id = 'comment-' + data._id;
+        newCommentArticle.classList.add('comment_wapper');
+
+        const createdAt = new Date(data.created_at).toLocaleDateString();
+
+        let ratingStars = '';
+        for (let i = 1; i <= data.rating; i++) {
+            ratingStars += '<span>&#9733;</span>';
+        }
+
+        let deleteButton = `
+            <form action="/products/${data.product_id}/comments/${data._id}/delete" onsubmit="event.preventDefault(); deleteComment('${data._id}')" method="POST">
+                <button type="submit">Izbriši</button>
+            </form>
+        `;
+
+        newCommentArticle.innerHTML = `
+            <div class="comment_left">
+                <h2>${data.user_id.first_name} ${data.user_id.last_name}</h2>
+                <p>${createdAt}</p>
+            </div>
+            <div class="comment_right">
+                <p>${ratingStars}</p>
+                <p>${data.comment}</p>
+                ${deleteButton}
+            </div>
+        `;
+
+        commentContainer.prepend(newCommentArticle);
+        const messageDefault = document.getElementById('message_default');
+            messageDefault.remove();
+    })
     .catch(error => {
-      console.error('There was an error adding the comment:', error);
+        console.error('There was an error adding the comment:', error);
     });
 }
 
@@ -217,10 +334,15 @@ function validateForm() {
     }
 
     if (!ratingSelected) {
-      alert('Please select a rating.');
+      alert('Potrebno je ocjeniti proizvod.');
       event.preventDefault(); 
     }
   }
+
+  function showMore(){
+    document.querySelector('.details_wrapper').classList.toggle('more');
+  }
+
 
 
 </script>

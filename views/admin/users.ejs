@@ -1,6 +1,6 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
+<section class="section_users">
 <p>Ukupno korisnika: <%=users.length %></p>
-<section class="section__users">
+
   <ul>
     <table>
       <thead>
@@ -9,14 +9,13 @@
       <tbody>
     <% if (users && users.length > 0 ){ %>
       <% users.forEach((user, userIndex) => { %>
-            <tr data-role="<%=(user.role !== 'guest') ? user.role : "guest" %>">
+            <tr onclick="location.href='/admin/user/<%= user._id %>'" data-role="<%=(user.role !== 'guest') ? user.role : "guest" %>">
                 <td> <sub><%=userIndex +1%></sub></td>
                 <td><%= user.first_name %> <%= user.last_name %></td>
                 <td><%= user.phone %></td>
                 <td><%= user.email %></td>
                 <td><%= user.created_at.toLocaleDateString() %></td>
                 <td><%= (user.role !== 'guest') ? user.role : "gost" %></td>
-                <td><a href="/admin/user/<%= user._id %>"><button>Detaljno</button></a></td>
               </tr>
       <% });} %>
       

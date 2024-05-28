@@ -1,27 +1,27 @@
-// overlay (SVG path element)
+ // overlay (SVG path element)
 const overlayPath = document.querySelector('.overlay__path');
 
-// menu (wrap) element
-const menuWrap = document.querySelector('.menu-wrap');
+// // menu (wrap) element
+ const menuWrap = document.querySelector('.menu-wrap');
 
-// menu items
-const menuItems = menuWrap.querySelectorAll('.menu__item');
+// // menu items
+ const menuItems = menuWrap.querySelectorAll('.menu__item');
 
-// open menu button
-const openMenuCtrl = document.querySelector('.menu_open');
+// // open menu button
+ const openMenuCtrl = document.querySelector('.menu_open');
 
-// close menu button
+// // close menu button
 const closeMenuCtrl = menuWrap.querySelector('.menu_close');
 
-// big title elements
-const title = {
+// // big title elements
+ const title = {
     main: document.querySelectorAll('.content__title-main'),
     sub: document.querySelectorAll('.content__title-sub')
 };
 
-let isAnimating = false;
-// opens the menu
-const openMenu = ()  => {
+ let isAnimating = false;
+ // opens the menu
+ const openMenu = ()  => {
     
     if ( isAnimating ) return;
     isAnimating = true;
@@ -44,33 +44,33 @@ const openMenu = ()  => {
                 menuWrap.classList.add('menu-wrap--open');
             }
         })
-        // title elements
-        .to([title.main, title.sub], { 
-            duration: 0.8,
-            ease: 'power3.in',
-            opacity: 0,
-            y: -200,
-            stagger: 0.05
-        }, 0.2)
+         // title elements
+         .to([title.main, title.sub], { 
+             duration: 0.8,
+             ease: 'power3.in',
+             opacity: 0,
+             y: -200,
+             stagger: 0.05
+         }, 0.2)
 
         // now reveal
-        .set(menuItems, { 
-            opacity: 0
-        })
-        .set(overlayPath, { 
-            attr: { d: 'M 0 0 V 100 Q 50 100 100 100 V 0 z' }
-        })
-        .to(overlayPath, { 
-            duration: 0.3,
-            ease: 'power2.in',
-            attr: { d: 'M 0 0 V 50 Q 50 0 100 50 V 0 z' }
-        })
-        .to(overlayPath, { 
-            duration: 0.8,
-            ease: 'power4',
-            attr: { d: 'M 0 0 V 0 Q 50 0 100 0 V 0 z' }
-        })
-        // menu items translate animation
+         .set(menuItems, { 
+             opacity: 0
+         })
+         .set(overlayPath, { 
+             attr: { d: 'M 0 0 V 100 Q 50 100 100 100 V 0 z' }
+         })
+         .to(overlayPath, { 
+             duration: 0.3,
+             ease: 'power2.in',
+             attr: { d: 'M 0 0 V 50 Q 50 0 100 50 V 0 z' }
+         })
+         .to(overlayPath, { 
+             duration: 0.8,
+             ease: 'power4',
+             attr: { d: 'M 0 0 V 0 Q 50 0 100 0 V 0 z' }
+         })
+         // menu items translate animation
         .to(menuItems, { 
             duration: 1.1,
             ease: 'power4',
@@ -83,7 +83,7 @@ const openMenu = ()  => {
 }
 
 // closes the menu
-const closeMenu = ()  => {
+ const closeMenu = ()  => {
     
     if ( isAnimating ) return;
     isAnimating = true;
@@ -106,7 +106,7 @@ const closeMenu = ()  => {
                 menuWrap.classList.remove('menu-wrap--open');
             }
         })
-        // now reveal
+         // now reveal
         .set(overlayPath, { 
             attr: { d: 'M 0 100 V 0 Q 50 0 100 0 V 100 z' }
         })
@@ -121,26 +121,25 @@ const closeMenu = ()  => {
             attr: { d: 'M 0 100 V 100 Q 50 100 100 100 V 100 z' }
         })
         // title elements
-        .to([title.main, title.sub], { 
-            duration: 1.1,
-            ease: 'power4',
-            opacity: 1,
-            y: 0,
-            stagger: -0.05
-        }, '>-=1.1')
-        // menu items translate animation
-        .to(menuItems, { 
-            duration: 0.8,
+         .to([title.main, title.sub], { 
+             duration: 1.1,
+             ease: 'power4',
+             opacity: 1,
+             y: 0,
+             stagger: -0.05
+         }, '>-=1.1')
+         // menu items translate animation
+         .to(menuItems, { 
+             duration: 0.8,
             ease: 'power2.in',
             y: 100,
-            opacity: 0,
-            stagger: -0.05
-        }, 0)
+             opacity: 0,
+           stagger: -0.05
+         }, 0)
 
 }
 
-
-// click on menu button
-openMenuCtrl.addEventListener('click', openMenu);
-// click on close menu button
-closeMenuCtrl.addEventListener('click', closeMenu); 
+  // click on menu button
+ openMenuCtrl.addEventListener('click', openMenu);
+  // click on close menu button
+ closeMenuCtrl.addEventListener('click', closeMenu); 

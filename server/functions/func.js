@@ -16,8 +16,9 @@ function checkPassword(password)  {
   // At least one digit, one special character
   // Minimum length of 6 characters
   const password_regex =
- /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\\\|\[\]{};:'",.<>?]).{6,}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\\\|\[\]{};:'",.<>?]).{6,}$/;
   return password_regex.test(password);
 };
 
+// Exported functions to make them available in scope
 module.exports = { capitalizeFirstLetter, validateEmail, checkPassword };

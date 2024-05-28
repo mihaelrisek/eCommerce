@@ -79,46 +79,30 @@
   /* mix-blend-mode: darken; */
 }
 
-.btn_filter_menu{
-  position: fixed;
-  left: 3rem;
-  top: 3rem;
-  z-index: 104;
-  background: red;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-}
 
 .filter_wrapper{
   position: fixed;
-  left: -100%;
+  left: 0;
   height: 100%;
   top: 0;
   display: flex;
   align-items: center;
-  width: 200px;
-  background: rgb(var(--clr-fg));
-  transition: 0.5s ease-in;
-}
-.filter_wrapper.inView{
-  left: 0;
 }
  
 .filter_wrapper form{
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
-  color: rgb(var(--clr-bg));
+  color: rgb(var(--clr-fg));
 }
-.filter_wrapper form h3{
-  padding-left: 10%;
+.filter_wrapper form h4{
+  padding-left: 0.5rem;
 }
 .filter_wrapper form article{
   display: flex;
   flex-direction: column;
-  padding-left: 30%;
+  align-items: flex-start;
+  padding-left: 1rem;
   gap: .5rem;
 }
 
@@ -195,6 +179,15 @@
 .discount_section h1{
    cursor: pointer;
    width: max-content;
+   user-select: none;
+   position: relative;
+   margin-bottom: 2rem;
+}
+.discount_section h1 span{
+  position: absolute;
+  left: calc(100% + 10px);
+  width: 100%;
+
 }
 .discount_section.resize{
   height: max-content;
@@ -206,4 +199,107 @@
 .products_section .product_discount_checkbox.show{
   visibility: visible;
   opacity: 1;
+}
+
+
+
+
+#checklist {
+  --text: #414856;
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+  justify-content: center;
+}
+
+#checklist label {
+  color: rgba(var(--clr-fg), 0.8);
+  position: relative;
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  width: fit-content;
+  transition: color 0.3s ease;
+  margin-right: 20px;
+  user-select: none;
+}
+
+#checklist label::before, #checklist label::after {
+  content: "";
+  position: absolute;
+}
+
+#checklist label::before {
+  height: 2px;
+  width: 8px;
+  left: -27px;
+  background: rgb(var(--clr-fg));
+  border-radius: 2px;
+  transition: background 0.3s ease;
+  opacity: 0;
+}
+
+
+#checklist input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  height: 15px;
+  width: 15px;
+  outline: none;
+  border: 0;
+  margin: 0 15px 0 0;
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  margin-right: 20px;
+}
+
+
+
+#checklist input[type="checkbox"]::after {
+  width: 0px;
+  left: 40%;
+  transform-origin: left bottom;
+}
+
+
+#checklist input[type="checkbox"]:checked + label {
+  color: rgba(var(--clr-fg), .5);
+  animation: move 0.3s ease 0.1s forwards;
+}
+
+
+#checklist input[type="checkbox"]:checked + label::before {
+  background: rgba(var(--clr-fg), .5);
+  animation: slice 0.4s ease forwards;
+}
+
+
+@keyframes move {
+  50% {
+    padding-left: 8px;
+    padding-right: 0px;
+  }
+
+  100% {
+    padding-right: 4px;
+    opacity: 1;
+  }
+}
+
+@keyframes slice {
+  60% {
+    width: 100%;
+    left: 4px;
+  }
+
+  100% {
+    width: 100%;
+    left: -2px;
+    padding-left: 0;
+    opacity: 1;
+
+  }
 }

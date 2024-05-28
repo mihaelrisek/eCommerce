@@ -1,32 +1,39 @@
-<a class="history_back" onclick="history.back()">Vrati se</a>
-<section class="products_section" > 
-  <% if (product !== '') { %>
-    <ul>
-    <% product.forEach(product => { %>
-      <li>
-        <a href="/product/<%= product.name.trim().replace(/\s+/g, '-').toLowerCase() %>-<%= product._id %>">
-          <div class="img">
-            <img src="<%- product.images[0] %>" alt="<%- product.name %>">
-          </div>
+  <section class="products_section reveal" >
 
-          <div class="details">
-            <span>
-              <h3><%= product.name %></h3>
-              <strong><%= product.price %> €</strong>
-            </span>
-            <% if (product.material) { %>
-              <span class="category"><%= product.material %></span>
-            <% } else { %>
-              <span></span>
-            <% } %>
-            </div>
-        </a>
-      </li>
+  <ul id="productsContainer" class="reveal_img">
+    <% if (products.length > 0) { %>
+      <% if (products !== '') { %>
+        <% products.forEach(product => { %>
+          <li id="product" data-product-material="<%=product.material%>"  data-animate class="reveal_img_item product" >
+            <a href="/product/<%=product.name.trim().replace(/\s+/g, '-').toLowerCase()%>-<%=product._id%>" class="reveal_img_inner">
+              <div class="img reveal_img_bl ">
+                  <img class="reveal_img_img" src="<%= product.images[0] %>" alt="<%= product.name %>">
+              </div>
 
-    <% }); %>
-  </ul>
+              <div class="details">
+                <span>
+                  <h3><%= product.name %></h3>
+                  <strong><%= product.price %> €</strong>
+                </span>
+                <% if (product.material) { %>
+                  <span class="category"><%= product.material %></span>
+                <% } else { %>
+                  <span></span>
+                <% } %>
+                </div>
+            </a>
+          </li>
+        <% }); %>
 
+      <% } %>
     <% } else { %>
       <p>No products found.</p>
     <% } %>
+  
+        
+    
+  </ul>
+
 </section>
+<script src="/js/reveal.js"  defer></script>
+
